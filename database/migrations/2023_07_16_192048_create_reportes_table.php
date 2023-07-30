@@ -1,0 +1,51 @@
+<?php
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
+
+class CreateReportesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('reportes', function (Blueprint $table) {
+            $table->id();
+			$table->string('codigo')->default('NA');
+            $table->integer('cantidad')->nullable();
+            // $table->string('fecha');
+            $table->datetime('hora_inicial')->nullable();
+            $table->datetime('hora_final')->nullable();
+
+           
+
+            $table->unsignedBigInteger('actividad_id')->nullable();
+            $table->unsignedBigInteger('centrotrabajo_id')->nullable();
+            $table->unsignedBigInteger('disponibilidad_id')->nullable();
+            $table->unsignedBigInteger('material_id')->nullable();
+            $table->unsignedBigInteger('operario_id')->nullable();
+            $table->unsignedBigInteger('ordentrabajo_id')->nullable();
+            $table->unsignedBigInteger('calendario_id')->nullable();
+            $table->unsignedBigInteger('pieza_id')->nullable();
+            $table->unsignedBigInteger('reproceso_id')->nullable();
+
+            //relationsships in create_reprocesos_table
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('reportes');
+    }
+}
