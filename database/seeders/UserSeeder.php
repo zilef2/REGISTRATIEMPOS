@@ -16,11 +16,14 @@ class UserSeeder extends Seeder
     public function run()
     {
         $sexos = ['Masculino', 'Femenino'];
+        $genPa = env('sap_gen');
+
 
         $superadmin = User::create([
             'name'              => 'Superadmin',
-            'email'             => 'superadmin@superadmin.com',
-            'password'          => bcrypt('superadmin0+-*/'),
+            'email'             => 'superadminDemco@superadmin.com',
+            'password'          => bcrypt($genPa.'super0.+-*'.$genPa),
+            // 'password'          => bcrypt('superadmin0+-*/'),
             'email_verified_at' => date('Y-m-d H:i'),
             'sexo' => $sexos[rand(0, 1)],
             'identificacion' => '11232454',
@@ -28,10 +31,12 @@ class UserSeeder extends Seeder
         ]);
         $superadmin->assignRole('superadmin');
 
+        $nombreAdmin = 'Admin';
+        $App = env('APP_NAME');
         $admin = User::create([
-            'name'              => 'Admin',
-            'email'             => 'admin@admin.com',
-            'password'          => bcrypt('BASEalejoasd00+*??'),
+            'name'              => "$nombreAdmin $App",
+            'email'             => "$nombreAdmin$App"."@gmail.com",
+            'password'          => bcrypt($genPa.'0.+-*'.$genPa),
             'email_verified_at' => date('Y-m-d H:i'),
             'sexo' => $sexos[rand(0, 1)],
             'identificacion' => '11232411',
@@ -65,7 +70,7 @@ class UserSeeder extends Seeder
             $unUsuario = User::create([
                 'name'              => $key,
                 'email'             => $key . '@' . $key . '.com',
-                'password'          => bcrypt('asd+-*'),
+                'password'          => bcrypt($genPa.'asd+-*'),
                 'email_verified_at' => date('Y-m-d H:i'),
                 'fecha_nacimiento' => $anios,
                 'sexo' => $sexos[rand(0, 1)],

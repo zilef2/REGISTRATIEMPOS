@@ -18,7 +18,7 @@ import DeleteBulk from '@/Pages/User/DeleteBulk.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import { router, usePage, useForm, Link } from '@inertiajs/vue3';
 
-import { number_format, formatDate, CalcularEdad, CalcularSexo } from '@/global.js';
+import { number_format, formatDate, CalcularEdad, CalcularSexo } from '@/global.ts';
 
 const { _, debounce, pickBy } = pkg
 const props = defineProps({
@@ -125,8 +125,7 @@ watchEffect(() => {
                         </DangerButton>
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg"
-                        placeholder="Nombre, correo, nivel o ID " />
+                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, correo, nivel o ID " />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -149,7 +148,7 @@ watchEffect(() => {
 
                                 <th class="px-2 py-4 cursor-pointer" v-on:click="order('identificacion')">
                                     <div class="flex justify-between items-center"> <span>{{ lang().label.identificacion
-                                    }}</span>
+                                                                                }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
@@ -187,15 +186,15 @@ watchEffect(() => {
                                     </span>
 
                                 </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
-                                    user.roles.length == 0 ? 'not selected' : user.roles[0].name
-                                }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ user.roles.length == 0 ? 'not selected' : user.roles[0].name }}
+                                </td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.identificacion }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.sexo }}</td>
                                 <td class="whitespace-nowrap text-center py-4 px-2 sm:py-3">{{
-                                    CalcularEdad(user.fecha_nacimiento) }}</td>
+                                                                    CalcularEdad(user.fecha_nacimiento) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">

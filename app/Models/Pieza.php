@@ -11,5 +11,6 @@ class Pieza extends Model
 
     protected $fillable = [
         'codigo',
+        'nombre',
     ];
 }

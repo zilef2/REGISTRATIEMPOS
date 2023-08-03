@@ -20,7 +20,8 @@ import Delete from '@/Pages/reporte/Delete.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
-import { PrimerasPalabras, vectorSelect, formatDate, CalcularEdad, number_format} from '@/global.js';
+
+import { PrimerasPalabras, vectorSelect, formatDate, CalcularAvg, number_format} from '@/global.ts';
 
 const { _, debounce, pickBy } = pkg
 const props = defineProps({
@@ -33,9 +34,8 @@ const props = defineProps({
     title: String,
     
     numberPermissions: Number,
+    losSelect: Object,
 })
-
-
 
 const data = reactive({
     params: {
@@ -44,20 +44,20 @@ const data = reactive({
         order: props.filters.order,
         perPage: props.perPage,
     },
+    generico: null,
     selectedId: [],
     multipleSelect: false,
     createOpen: false,
     editOpen: false,
     deleteOpen: false,
     // deleteBulkOpen: false,
-    dataSet: usePage().props.app.perpage
+    dataSet: usePage().props.app.perpage,
+    totalEmpleados: 0
 })
 
 const order = (field) => {
     data.params.field = field
-    console.log("🧈 debu data.params.field:", data.params.field);
     data.params.order = data.params.order === "asc" ? "desc" : "asc"
-    console.log("🧈 debu data.params.order:", data.params.order);
 }
 
 watch(() => _.cloneDeep(data.params), debounce(() => {
@@ -96,24 +96,27 @@ watchEffect(() => {
 
 
 //text number dinero date datetime foreign
+// text // number // dinero // date // datetime // foreign
 const titulos = [
     {order: 'codigo' , label: 'codigo', type: 'text'},
-    {order: 'cantidad' , label: 'cantidad', type: 'number'},
-    {order: 'fecha' , label: 'fecha'},
-    {order: 'hora_inicial' , label: 'hora inicial', type: 'date'},
-    {order: 'hora_final' , label: 'hora final', type: 'date'},
+    {order: 'fecha' , label: 'fecha', type:'date'},
+    {order: 'hora_inicial' , label: 'hora inicial', type: 'text'},
+    {order: 'hora_final' , label: 'hora final', type: 'text'},
     {order: 'actividad_id' , label: 'actividad', type: 'foreign', nameid: 'actividad_s'},
     {order: 'centrotrabajo_id' , label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s'},
-    {order: 'disponibilidad_id' , label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s'},
     {order: 'material_id' , label: 'material', type: 'foreign', nameid: 'material_s'},
-    {order: 'operario_id' , label: 'operario', type: 'foreign', nameid: 'operario_s'},
     {order: 'ordentrabajo_id' , label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_s'},
-    {order: 'calendario_id' , label: 'calendario', type: 'foreign', nameid: 'calendario_s'},
+    
     {order: 'pieza_id' , label: 'pieza', type: 'foreign', nameid: 'pieza_s'},
+    {order: 'cantidad' , label: 'cantidad', type: 'number'},
+    
+    {order: 'disponibilidad_id' , label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s'},
     {order: 'reproceso_id' , label: 'reproceso', type: 'foreign', nameid: 'reproceso_s'},
+    
+    // {order: 'calendario_id' , label: 'calendario', type: 'foreign', nameid: 'calendario_s'},
+    {order: 'operario_id' , label: 'operario', type: 'foreign', nameid: 'operario_s'},
 ];
 
-console.log(props.fromController)
 </script>
 
 <template>
@@ -122,17 +125,26 @@ console.log(props.fromController)
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         <div class="space-y-4">
+            <!-- {{ props.fromController.data[2] }} -->
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true" v-if="can(['create reporte'])">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title" v-if="can(['create reporte'])" 
+
+                    <Create v-if="can(['create reporte'])" :numberPermissions="props.numberPermissions"
+                        :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
+                        :losSelect=props.losSelect />
+
+                    <Edit v-if="can(['update reporte'])" 
+                        :numberPermissions="props.numberPermissions"
+                        :show="data.editOpen" @close="data.editOpen = false" :generica="data.generico" :title="props.title"
+                        :losSelect=props.losSelect
                         />
-                    <Edit :show="data.editOpen" @close="data.editOpen = false" :generica="data.generico" :title="props.title" v-if="can(['update reporte'])" 
-                        />
-                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :generica="data.generico"
-                        v-if="can(['delete reporte'])" :title="props.title" />
+
+                    <Delete v-if="can(['delete reporte'])" :numberPermissions="props.numberPermissions"
+                        :show="data.deleteOpen" @close="data.deleteOpen = false" :generica="data.generico"
+                        :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -146,8 +158,7 @@ console.log(props.fromController)
                         </DangerButton> -->
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg"
-                        placeholder="Nombre, correo, nivel o ID " />
+                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, correo, nivel o ID " />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table v-if="props.total > 0" class="w-full">
@@ -156,8 +167,11 @@ console.log(props.fromController)
                                 <th class="px-2 py-4 text-center">
                                     <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                                 </th>
+                                <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
+
                                 <th class="px-2 py-4 text-center">#</th>
-                                <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer" v-on:click="order(titulo['order'])">
+                                <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
+                                    v-on:click="order(titulo['order'])">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label[titulo['label']] }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
@@ -169,7 +183,6 @@ console.log(props.fromController)
                                     </div>
                                 </th> -->
 
-                                <th class="px-2 py-4">Accion</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -178,18 +191,39 @@ console.log(props.fromController)
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <input
                                         class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
-                                        type="checkbox" @change="select" :value="clasegenerica.id" v-model="data.selectedId" />
+                                        type="checkbox" @change="select" :value="clasegenerica.id"
+                                        v-model="data.selectedId" />
+                                </td>
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    <div class="flex justify-center items-center">
+                                        <div class="rounded-md overflow-hidden">
+                                            <InfoButton v-show="can(['update user'])" type="button"
+                                                @click="(data.editOpen = true), (data.generico = clasegenerica)"
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </InfoButton>
+                                            <DangerButton v-show="can(['delete user'])" type="button"
+                                                @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </DangerButton>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                                 <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <span v-if="titulo['type'] == 'text'"> {{ clasegenerica[titulo['order']] }} </span>
-                                    <span v-if="titulo['type'] == 'number'"> {{ number_format(clasegenerica[titulo['order']],0,false) }} </span>
-                                    <span v-if="titulo['type'] == 'dinero'"> {{ number_format(clasegenerica[titulo['order']],0,true) }} </span>
-                                    <span v-if="titulo['type'] == 'date'"> {{ formatDate(clasegenerica[titulo['order']],false) }} </span>
-                                    <span v-if="titulo['type'] == 'datetime'"> {{ formatDate(clasegenerica[titulo['order']],true) }} </span>
+                                    <span v-if="titulo['type'] == 'number'"> {{
+                                                                            number_format(clasegenerica[titulo['order']],0,false) }} </span>
+                                    <span v-if="titulo['type'] == 'dinero'"> {{
+                                                                            number_format(clasegenerica[titulo['order']],0,true) }} </span>
+                                    <span v-if="titulo['type'] == 'date'"> {{
+                                                                            formatDate(clasegenerica[titulo['order']],false) }} </span>
+                                    <span v-if="titulo['type'] == 'datetime'"> {{
+                                                                            formatDate(clasegenerica[titulo['order']],true) }} </span>
                                     <span v-if="titulo['type'] == 'foreign'"> {{ clasegenerica[titulo['nameid']] }} </span>
                                 </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update reporte'])" type="button"
@@ -204,16 +238,27 @@ console.log(props.fromController)
                                             </DangerButton>
                                         </div>
                                     </div>
+                                </td> -->
+
+                            </tr>
+                            <tr>
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Hora inicial Promedio: </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                                    {{CalcularAvg(props.fromController.data,'hora_inicial',true)}}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                     <h2 v-else class="text-center text-xl my-8">Sin Registros</h2>
                 </div>
-                <div v-if="props.total > 0" class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
+                <div v-if="props.total > 0"
+                    class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
                     <Pagination :links="props.fromController" :filters="data.params" />
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
-</template>
+    </AuthenticatedLayout></template>

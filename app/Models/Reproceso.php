@@ -11,5 +11,6 @@ class Reproceso extends Model
 
     protected $fillable = [
         'codigo',
+        'nombre',
     ];
 }

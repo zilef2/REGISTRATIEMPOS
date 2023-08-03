@@ -18,9 +18,6 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'isSuper']);
         Permission::create(['name' => 'isAdmin']);
 
-
-
-
         //otros cargos NO_ADMIN
         $nombresDeCargos = [
             'trabajador',//to change massive

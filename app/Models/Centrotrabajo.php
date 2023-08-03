@@ -11,5 +11,6 @@ class Centrotrabajo extends Model
 
     protected $fillable = [
         'codigo',
+        'nombre',
     ];
 }

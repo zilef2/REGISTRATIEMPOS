@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -83,4 +84,14 @@ class User extends Authenticatable
             })
             ->get();
     }
+
+
+    // public function actividad(): BelongsToMany { return $this->BelongsToMany(Actividad::class); }
+    // public function centrotrabajo(): BelongsToMany { return $this->BelongsToMany(Centrotrabajo::class,'centrotrabajo_id'); }
+    // public function disponibilidad(): BelongsToMany { return $this->BelongsToMany(Disponibilidad::class,'disponibilidad_id'); }
+    // public function material(): BelongsToMany { return $this->BelongsToMany(Material::class, 'material_id'); }
+    // public function ordentrabajo(): BelongsToMany { return $this->BelongsToMany(Ordentrabajo::class); }
+    // public function pieza(): BelongsToMany { return $this->BelongsToMany(Pieza::class); }
+    // public function reproceso(): BelongsToMany { return $this->BelongsToMany(Reproceso::class); }
+
 }

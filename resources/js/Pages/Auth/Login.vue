@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuntheticationIllustration from '@/Components/AuntheticationIllustration.vue';
+import login from '@/Components/svgs/login.vue';
 
 defineProps({
     canResetPassword: Boolean,
@@ -31,7 +32,9 @@ const submit = () => {
 
         <Head :title="lang().label.login" />
         <template #illustration>
-            <AuntheticationIllustration type="login" class="w-72 h-auto" />
+            <!-- <AuntheticationIllustration type="login" class="w-72 h-auto" /> -->
+            <!-- <mypass class="w-72 h-auto"></mypass> -->
+            <login class="w-full h-auto"></login>
         </template>
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
             {{ status }}

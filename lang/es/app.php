@@ -2,24 +2,42 @@
 
 return [
     'label' => [
+        //clases simples
+        'ordentrabajo' => 'orden de trabajo',
+        'Ordentrabajo' => 'Orden de trabajo',
+        'actividad' => 'actividad',
+        'Actividad' => 'Actividad',
+        'centrotrabajo' => 'centro de trabajo',
+        'Centrotrabajo' => 'Centro de trabajo',
+        'disponibilidad' => 'disponibilidad',
+        'Disponibilidad' => 'Disponibilidad',
+        'material' => 'material',
+        'Material' => 'Material',
+        'pieza' => 'pieza',
+        'Pieza' => 'Pieza',
+        'reproceso' => 'reproceso',
+        'Reproceso' => 'Reproceso',
+
+
         //parametros
         'parametros' => 'parametros',
         //reporte
-        'reporte' => 'reporte',
-        'codigo' => 'codigo',
-        'cantidad' => 'cantidad',
-        'fecha' => 'fecha',
-        'hora inicial' => 'hora inicial',
-        'hora final' => 'hora final',
-        'actividad' => 'actividad',
-        'centrotrabajo' => 'centrotrabajo',
-        'disponibilidad' => 'disponibilidad',
-        'material' => 'material',
-        'operario' => 'operario',
-        'ordentrabajo' => 'ordentrabajo',
-        'calendario' => 'calendario',
-        'pieza' => 'pieza',
-        'reproceso' => 'reproceso',
+        'cantidad (pieza)' => 'Cantidad (pieza)',
+        'reporte' => 'Reporte',
+        'codigo' => 'Codigo',
+        'cantidad' => 'Cantidad',
+        'fecha' => 'Fecha',
+        'hora inicial' => 'Hora inicial',
+        'hora final' => 'Hora final',
+        'actividad' => 'Actividad',
+        'centrotrabajo' => 'Centro de trabajo',
+        'disponibilidad' => 'Disponibilidad',
+        'material' => 'Material',
+        'operario' => 'Operario',
+        'ordentrabajo' => 'Orden de trabajo',
+        'calendario' => 'Calendario',
+        'pieza' => 'Pieza',
+        'reproceso' => 'Reproceso',
 
         //user
         'pgrado' => 'Nivel',
@@ -34,23 +52,6 @@ return [
         'limite_token_leccion' => 'limite de tokens por leccion',
         'limite_token_lec' => 'limite/leccion',
 
-        //universidad
-        'universidad' => 'universidad',
-        'Universidads' => 'universidades',
-        //carrera
-        'carrera' => 'carrera',
-        'carreras' => 'carreras',
-        'UnObjetivo' => 'Describa el objetivo de la materia',
-        'otroObjetivo' => 'Puede agregar un objetivo extras a la materia (opcional)',
-
-        //each model
-        'universidadCarreras' => 'Universidad y Carreras',
-        'carrera' => 'carrera',
-        'Carreras' => 'carreras',
-        'materia' => 'materia',
-        'Unidad' => 'Unidad',
-        'subtopico' => 'Tema',
-        'ejercicio' => 'ejercicio',
 
         'cliente' => 'Cliente',
         'valor_tentativo' => 'Valor tentativo',

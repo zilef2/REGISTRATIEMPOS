@@ -20,6 +20,8 @@ class RoleSeeder extends Seeder
         $admin = Role::create(['name' => 'admin']);
 
        $constantes = Myhelp::CargosYModelos();
+
+        //ex: istrabajador
         foreach ($constantes['nombresDeCargos'] as $value) {
 
             $$value = Role::create(['name' => $value]);
@@ -40,8 +42,7 @@ class RoleSeeder extends Seeder
 
             //otros
         $trabajador->givePermissionTo([
-            // 'read universidad',
-            // 'read ejercicio', // 'update ejercicio', // 'create ejercicio', // 'delete ejercicio',
+            'read reporte',  'update reporte',  'create reporte',  // 'delete reporte',
         ]);
 
         // $role->revokePermissionTo($permission);

@@ -16,6 +16,7 @@ class CreateCentrotrabajosTable extends Migration
         Schema::create('centrotrabajos', function (Blueprint $table) {
             $table->id();
 			$table->string('codigo');
+			$table->string('nombre');
             $table->timestamps();
         });
     }

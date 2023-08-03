@@ -16,22 +16,24 @@ class CreateReportesTable extends Migration
         Schema::create('reportes', function (Blueprint $table) {
             $table->id();
 			$table->string('codigo')->default('NA');
-            $table->integer('cantidad')->nullable();
-            // $table->string('fecha');
-            $table->datetime('hora_inicial')->nullable();
-            $table->datetime('hora_final')->nullable();
+            $table->date('fecha');
+            $table->time('hora_inicial')->nullable();
+            $table->time('hora_final')->nullable();
 
-           
-
+            
             $table->unsignedBigInteger('actividad_id')->nullable();
             $table->unsignedBigInteger('centrotrabajo_id')->nullable();
-            $table->unsignedBigInteger('disponibilidad_id')->nullable();
             $table->unsignedBigInteger('material_id')->nullable();
-            $table->unsignedBigInteger('operario_id')->nullable();
             $table->unsignedBigInteger('ordentrabajo_id')->nullable();
-            $table->unsignedBigInteger('calendario_id')->nullable();
+            $table->unsignedBigInteger('operario_id')->nullable();
+
             $table->unsignedBigInteger('pieza_id')->nullable();
+            $table->integer('cantidad')->nullable();
+            
+            $table->unsignedBigInteger('disponibilidad_id')->nullable();
             $table->unsignedBigInteger('reproceso_id')->nullable();
+
+            // $table->unsignedBigInteger('calendario_id')->nullable();
 
             //relationsships in create_reprocesos_table
 

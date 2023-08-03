@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Models\Ejercicio;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -27,6 +26,12 @@ class DatabaseSeeder extends Seeder
 
             // Seeder::class,
             ActividadSeeder::class,
+            CentroTrabajoSeeder::class,
+            MaterialSeeder::class,
+            OrdentrabajoSeeder::class,
+            PiezaSeeder::class,
+            DisponibilidadSeeder::class,
+            ReprocesoSeeder::class,
 
         ]);
         // Ejercicio::create(['nombre' => 'la funcion x^2 es continua? en que region?', 'descripcion' => 'descripcion generica', 'subtopico_id' => 2]);

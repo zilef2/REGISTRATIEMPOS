@@ -15,7 +15,8 @@ class CreateDisponibilidadsTable extends Migration
     {
         Schema::create('disponibilidads', function (Blueprint $table) {
             $table->id();
-			$table->string('codigo');
+            $table->string('codigo');
+            $table->string('nombre');
             $table->timestamps();
         });
     }

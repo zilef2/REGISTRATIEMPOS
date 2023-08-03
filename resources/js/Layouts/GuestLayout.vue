@@ -18,14 +18,15 @@ import SwitchLangNavbar from '@/Components/SwitchLangNavbar.vue';
                         <p class="text-lg ml-2">{{ $page.props.app.name }}</p>
                         </Link>
                         <div class="flex space-x-2 items-center">
-                            <SwitchLangNavbar />
+                            <!-- <SwitchLangNavbar /> -->
                             <SwitchDarkMode />
                         </div>
                     </div>
                     <slot />
                 </div>
                 <div
-                    class="hidden lg:flex lg:flex-col px-6 py-4 justify-center items-center space-y-2 bg-primary text-white">
+                    class="hidden lg:flex lg:flex-col px-6 py-4 
+                    justify-center items-center space-y-2 bg-gray-200 text-white">
                     <slot name="illustration" />
                 </div>
             </div>

@@ -11,5 +11,6 @@ class Ordentrabajo extends Model
 
     protected $fillable = [
         'codigo',
+        'nombre',
     ];
 }

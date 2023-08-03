@@ -23,7 +23,7 @@ defineProps({
                     <p class="text-3xl sm:text-5xl ml-4 text-primary">{{ $page.props.app.name }}</p>
                 </div>
                 <div class="flex space-x-2 items-center">
-                    <SwitchLangNavbar />
+                    <!-- <SwitchLangNavbar /> -->
                     <SwitchDarkMode />
                 </div>
             </div>

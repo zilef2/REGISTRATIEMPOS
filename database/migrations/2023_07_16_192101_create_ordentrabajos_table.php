@@ -15,7 +15,8 @@ class CreateOrdentrabajosTable extends Migration
     {
         Schema::create('ordentrabajos', function (Blueprint $table) {
             $table->id();
-			$table->string('codigo');
+            $table->string('codigo');
+            $table->string('nombre');
             $table->timestamps();
         });
     }

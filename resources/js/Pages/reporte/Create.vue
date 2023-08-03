@@ -7,68 +7,92 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { watchEffect,ref } from 'vue';
+import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
+import { reactive, watch, onMounted, ref, watchEffect } from 'vue';
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+
+// --------------------------- ** -------------------------
 
 const props = defineProps({
     show: Boolean,
     title: String,
     roles: Object,
+    
+    losSelect: Object,
+    numberPermissions: Number,
 })
 const emit = defineEmits(["close"]);
 
-// VueDatePicker
-const formatToVue = (date) => {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
-}
-const flow = ref(['year', 'month', 'calendar']);
-let anio = ref(0);
-
-const anioHoy = new Date().getFullYear();
-const anio18 = anioHoy - 18;
-// VueDatePicker
-
-
-const form = useForm({
-    name: 'alejo pruebas',
-    email: 'ajelof22@gmail.com',
-    password: '',
-    password_confirmation: '',
-    role: 'trabajador',
-
-    identificacion: 1152194566,
-    sexo: 0,
-    // sexo: 'Masculino',
-    fecha_nacimiento: anio18+'-12-01T00:00',
-    semestre: '1',
-    semestre_mas_bajo: 1,
-    limite_token_leccion: '3',
-    pgrado: 'pregrado',//Bachillerato, pregrado o posgrado
-
-    // name: '',
-    // email: '',
-    // password: '',
-    // password_confirmation: '',
-    // role: 'trabajador',
-
-    // sexo:'',
-    // fecha_nacimiento:'',
-    // semestre:'1',
-    // semestre_mas_bajo:1,
-    // // limite_token_general:'',
-    // limite_token_leccion:'',
-    // pgrado: '',//Bachillerato, pregrado o posgrado
-
+const data = reactive({
+    params: {
+        pregunta: ''
+    },
+    actividad_id:props.losSelect.actividad,
+    centrotrabajo_id:props.losSelect.centrotrabajo,
+    disponibilidad_id:props.losSelect.disponibilidad,
+    material_id:props.losSelect.material,
+    ordentrabajo_id:props.losSelect.ordentrabajo,
+    pieza_id:props.losSelect.pieza,
+    reproceso_id:props.losSelect.reproceso,
 })
 
+//very usefull
+const justNames = [
+    'codigo',
+    'cantidad',
+    'fecha',
+    'hora_inicial',
+    'hora_final',
+    'actividad_id',
+    'centrotrabajo_id',
+    'disponibilidad_id',
+    'material_id',
+    'operario_id',
+    'ordentrabajo_id',
+    'pieza_id',
+    'reproceso_id'
+    // 'calendario_id',
+]; const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
+
+
+onMounted(() => {
+    if(props.numberPermissions > 8){
+
+        const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
+        form.codigo = 'AdminCod'+ (valueRAn);
+        form.hora_inicial = '0'+valueRAn+':00'//temp
+        form.fecha = '2023-06-01'
+
+    }
+});
+
+//the real order
+const printForm = [
+    { idd: 'codigo', label: 'codigo', type: 'text', value: form.codigo , elif:null},
+    { idd: 'fecha', label: 'fecha', type: 'date', value: form.fecha , elif:null},
+    { idd: 'hora_inicial', label: 'hora inicial', type: 'time', value: form.hora_inicial , elif:null},
+    // { idd: 'hora_final', label: 'hora final', type: 'time', value: form.hora_final , elif:null},
+    
+    { idd: 'ordentrabajo_id', label: 'Orden de trabajo', type: 'id', value: form.ordentrabajo_id , elif:null},
+    { idd: 'centrotrabajo_id', label: 'Centro de trabajo', type: 'id', value: form.centrotrabajo_id , elif:null},
+    { idd: 'actividad_id', label: 'Actividad', type: 'id', value: form.actividad_id , elif:null},
+    //opcionales
+    { idd: 'disponibilidad_id', label: 'Disponibilidad (paro)', type: 'id', value: form.disponibilidad_id, elif:null },
+    { idd: 'reproceso_id', label: 'Reproceso', type: 'id', value: form.reproceso_id, elif:null },
+    { idd: 'material_id', label: 'Material', type: 'id', value: form.material_id , elif:null},
+
+    { idd: 'pieza_id', label: 'Pieza', type: 'id', value: form.pieza_id, elif:null },
+    { idd: 'cantidad', label: 'cantidad (pieza)', type: 'text', value: form.cantidad, elif:'pieza_id' },
+
+    // { idd: 'operario_id', label: 'Operario', type: 'id', value: form.operario_id },
+];
+
+
 const create = () => {
-    form.post(route('user.store'), {
+    // console.log("🧈 debu pieza_id:", form.pieza_id);
+    form.post(route('reporte.store'), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -81,24 +105,19 @@ const create = () => {
 
 watchEffect(() => {
     if (props.show) {
-
         form.errors = {}
     }
-    if(form.fecha_nacimiento)
-        anio = parseInt(anioHoy - new Date(form.fecha_nacimiento).getFullYear())
-    if(form.semestre)
-        form.semestre_mas_bajo = form.semestre
 })
+
+
 //TOSTUDY
-const roles = props.roles?.map(role => ({
-    label: role.name.replace(/_/g," "),
-    value: (role.name)
-}))
+// const roles = props.roles?.map(role => ({
+//     label: role.name.replace(/_/g, " "),
+//     value: (role.name)
+// }))
 
 //very usefull
-const sexos = [ { label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 } ];
-const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
-
+const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }];
 </script>
 
 <template>
@@ -108,88 +127,45 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
-                <div class="my-6 space-y-4">
-                    <div>
-                        <InputLabel for="name" :value="lang().label.name" />
-                        <TextInput id="name" type="text" class="mt-1 block w-full" v-model="form.name" required
-                            :placeholder="lang().placeholder.name" :error="form.errors.name" />
-                        <InputError class="mt-2" :message="form.errors.name" />
-                    </div>
-                    <div>
-                        <InputLabel for="email" :value="lang().label.email" />
-                        <TextInput id="email" type="email" class="mt-1 block w-full" v-model="form.email"
-                            :placeholder="lang().placeholder.email" :error="form.errors.email" />
-                        <InputError class="mt-2" :message="form.errors.email" />
-                    </div>
-                    <div>
-                        <InputLabel for="identificacion" :value="lang().label.identificacion" />
-                        <TextInput id="identificacion" type="text" class="mt-1 block w-full" v-model="form.identificacion"
-                            :placeholder="lang().placeholder.identificacion" :error="form.errors.identificacion" />
-                        <InputError class="mt-2" :message="form.errors.identificacion" />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div v-for="(atributosform, indice) in printForm" :key="indice">
+                        
+                        
+
+                        <div v-if="atributosform.type =='id'" id="SelectVue">
+                            <label name="labelSelectVue"> {{atributosform.label}} </label>
+                            <v-select :options="data[atributosform.idd]" label="title"
+                            v-model="form[atributosform.idd]"></v-select>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+
+                        </div>
+                        <div v-else-if="atributosform.type =='time'" id="SelectVue">
+                            <InputLabel 
+                                :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <TextInput
+                                :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" 
+                                step="3600"
+                            />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                        </div>
+                        <div v-else class="">
+                            <InputLabel
+                                :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <TextInput
+                                 :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" />
+                                <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <InputLabel for="role" :value="lang().label.role" />
-                            <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
-                            </SelectInput>
-                            <InputError class="mt-2" :message="form.errors.role" />
-                        </div>
-                        <!-- otros campos -->
-                        <div>
-                            <InputLabel for="sexo" :value="lang().label.sexo" />
-                            <SelectInput id="sexo" class="mt-1 block w-full" v-model="form.sexo" required :dataSet="sexos">
-                            </SelectInput>
-                            <InputError class="mt-2" :message="form.errors.sexo" />
-                        </div>
-
-                        <div>
-                            <InputLabel for="fecha_nacimiento" :value="lang().label.fecha_nacimiento" />
-                            <VueDatePicker :is-24="false" :day-names="daynames" :format="formatToVue" :flow="flow"
-                                auto-apply :enable-time-picker="false" id="fecha_nacimiento" class="mt-1 block w-full"
-                                v-model="form.fecha_nacimiento" required :placeholder="lang().placeholder.fecha_nacimiento"
-                                :error="form.errors.fecha_nacimiento" />
-                            <InputError class="mt-2" :message="form.errors.fecha_nacimiento" />
-                        </div>
-
-                        <div class="">
-                            <InputLabel for="anio" :value="lang().label.anio" />
-                            <TextInput id="anio" type="number" disabled class="bg-gray-300 mt-1 block w-full" v-model="anio"
-                                placeholder="Años" />
-                        </div>
-                        <div class="">
-                            <InputLabel for="semestre" :value="lang().label.semestre" />
-                            <TextInput id="semestre" type="number" class="mt-1 block w-full" v-model="form.semestre"
-                                :placeholder="lang().placeholder.semestre" :error="form.errors.semestre" />
-                            <InputError class="mt-2" :message="form.errors.semestre" />
-                        </div>
-                        <div class="">
-                            <InputLabel for="semestre_mas_bajo" :value="lang().label.semestre_mas_bajo" />
-                            <TextInput id="semestre_mas_bajo" type="number" class="bg-gray-300 mt-1 block w-full"
-                                v-model="form.semestre_mas_bajo" disabled
-                                :placeholder="lang().placeholder.semestre_mas_bajo"
-                                :error="form.errors.semestre_mas_bajo" />
-                            <InputError class="mt-2" :message="form.errors.semestre_mas_bajo" />
-                        </div>
-                        <div>
-                            <InputLabel for="limite_token_leccion" :value="lang().label.limite_token_leccion" />
-                            <TextInput id="limite_token_leccion" type="number" class="mt-1 block w-full"
-                                v-model="form.limite_token_leccion" :placeholder="lang().placeholder.limite_token_leccion"
-                                :error="form.errors.limite_token_leccion" />
-                            <InputError class="mt-2" :message="form.errors.limite_token_leccion" />
-                        </div>
-                        <div>
-                            <InputLabel for="pgrado" :value="lang().label.pgrado" />
-                            <TextInput id="pgrado" type="text" class="mt-1 block w-full" v-model="form.pgrado"
-                                :placeholder="lang().placeholder.pgrado" :error="form.errors.pgrado" />
-                            <InputError class="mt-2" :message="form.errors.pgrado" />
-                        </div>
-                    </div>
                     <!-- limite_token_general -->
 
 
                     <!-- pass -->
-                    <div>
+                    <!-- <div>
                         <InputLabel for="password" :value="lang().label.password" />
                         <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password"
                             :placeholder="lang().placeholder.password" :error="form.errors.password" />
@@ -201,10 +177,10 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
                             v-model="form.password_confirmation" :placeholder="lang().placeholder.password_confirmation"
                             :error="form.errors.password_confirmation" />
                         <InputError class="mt-2" :message="form.errors.password_confirmation" />
-                    </div>
+                    </div> -->
 
                 </div>
-                <div class="flex justify-end">
+                <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
@@ -216,3 +192,19 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
         </Modal>
     </section>
 </template>
+
+<style>
+    textarea {
+        @apply px-3 py-2 border border-gray-300 rounded-md;
+    }
+
+    [name="labelSelectVue"],
+    .muted {
+        color: #1b416699;
+    }
+
+    [name="labelSelectVue"] {
+        /* font-size: 22px; */
+        font-weight: 600;
+    }
+</style>

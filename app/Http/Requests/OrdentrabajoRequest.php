@@ -26,6 +26,7 @@ class OrdentrabajoRequest extends FormRequest
         return
         [
 			'codigo' => 'required',
+			'nombre' => 'required',
         ];
     }
 }

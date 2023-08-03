@@ -25,6 +25,13 @@ const toggleContent2 = () => {
 
 const sidebarButtons = [ //SAME AS WEB.PHP
     'reporte',
+    'ordentrabajo',
+    'actividad',
+// 'centrotrabajo',
+// 'disponibilidad',
+// 'material',
+// 'pieza',
+// 'reproceso',
 ];
 
 </script>
@@ -80,7 +87,7 @@ const sidebarButtons = [ //SAME AS WEB.PHP
                 <span class="ml-3">{{ lang().label.role }}</span>
                 </Link>
             </li>
-            <li v-if="data.showContent" v-show="can(['read permission'])"
+            <li v-if="data.showContent" v-show="can(['isSuper'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                 :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('permission.index') }">
                 <Link :href="route('permission.index')" class="flex items-center py-2 px-4">
@@ -92,30 +99,27 @@ const sidebarButtons = [ //SAME AS WEB.PHP
 
             <!-- zone parametros -->
             <!-- <li v-show="can(['isAdmin'])" class="py-2"> <p>Parametros</p> </li> -->
-            <li v-if="data.showContent" v-show="can(['isAdmin'])"
+            <!-- <li v-if="data.showContent" v-show="can(['isAdmin'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                 :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('parametro.index') }">
                 <Link :href="route('parametro.index')" class="flex items-center py-2 px-4">
                 <PresentationChartLineIcon class="w-6 h-5" />
                 <span class="ml-3">{{ lang().label.parametros }}</span>
                 </Link>
-            </li>
-
-
+            </li> -->
 
 
             <!-- zone normal -->
         </ul>
         <button @click="toggleContent2" v-show="can(['isAdmin'])" class="text-blue-500">{{ data.showContent2 ? 'Ocultar' : 'Mostrar' }}</button>
         <ul v-if="data.showContent2" class="space-y-2 my-4">
-
             <div class="" v-for="value in sidebarButtons">
                 <li v-show="can(['istrabajador'])"
                     class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                     :class="{ 'bg-sky-600 dark:bg-sky-600': route().current(value+'.index') }">
                     <Link :href="route(value+'.index')" class="flex items-center py-1 px-4">
                         <PresentationChartLineIcon class="w-6 h-5" />
-                        <span class="ml-3">{{ lang().label.reporte }}</span>
+                        <span class="ml-3">{{ lang().label[value] }}</span>
                     </Link>
                 </li>
             </div>

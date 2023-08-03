@@ -63,7 +63,7 @@ class parametrosController extends Controller
     public function create() { }
     public function store(Request $request) {
         DB::beginTransaction();
-        Myhelp::EscribirEnLog($this, get_called_class(), '', false); //!usefull
+        Myhelp::EscribirEnLog($this, get_called_class(), ' store ', false); //!usefull
 
         try {
             $parametro = Parametro::create([

@@ -1,10 +1,17 @@
 <?php
 
-use App\Http\Controllers\parametrosController;
+use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ActividadsController;
+use App\Http\Controllers\CentrotrabajosController;
+use App\Http\Controllers\DisponibilidadsController;
+use App\Http\Controllers\MaterialsController;
+use App\Http\Controllers\OrdentrabajosController;
+use App\Http\Controllers\PiezasController;
+use App\Http\Controllers\ReprocesosController;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -16,14 +23,16 @@ use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
 
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+// Route::get('/', function () {
+//     return Inertia::render('Welcome', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// });
+Route::get('/', function () { return redirect('/login'); });
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
@@ -55,10 +64,20 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource('/permission', PermissionController::class)->except('create', 'show', 'edit');
     Route::post('/permission/destroy-bulk', [PermissionController::class, 'destroyBulk'])->name('permission.destroy-bulk');
 
-    Route::resource('/parametro', parametrosController::class);
-
+    
+    Route::resource('/parametro', ParametrosController::class);
+    
     //# SIDEBARMENU
     Route::resource('/reporte', ReportesController::class);
+    Route::resource('/ordentrabajo', OrdentrabajosController::class);
+    Route::resource('/actividad', ActividadsController::class);
+
+    Route::resource('/centrotrabajo', CentrotrabajosController::class);
+    Route::resource('/disponibilidad', DisponibilidadsController::class);
+    Route::resource('/material', MaterialsController::class);
+    Route::resource('/pieza', PiezasController::class);
+    Route::resource('/reproceso', ReprocesosController::class);
+
 
 });
 

@@ -11,5 +11,6 @@ class Disponibilidad extends Model
 
     protected $fillable = [
         'codigo',
+        'nombre',
     ];
 }

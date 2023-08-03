@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\CentroTrabajo;
+use App\Models\Centrotrabajo;
 use Illuminate\Database\Seeder;
 
 class CentroTrabajoSeeder extends Seeder
@@ -14,8 +14,14 @@ class CentroTrabajoSeeder extends Seeder
      */
     public function run()
     {
-        CentroTrabajo::create([ 'nombre' => 'centro'.rand(10,10000), ]);
-        CentroTrabajo::create([ 'nombre' => 'centro'.rand(10001,20000), ]);
-        CentroTrabajo::create([ 'nombre' => 'centro'.rand(20001,30000), ]);
+        $palabraClave = 'Centro de Trabajo';
+        $limite = 10;
+        for ($i=0; $i < $limite; $i++) { 
+            Centrotrabajo::create([
+                'nombre' => $palabraClave.rand(10,10000),
+                'codigo' => rand(10,10000)
+             ]);
+        }
+        // Centrotrabajo::create([ 'nombre' => 'centro'.rand(10,10000), ]);
     }
 }

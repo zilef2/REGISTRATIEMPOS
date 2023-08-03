@@ -23,9 +23,24 @@ class ReporteRequest extends FormRequest
      */
     public function rules()
     {
+        $reporteId = $this->route('reporte') ?? null;
         return
         [
-			'nombre' => 'required',
+			// 'nombre' => 'required',
+            'codigo' => 'required|unique:reportes,codigo,'.$reporteId,
+            'fecha' => 'required',
+            'hora_inicial' => 'required',
+            'hora_final' => 'nullable',
+            'actividad_id' => 'required',
+            'centrotrabajo_id' => 'required',
+            'material_id' => 'required',
+            'ordentrabajo_id' => 'required',
+
+            'pieza_id' => 'nullable',
+            'cantidad' => 'nullable',
+            
+            'disponibilidad_id' => 'nullable',
+            'reproceso_id' => 'nullable',
         ];
     }
 }

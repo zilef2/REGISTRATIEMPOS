@@ -16,7 +16,7 @@ import { BookOpenIcon, ArrowUpCircleIcon, ArrowDownCircleIcon } from '@heroicons
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
-import { PrimerasPalabras, vectorSelect, formatDate, CalcularEdad, CalcularSexo} from '@/global.js';
+import { PrimerasPalabras, vectorSelect, formatDate, CalcularEdad, CalcularSexo} from '@/global.ts';
 
 
 const { _, debounce, pickBy } = pkg
@@ -210,9 +210,9 @@ data.UniversidadSelect = vectorSelect(data.UniversidadSelect,props.UniversidadSe
                                             columnas</h2>
                                         <ul class="list-decimal my-6 mx-5">
                                             <li class="text-lg">Identificacion : del trabajador a inscribir</li>
-                                    </ul>
+                                        </ul>
 
-                                    <!-- <div class="flex items-center flex-wrap my-6">
+                                        <!-- <div class="flex items-center flex-wrap my-6">
                                             <a class="text-gray-500 inline-flex items-center md:mb-2 lg:mb-0">Numero de Usuarios: </a>
                                             <span
                                                 class="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
@@ -220,14 +220,15 @@ data.UniversidadSelect = vectorSelect(data.UniversidadSelect,props.UniversidadSe
                                                 {{  props.numUsuarios }}
                                             </span>
                                         </div> -->
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- user matriculas : multiple -->
+                            <!-- user matriculas : multiple -->
 
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
-    </div>
-</AuthenticatedLayout></template>
+    </AuthenticatedLayout>
+</template>
