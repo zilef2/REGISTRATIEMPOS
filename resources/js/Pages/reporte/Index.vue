@@ -12,16 +12,18 @@ import pkg from 'lodash';
 import { router, usePage, Link, useForm } from '@inertiajs/vue3';
 
 import Pagination from '@/Components/Pagination.vue';
-import { CursorArrowRippleIcon, ChevronUpDownIcon,QuestionMarkCircleIcon, EyeIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/vue/24/solid';
+import { ChevronUpDownIcon, CheckCircleIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
 
 import Create from '@/Pages/reporte/Create.vue';
 import Edit from '@/Pages/reporte/Edit.vue';
+import TerminarReporte from '@/Pages/reporte/TerminarReporte.vue';
 import Delete from '@/Pages/reporte/Delete.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
+import ClockWorking from '@/Components/uiverse/ClockWorking.vue';
 
-import { PrimerasPalabras, vectorSelect, formatDate, CalcularAvg, number_format} from '@/global.ts';
+import { TimeTo12Format, formatDate, CalcularAvg, number_format } from '@/global.ts';
 
 const { _, debounce, pickBy } = pkg
 const props = defineProps({
@@ -30,9 +32,9 @@ const props = defineProps({
     filters: Object,
     breadcrumbs: Object,
     perPage: Number,
-    
+
     title: String,
-    
+
     numberPermissions: Number,
     losSelect: Object,
 })
@@ -49,6 +51,7 @@ const data = reactive({
     multipleSelect: false,
     createOpen: false,
     editOpen: false,
+    TerminarOpen: false,
     deleteOpen: false,
     // deleteBulkOpen: false,
     dataSet: usePage().props.app.perpage,
@@ -98,23 +101,23 @@ watchEffect(() => {
 //text number dinero date datetime foreign
 // text // number // dinero // date // datetime // foreign
 const titulos = [
-    {order: 'codigo' , label: 'codigo', type: 'text'},
-    {order: 'fecha' , label: 'fecha', type:'date'},
-    {order: 'hora_inicial' , label: 'hora inicial', type: 'text'},
-    {order: 'hora_final' , label: 'hora final', type: 'text'},
-    {order: 'actividad_id' , label: 'actividad', type: 'foreign', nameid: 'actividad_s'},
-    {order: 'centrotrabajo_id' , label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s'},
-    {order: 'material_id' , label: 'material', type: 'foreign', nameid: 'material_s'},
-    {order: 'ordentrabajo_id' , label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_s'},
-    
-    {order: 'pieza_id' , label: 'pieza', type: 'foreign', nameid: 'pieza_s'},
-    {order: 'cantidad' , label: 'cantidad', type: 'number'},
-    
-    {order: 'disponibilidad_id' , label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s'},
-    {order: 'reproceso_id' , label: 'reproceso', type: 'foreign', nameid: 'reproceso_s'},
-    
+    { order: 'codigo', label: 'codigo', type: 'text' },
+    { order: 'fecha', label: 'fecha', type: 'date' },
+    { order: 'hora_inicial', label: 'hora inicial', type: 'time' },
+    { order: 'hora_final', label: 'hora final', type: 'time' },
+    { order: 'actividad_id', label: 'actividad', type: 'foreign', nameid: 'actividad_s' },
+    { order: 'centrotrabajo_id', label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s' },
+    { order: 'material_id', label: 'material', type: 'foreign', nameid: 'material_s' },
+    { order: 'ordentrabajo_id', label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_s' },
+
+    { order: 'pieza_id', label: 'pieza', type: 'foreign', nameid: 'pieza_s' },
+    { order: 'cantidad', label: 'cantidad', type: 'number' },
+
+    { order: 'disponibilidad_id', label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s' },
+    { order: 'reproceso_id', label: 'reproceso', type: 'foreign', nameid: 'reproceso_s' },
+
     // {order: 'calendario_id' , label: 'calendario', type: 'foreign', nameid: 'calendario_s'},
-    {order: 'operario_id' , label: 'operario', type: 'foreign', nameid: 'operario_s'},
+    { order: 'operario_id', label: 'operario', type: 'foreign', nameid: 'operario_s' },
 ];
 
 </script>
@@ -136,10 +139,12 @@ const titulos = [
                         :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :losSelect=props.losSelect />
 
-                    <Edit v-if="can(['update reporte'])" 
-                        :numberPermissions="props.numberPermissions"
-                        :show="data.editOpen" @close="data.editOpen = false" :generica="data.generico" :title="props.title"
-                        :losSelect=props.losSelect
+                    <Edit v-if="can(['update reporte']) && numberPermissions > 1" :numberPermissions="props.numberPermissions" :show="data.editOpen"
+                        @close="data.editOpen = false" :generica="data.generico" :title="props.title"
+                        :losSelect=props.losSelect />
+
+                    <TerminarReporte v-if="can(['read reporte'])" :numberPermissions="props.numberPermissions" :show="data.TerminarOpen"
+                        @close="data.TerminarOpen = false" :generica="data.generico" :title="props.title"
                         />
 
                     <Delete v-if="can(['delete reporte'])" :numberPermissions="props.numberPermissions"
@@ -158,7 +163,7 @@ const titulos = [
                         </DangerButton> -->
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, correo, nivel o ID " />
+                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="codigo o fecha " />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table v-if="props.total > 0" class="w-full">
@@ -167,10 +172,10 @@ const titulos = [
                                 <th class="px-2 py-4 text-center">
                                     <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                                 </th>
-                                <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
+                                <th class="px-2 py-4">Accion</th>
 
                                 <th class="px-2 py-4 text-center">#</th>
-                                <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
+                                <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer min-w-min"
                                     v-on:click="order(titulo['order'])">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label[titulo['label']] }}</span>
@@ -194,15 +199,20 @@ const titulos = [
                                         type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId" />
                                 </td>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
-                                            <InfoButton v-show="can(['update user'])" type="button"
+                                            <InfoButton v-show="can(['update reporte'])" type="button"
                                                 @click="(data.editOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <DangerButton v-show="can(['delete user'])" type="button"
+                                            <InfoButton v-show="can(['update reporte'])" type="button"
+                                                @click="(data.TerminarOpen = true), (data.generico = clasegenerica)"
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                                <CheckCircleIcon class="w-4 h-4" />
+                                            </InfoButton>
+                                            <DangerButton v-show="can(['delete reporte'])" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
                                                 <TrashIcon class="w-4 h-4" />
@@ -213,42 +223,27 @@ const titulos = [
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                                 <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <span v-if="titulo['type'] == 'text'"> {{ clasegenerica[titulo['order']] }} </span>
-                                    <span v-if="titulo['type'] == 'number'"> {{
-                                                                            number_format(clasegenerica[titulo['order']],0,false) }} </span>
-                                    <span v-if="titulo['type'] == 'dinero'"> {{
-                                                                            number_format(clasegenerica[titulo['order']],0,true) }} </span>
-                                    <span v-if="titulo['type'] == 'date'"> {{
-                                                                            formatDate(clasegenerica[titulo['order']],false) }} </span>
-                                    <span v-if="titulo['type'] == 'datetime'"> {{
-                                                                            formatDate(clasegenerica[titulo['order']],true) }} </span>
+                                    <!-- <span v-if="titulo['type'] == 'time'"> {{ (clasegenerica[titulo['order']]).slice(0,-3) }} </span> -->
+                                    <span v-if="titulo['type'] == 'time'"> {{ TimeTo12Format(clasegenerica[titulo['order']]) }} </span>
+                                    <span v-if="titulo['type'] == 'number'"> {{ number_format(clasegenerica[titulo['order']], 0, false) }} </span>
+                                    <span v-if="titulo['type'] == 'dinero'"> {{ number_format(clasegenerica[titulo['order']], 0, true) }} </span>
+                                    <span v-if="titulo['type'] == 'date'"> {{ formatDate(clasegenerica[titulo['order']], '') }} </span>
+                                    <span v-if="titulo['type'] == 'datetime'"> {{ formatDate(clasegenerica[titulo['order']], 'conLaHora') }} </span>
                                     <span v-if="titulo['type'] == 'foreign'"> {{ clasegenerica[titulo['nameid']] }} </span>
+                                    <span v-if="titulo['order'] == 'hora_final' && clasegenerica[titulo['order']] == null">
+                                        <ClockWorking />
+                                    </span>
                                 </td>
-                                <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <div class="flex justify-center items-center">
-                                        <div class="rounded-md overflow-hidden">
-                                            <InfoButton v-show="can(['update reporte'])" type="button"
-                                                @click="(data.editOpen = true), (data.reporte = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </InfoButton>
-                                            <DangerButton v-show="can(['delete reporte'])" type="button"
-                                                @click="(data.deleteOpen = true), (data.reporte = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </DangerButton>
-                                        </div>
-                                    </div>
-                                </td> -->
-
                             </tr>
                             <tr>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">  </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Hora inicial Promedio: </td>
+                                <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Hora inicial
+                                    Promedio: </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    {{CalcularAvg(props.fromController.data,'hora_inicial',true)}}
+                                    {{ CalcularAvg(props.fromController.data, 'hora_inicial', true) }}
                                 </td>
                             </tr>
                         </tbody>
@@ -261,4 +256,6 @@ const titulos = [
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout></template>
+
+    </AuthenticatedLayout>
+</template>

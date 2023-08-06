@@ -15,12 +15,12 @@ class MaterialSeeder extends Seeder
     public function run()
     {
         $palabraClave = 'Material ';
-        $limite = 10;
-        for ($i=0; $i < $limite; $i++) { 
+        $limite = intval(env('seedersNumber'));
+        for ($i = 0; $i < $limite; $i++) {
             Material::create([
-                'nombre' => $palabraClave.rand(10,10000),
-                'codigo' => rand(10,10000)
-             ]);
+                'nombre' => $palabraClave . rand(10, 10000),
+                'codigo' => rand(10, 10000)
+            ]);
         }
         // Material::create([ 'nombre' => 'centro'.rand(10,10000), ]);
     }

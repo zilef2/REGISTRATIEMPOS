@@ -16,7 +16,7 @@ class ActividadSeeder extends Seeder
     {
         $randNumber = rand(1,1000);
         Actividad::create([ 'codigo' => $randNumber, 'nombre' => "actividad $randNumber", ]);
-        $randNumber = rand(1,1000);
-        Actividad::create([ 'codigo' => $randNumber, 'nombre' => "actividad $randNumber", ]);
+        // $randNumber = rand(1,1000);
+        // Actividad::create([ 'codigo' => $randNumber, 'nombre' => "actividad $randNumber", ]);
     }
 }

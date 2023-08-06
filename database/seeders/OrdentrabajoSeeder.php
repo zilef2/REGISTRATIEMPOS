@@ -15,12 +15,12 @@ class OrdentrabajoSeeder extends Seeder
     public function run()
     {
         $palabraClave = 'Orden de Trabajo';
-        $limite = 10;
-        for ($i=0; $i < $limite; $i++) { 
+        $limite = intval(env('seedersNumber'));
+        for ($i = 0; $i < $limite; $i++) {
             Ordentrabajo::create([
-                'nombre' => $palabraClave.rand(10,10000),
-                'codigo' => rand(10,10000)
-             ]);
+                'nombre' => $palabraClave . rand(10, 10000),
+                'codigo' => rand(10, 10000)
+            ]);
         }
         // Ordentrabajo::create([ 'nombre' => $palabraClave.rand(10,10000) ]);
     }

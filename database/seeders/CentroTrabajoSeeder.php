@@ -15,12 +15,12 @@ class CentroTrabajoSeeder extends Seeder
     public function run()
     {
         $palabraClave = 'Centro de Trabajo';
-        $limite = 10;
-        for ($i=0; $i < $limite; $i++) { 
+        $limite = intval(env('seedersNumber'));
+        for ($i = 0; $i < $limite; $i++) {
             Centrotrabajo::create([
-                'nombre' => $palabraClave.rand(10,10000),
-                'codigo' => rand(10,10000)
-             ]);
+                'nombre' => $palabraClave . rand(10, 10000),
+                'codigo' => rand(10, 10000)
+            ]);
         }
         // Centrotrabajo::create([ 'nombre' => 'centro'.rand(10,10000), ]);
     }

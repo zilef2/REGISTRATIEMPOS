@@ -22,7 +22,7 @@ import Delete from '@/Pages/ordentrabajo/Delete.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 
-import { PrimerasPalabras, vectorSelect, formatDate, CalcularAvg, number_format} from '@/global.ts';
+import { PrimerasPalabras, vectorSelect, formatDate, CalcularAvg, number_format } from '@/global.ts';
 
 const { _, debounce, pickBy } = pkg
 const props = defineProps({
@@ -31,9 +31,9 @@ const props = defineProps({
     filters: Object,
     breadcrumbs: Object,
     perPage: Number,
-    
+
     title: String,
-    
+
     numberPermissions: Number,
     Flash: String,
 })
@@ -93,8 +93,8 @@ const select = () => {
 
 // text // number // dinero // date // datetime // foreign
 const titulos = [
-    {order: 'codigo' , label: 'codigo', type: 'text'},
-    {order: 'nombre' , label: 'nombre', type:'text'},
+    { order: 'codigo', label: 'codigo', type: 'text' },
+    { order: 'nombre', label: 'nombre', type: 'text' },
 ];
 
 </script>
@@ -113,16 +113,12 @@ const titulos = [
                     </PrimaryButton>
 
                     <Create v-if="can(['create ordentrabajo'])" :numberPermissions="props.numberPermissions"
-                        :titulos ="titulos"
-                        :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
+                        :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :losSelect=props.losSelect />
 
-                    <Edit v-if="can(['update ordentrabajo'])" 
-                        :titulos ="titulos"
-                        :numberPermissions="props.numberPermissions"
-                        :show="data.editOpen" @close="data.editOpen = false" :generica="data.generico" :title="props.title"
-                        :losSelect=props.losSelect
-                        />
+                    <Edit v-if="can(['update ordentrabajo'])" :titulos="titulos"
+                        :numberPermissions="props.numberPermissions" :show="data.editOpen" @close="data.editOpen = false"
+                        :generica="data.generico" :title="props.title" :losSelect=props.losSelect />
 
                     <Delete v-if="can(['delete ordentrabajo'])" :numberPermissions="props.numberPermissions"
                         :show="data.deleteOpen" @close="data.deleteOpen = false" :generica="data.generico"
@@ -170,14 +166,14 @@ const titulos = [
                         <tbody>
                             <tr v-for="(clasegenerica, indexu) in props.fromController.data" :key="indexu"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-                                
+
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <input
                                         class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
                                         type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId" />
                                 </td>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update user'])" type="button"
@@ -196,20 +192,25 @@ const titulos = [
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                                 <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <span v-if="titulo['type'] == 'text'"> {{ clasegenerica[titulo['order']] }} </span>
-                                    <span v-if="titulo['type'] == 'number'"> {{ number_format(clasegenerica[titulo['order']],0,false) }} </span>
-                                    <span v-if="titulo['type'] == 'dinero'"> {{ number_format(clasegenerica[titulo['order']],0,true) }} </span>
-                                    <span v-if="titulo['type'] == 'date'"> {{ formatDate(clasegenerica[titulo['order']],false) }} </span>
-                                    <span v-if="titulo['type'] == 'datetime'"> {{ formatDate(clasegenerica[titulo['order']],true) }} </span>
+                                    <span v-if="titulo['type'] == 'number'"> {{
+                                        number_format(clasegenerica[titulo['order']], 0, false) }} </span>
+                                    <span v-if="titulo['type'] == 'dinero'"> {{
+                                        number_format(clasegenerica[titulo['order']], 0, true) }} </span>
+                                    <span v-if="titulo['type'] == 'date'"> {{
+                                        formatDate(clasegenerica[titulo['order']], false) }} </span>
+                                    <span v-if="titulo['type'] == 'datetime'"> {{
+                                        formatDate(clasegenerica[titulo['order']], true) }} </span>
                                     <span v-if="titulo['type'] == 'foreign'"> {{ clasegenerica[titulo['nameid']] }} </span>
                                 </td>
 
                             </tr>
-                            <tr>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> -
+                            <tr class="border-t border-gray-600">
+                                <td v-if="numberPermissions > 1"
+                                    class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> -
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> Total: </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    {{props.total}}
+                                    {{ props.total }}
                                 </td>
                             </tr>
                         </tbody>
@@ -222,4 +223,5 @@ const titulos = [
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout></template>
+    </AuthenticatedLayout>
+</template>

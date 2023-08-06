@@ -7,7 +7,7 @@ import { useForm } from '@inertiajs/vue3';
 const props = defineProps({
     show: Boolean,
     title: String,
-    user: Object,
+    generica: Object,
 })
 
 const emit = defineEmits(["close"]);
@@ -15,7 +15,7 @@ const emit = defineEmits(["close"]);
 const form = useForm({});
 
 const destory = () => {
-    form.delete(route('user.destroy', props.user?.id), {
+    form.delete(route('actividad.destroy', props.generica?.id), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")

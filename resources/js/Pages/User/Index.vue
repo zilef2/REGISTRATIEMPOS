@@ -90,6 +90,16 @@ watchEffect(() => {
     data.ArchivoNombre = form.archivo1?.name
 })
 
+// text // number // dinero // date // datetime // foreign 
+const titulos = [
+    { order: 'name', label: 'Nombre', type: 'text' },
+    { order: 'fecha_nacimiento', label: 'Fecha nacimiento', type: 'date' },
+    { order: 'email', label: 'Email', type: 'text' },
+    { order: 'identificacion', label: 'Identificacion', type: 'text' },
+    // { order: 'sexo', label: 'Sexo', type: 'foreign' },
+    { order: 'sexo', label: 'sexo', type: 'foreign', nameid: 'sexo_S' },
+
+];
 </script>
 
 <template>
@@ -104,9 +114,9 @@ watchEffect(() => {
                         {{ lang().button.add }}
                     </PrimaryButton>
                     <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
-                        v-if="can(['create user'])" :title="props.title" />
+                        v-if="can(['create user'])" :title="props.title" :titulos="titulos"/>
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
-                        v-if="can(['update user'])" :title="props.title" />
+                        v-if="can(['update user'])" :title="props.title" :titulos="titulos" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
                     <DeleteBulk :show="data.deleteBulkOpen"
@@ -125,7 +135,7 @@ watchEffect(() => {
                         </DangerButton>
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, correo, nivel o ID " />
+                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, correo o identificación" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">

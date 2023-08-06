@@ -24,36 +24,36 @@ class ActividadsController extends Controller
     public $MayusnombreClase = 'Actividad';
     public $thisAtributos;
 
-    public function __construct(){
-
+    public function __construct()
+    {
         $this->thisAtributos = (new Actividad())->getFillable();
-        
     }
 
-
-    public function MapearClasePP(&$Actividads, $numberPermissions) {
+    public function MapearClasePP(&$Actividads, $numberPermissions)
+    {
         $Actividads = $Actividads->get()->map(function ($Actividad) use ($numberPermissions) {
             // $Actividad->actividad_s = $Actividad->actividad()->first() !== null ? $Actividad->actividad()->first()->nombre : '';
-            
+
             return $Actividad;
         })->filter();
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $permissions = Myhelp::EscribirEnLog($this, $this->nombreClase);
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();
-        if($numberPermissions > 1){
-            $Actividads = Actividad::query();
-        }else{
-            $Actividads = Actividad::Where('operario_id',$user->id);
-        }
+
+        // if($numberPermissions > 1){
+        $Actividads = Actividad::query();
+        // }else{
+        //     $Actividads = Actividad::Where('operario_id',$user->id);
+        // }
 
         if ($request->has('search')) {
             $Actividads->where(function ($query) use ($request) {
                 $query->where('codigo', 'LIKE', "%" . $request->search . "%")
-                    // ->orWhere('email', 'LIKE', "%" . $request->search . "%")
-                    ;
+                    ->orWhere('nombre', 'LIKE', "%" . $request->search . "%");
             });
         }
         if ($request->has(['field', 'order'])) {
@@ -92,14 +92,17 @@ class ActividadsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() { }
+    public function create()
+    {
+    }
 
 
     //! STORE - UPDATE - DELETE
-    public function store(ActividadRequest $request) {
+    public function store(ActividadRequest $request)
+    {
         $user = Auth::User();
-        Myhelp::EscribirEnLog($this, 'STORE:Actividads','', false);
-        
+        Myhelp::EscribirEnLog($this, 'STORE:Actividads', '', false);
+
         DB::beginTransaction();
         try {
             $guardar = [];
@@ -111,16 +114,20 @@ class ActividadsController extends Controller
             DB::commit();
             Myhelp::EscribirEnLog($this, 'STORE:Actividads', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
             return back()->with('success', __('app.label.created_successfully', ['name' => $Actividad->name]));
-
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:Actividads', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Actividad')]) . $th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Actividad')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
     //fin store functions
 
-    public function show($id) { } public function edit($id) { }
+    public function show($id)
+    {
+    }
+    public function edit($id)
+    {
+    }
 
 
     public function update(ActividadRequest $request, $id)
@@ -142,7 +149,7 @@ class ActividadsController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Actividad->name]) . $th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
@@ -161,8 +168,8 @@ class ActividadsController extends Controller
             Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $Actividad->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' fallo en el borrado:: ' . $th->getMessage(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Actividad->name]) . $th->getMessage());
+            Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
@@ -173,7 +180,7 @@ class ActividadsController extends Controller
             $Actividad->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.Actividad')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Actividad')]) . $th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Actividad')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -263,8 +270,8 @@ class ActividadsController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:Actividads', ' Fallo importacion: ' . $th->getMessage(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage());
+            Myhelp::EscribirEnLog($this, 'IMPORT:Actividads', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 }

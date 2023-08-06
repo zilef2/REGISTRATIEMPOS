@@ -17,7 +17,14 @@ return [
         'Pieza' => 'Pieza',
         'reproceso' => 'reproceso',
         'Reproceso' => 'Reproceso',
-
+        'Nombre' => 'Nombre',
+        'Email' => 'Email',
+        'Identificacion' => 'Identificacion',
+        'Sexo' => 'Sexo',
+        'Fecha nacimiento' => 'Fecha nacimiento',
+        //dashboard
+        'reportes' => 'reportes',
+        'roles' => 'roles',
 
         //parametros
         'parametros' => 'parametros',
@@ -46,11 +53,6 @@ return [
         'anio' => 'edad',
         'sexo' => 'sexo',
         'fecha_nacimiento' => 'fecha de nacimiento',
-        'semestre' => 'semestre',
-        'semestre_mas_bajo' => 'semestre mas bajo',
-        'limite_token_general' => 'limite general',
-        'limite_token_leccion' => 'limite de tokens por leccion',
-        'limite_token_lec' => 'limite/leccion',
 
 
         'cliente' => 'Cliente',
@@ -88,6 +90,7 @@ return [
         'verify_email' => "Gracias por ingresar! Antes de comnezar, ¿Podria verificar su correo electronico haciendo click en el link que acabamos de enviar a su correo? Si no resiviste el correo, Con mucho gusto le enviaremos otro.",
         'data' => 'Info',
         'user' => 'Usuario',
+        'users' => 'Usuarios',
         'access' => 'Acceso',
         'role' => 'Rol',
         'permission' => 'Permisos',

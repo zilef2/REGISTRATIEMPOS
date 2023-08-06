@@ -40,9 +40,11 @@ class RoleSeeder extends Seeder
         unset($isSomeThing[0]);
         $admin->givePermissionTo($isSomeThing);
 
-            //otros
+
+
+        //otros
         $trabajador->givePermissionTo([
-            'read reporte',  'update reporte',  'create reporte',  // 'delete reporte',
+            'read reporte',  'create reporte',  // 'delete reporte',
         ]);
 
         // $role->revokePermissionTo($permission);

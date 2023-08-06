@@ -36,17 +36,15 @@ const justNames = props.titulos.map(names => names['order'] )
 const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
 onMounted(() => {
     if(props.numberPermissions > 8){
-
         const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
         form.nombre = 'admin orden trabajo '+ (valueRAn);
         form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
-
     }
 });
 
-const printForm =[];
+const printForm = [];
 props.titulos.forEach(names => 
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
@@ -78,7 +76,6 @@ watchEffect(() => {
         form.errors = {}
     }
 })
-
 
 // const roles = props.roles?.map(role => ({
 //     label: role.name.replace(/_/g, " "),

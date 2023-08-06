@@ -12,6 +12,7 @@ import { reactive, watch, onMounted, ref, watchEffect } from 'vue';
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+import { LookForValueInArray, formatTime, formatDate, TransformTdate } from '@/global.ts';
 
 // --------------------------- ** -------------------------
 
@@ -29,6 +30,7 @@ const data = reactive({
     params: {
         pregunta: ''
     },
+    tipoReporte:{ title: 'Actividad', value: 0 },
     actividad_id:props.losSelect.actividad,
     centrotrabajo_id:props.losSelect.centrotrabajo,
     disponibilidad_id:props.losSelect.disponibilidad,
@@ -36,6 +38,10 @@ const data = reactive({
     ordentrabajo_id:props.losSelect.ordentrabajo,
     pieza_id:props.losSelect.pieza,
     reproceso_id:props.losSelect.reproceso,
+    temp_disponibilidad_id:null,
+    temp_reproceso_id:null,
+    temp_actividad_id:null,
+    valorInactivo:'NA',
 })
 
 //very usefull
@@ -59,12 +65,14 @@ const justNames = [
 
 onMounted(() => {
     if(props.numberPermissions > 8){
-
         const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
         form.codigo = 'AdminCod'+ (valueRAn);
         form.hora_inicial = '0'+valueRAn+':00'//temp
         form.fecha = '2023-06-01'
-
+    }else{
+        let currentDate = new Date();
+        form.fecha = (TransformTdate(currentDate,'')).substring(0,10);
+        form.hora_inicial = formatTime()
     }
 });
 
@@ -77,12 +85,14 @@ const printForm = [
     
     { idd: 'ordentrabajo_id', label: 'Orden de trabajo', type: 'id', value: form.ordentrabajo_id , elif:null},
     { idd: 'centrotrabajo_id', label: 'Centro de trabajo', type: 'id', value: form.centrotrabajo_id , elif:null},
+
+    //3 opciones
     { idd: 'actividad_id', label: 'Actividad', type: 'id', value: form.actividad_id , elif:null},
-    //opcionales
     { idd: 'disponibilidad_id', label: 'Disponibilidad (paro)', type: 'id', value: form.disponibilidad_id, elif:null },
     { idd: 'reproceso_id', label: 'Reproceso', type: 'id', value: form.reproceso_id, elif:null },
+    
+    //opcionales
     { idd: 'material_id', label: 'Material', type: 'id', value: form.material_id , elif:null},
-
     { idd: 'pieza_id', label: 'Pieza', type: 'id', value: form.pieza_id, elif:null },
     { idd: 'cantidad', label: 'cantidad (pieza)', type: 'text', value: form.cantidad, elif:'pieza_id' },
 
@@ -103,6 +113,28 @@ const create = () => {
     })
 }
 
+watch(() => data.tipoReporte, (newX) => {
+    if( data.tipoReporte.value == 0 ){  //actividad
+        form.disponibilidad_id = data.valorInactivo
+        form.reproceso_id = data.valorInactivo
+        form.actividad_id = form.actividad_id == data.valorInactivo ? '' : props.losSelect.actividad_id
+        console.log("🧈 debu props.losSelect.actividad_id:", props.losSelect.actividad_id);
+    }
+    if( data.tipoReporte.value == 1 ){  //reproceso
+        form.disponibilidad_id = data.valorInactivo
+        form.actividad_id = data.valorInactivo
+        // form.actividad_id = data.temp_reproceso_id
+        form.reproceso_id = form.reproceso_id == data.valorInactivo ? '' : props.losSelect.reproceso_id
+    }
+    console.log("🧈 debu form.disponibilidad_id:", form.disponibilidad_id);
+    if( data.tipoReporte.value == 2 ){  //disponibilidad
+        form.actividad_id = data.valorInactivo
+        form.reproceso_id = data.valorInactivo
+        // form.actividad_id = data.temp_disponibilidad_id
+        form.disponibilidad_id = form.disponibilidad_id == data.valorInactivo ? '' : props.losSelect.disponibilidad_id
+    }
+})
+
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
@@ -117,7 +149,7 @@ watchEffect(() => {
 // }))
 
 //very usefull
-const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }];
+const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
 </script>
 
 <template>
@@ -128,36 +160,45 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div v-for="(atributosform, indice) in printForm" :key="indice">
-                        
-                        
+                    <div id="opcinesActividadO" >
+                        <label name=""> Tipo de reporte </label>
+                        <v-select :options="opcinesActividadOTros" label="title"
+                        v-model="data.tipoReporte"></v-select>
+                    </div>
 
-                        <div v-if="atributosform.type =='id'" id="SelectVue">
-                            <label name="labelSelectVue"> {{atributosform.label}} </label>
-                            <v-select :options="data[atributosform.idd]" label="title"
-                            v-model="form[atributosform.idd]"></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                    <div v-for="(atributosform, indice) in printForm" :key="indice" >
 
-                        </div>
-                        <div v-else-if="atributosform.type =='time'" id="SelectVue">
-                            <InputLabel 
-                                :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput
-                                :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" 
-                                step="3600"
-                            />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
-                        <div v-else class="">
-                            <InputLabel
-                                :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput
-                                 :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" />
+                        <div >
+                            <div v-if="atributosform.type =='id'" id="SelectVue" >
+                                
+                                <label name="labelSelectVue"> {{atributosform.label}} </label>
+                                <v-select :options="data[atributosform.idd]" label="title"
+                                v-model="form[atributosform.idd]"
+                                :class="{'bg-gray-200 text-white' : form[atributosform.idd] == data.valorInactivo}"
+                                ></v-select>
                                 <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+
+                            </div>
+                            <div v-else-if="atributosform.type =='time'" id="SelectVue">
+                                <InputLabel 
+                                    :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                                <TextInput
+                                    :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                    v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                    :error="form.errors[atributosform.idd]" 
+                                    step="3600"
+                                />
+                                <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                            </div>
+                            <div v-else class="">
+                                <InputLabel
+                                    :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                                <TextInput
+                                    :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                    v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                    :error="form.errors[atributosform.idd]" />
+                                    <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                            </div>
                         </div>
                     </div>
 

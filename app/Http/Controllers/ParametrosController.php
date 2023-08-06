@@ -20,7 +20,8 @@ class parametrosController extends Controller
     public $MAX_USAGE_RESPUESTA = 550;
     public $MAX_USAGE_TOTAL = 600;
 
-    public function fNombresTabla() {
+    public function fNombresTabla()
+    {
         $nombresTabla = [ //0: como se ven //1 como es la BD //2 ordenables
             ["Acciones"],
             [],
@@ -31,19 +32,21 @@ class parametrosController extends Controller
         return $nombresTabla;
     }
 
-    public function losSelect() {
+    public function losSelect()
+    {
         // $MateriasSelect = Materia::all();
         // return [
         //     'MateriasSelect' => $MateriasSelect
         // ];
     }
 
-    public function index(Request $request) {
-        $permissions = Myhelp::EscribirEnLog($this,' parametro');
+    public function index(Request $request)
+    {
+        $permissions = Myhelp::EscribirEnLog($this, ' parametro');
 
 
         $titulo = __('app.label.parametros');
-        if($permissions == 'admin' || $permissions == 'superadmin'){
+        if ($permissions == 'admin' || $permissions == 'superadmin') {
             $nombresTabla = $this->fNombresTabla();
 
             return Inertia::render('parametro/Index', [ //carpeta
@@ -54,14 +57,16 @@ class parametrosController extends Controller
                 'breadcrumbs'    =>  [['label' => __('app.label.parametros'), 'href' => route('parametro.index')]],
                 'nombresTabla'   =>  $nombresTabla,
             ]);
-        }else{
-            Myhelp::EscribirEnLog($this,' parametro','en el index nos hackearon ',false,true); //!usefull
+        } else {
+            Myhelp::EscribirEnLog($this, ' parametro', 'en el index nos hackearon ', false, true); //!usefull
         }
-
     } //fin index
 
-    public function create() { }
-    public function store(Request $request) {
+    public function create()
+    {
+    }
+    public function store(Request $request)
+    {
         DB::beginTransaction();
         Myhelp::EscribirEnLog($this, get_called_class(), ' store ', false); //!usefull
 
@@ -78,16 +83,21 @@ class parametrosController extends Controller
             return back()->with('success', __('app.label.created_successfully2', ['nombre' => $parametro->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            Log::alert("U -> " . Auth::user()->name . " fallo en Guardar parametro " . $request->nombre . " - " . $th->getMessage());
+            Log::alert("U -> " . Auth::user()->name . " fallo en Guardar parametro " . $request->nombre . " - " . $th->getMessage() . ' L:' . $th->getLine());
 
-            return back()->with('error', __('app.label.created_error', ['nombre' => __('app.label.parametro')]) . $th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['nombre' => __('app.label.parametro')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
-    public function show(parametro $parametro) { }
-    public function edit(parametro $parametro) { }
+    public function show(parametro $parametro)
+    {
+    }
+    public function edit(parametro $parametro)
+    {
+    }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $parametro = Parametro::find($id);
         DB::beginTransaction();
         Myhelp::EscribirEnLog($this, get_called_class(), '', false);
@@ -108,13 +118,14 @@ class parametrosController extends Controller
         } catch (\Throwable $th) {
 
             DB::rollback();
-            Log::alert("U -> " . Auth::user()->name . " fallo en actualizar parametro " . $request->nombre . " - " . $th->getMessage());
-            return back()->with('error', __('app.label.updated_error', ['nombre' => $parametro->nombre]) . $th->getMessage());
+            Log::alert("U -> " . Auth::user()->name . " fallo en actualizar parametro " . $request->nombre . " - " . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.updated_error', ['nombre' => $parametro->nombre]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
     // public function destroy(parametro $parametro)
-    public function destroy($id) {
+    public function destroy($id)
+    {
         Myhelp::EscribirEnLog($this, get_called_class(), '', false);
 
         DB::beginTransaction();
@@ -129,8 +140,8 @@ class parametrosController extends Controller
             return back()->with('success', __('app.label.deleted_successfully2', ['nombre' => $parametros->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            Log::alert("U -> " . Auth::user()->name . " fallo en borrar parametro " . $id . " - " . $th->getMessage());
-            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.parametros')]) . $th->getMessage());
+            Log::alert("U -> " . Auth::user()->name . " fallo en borrar parametro " . $id . " - " . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.parametros')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 }

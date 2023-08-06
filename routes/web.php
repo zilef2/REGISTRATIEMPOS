@@ -13,6 +13,7 @@ use App\Http\Controllers\OrdentrabajosController;
 use App\Http\Controllers\PiezasController;
 use App\Http\Controllers\ReprocesosController;
 use App\Models\Permission;
+use App\Models\Reporte;
 use App\Models\Role;
 use App\Models\User;
 
@@ -38,6 +39,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
         'users'         => (int) User::count(),
         'roles'         => (int) Role::count(),
+        'reportes'      => (int) Reporte::count(),
         'permissions'   => (int) Permission::count(),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -77,7 +79,6 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource('/material', MaterialsController::class);
     Route::resource('/pieza', PiezasController::class);
     Route::resource('/reproceso', ReprocesosController::class);
-
 
 });
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 
 use App\Models\Ordentrabajo;
@@ -16,43 +17,41 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
-class OrdentrabajosController extends Controller {
-
-    
+class OrdentrabajosController extends Controller
+{
     public $nombreClase = 'ordentrabajo';
     public $MayusnombreClase = 'Ordentrabajo';
     public $thisAtributos;
 
-    public function __construct(){
-
+    public function __construct()
+    {
         $this->thisAtributos = (new Ordentrabajo())->getFillable();
-        
     }
 
-
-    public function MapearClasePP(&$Ordentrabajos, $numberPermissions) {
+    public function MapearClasePP(&$Ordentrabajos, $numberPermissions)
+    {
         $Ordentrabajos = $Ordentrabajos->get()->map(function ($Ordentrabajo) use ($numberPermissions) {
             // $Ordentrabajo->actividad_s = $Ordentrabajo->actividad()->first() !== null ? $Ordentrabajo->actividad()->first()->nombre : '';
-            
+
             return $Ordentrabajo;
         })->filter();
     }
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $permissions = Myhelp::EscribirEnLog($this, $this->nombreClase);
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();
-        if($numberPermissions > 1){
-            $Ordentrabajos = Ordentrabajo::query();
-        }else{
-            $Ordentrabajos = Ordentrabajo::Where('operario_id',$user->id);
-        }
+        // if($numberPermissions > 1){
+        $Ordentrabajos = Ordentrabajo::query();
+        // }else{
+        // $Ordentrabajos = Ordentrabajo::Where('operario_id',$user->id);
+        // }
 
         if ($request->has('search')) {
             $Ordentrabajos->where(function ($query) use ($request) {
                 $query->where('codigo', 'LIKE', "%" . $request->search . "%")
-                    // ->orWhere('email', 'LIKE', "%" . $request->search . "%")
-                    ;
+                    ->orWhere('nombre', 'LIKE', "%" . $request->search . "%");
             });
         }
         if ($request->has(['field', 'order'])) {
@@ -91,14 +90,17 @@ class OrdentrabajosController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() { }
+    public function create()
+    {
+    }
 
 
     //! STORE - UPDATE - DELETE
-    public function store(OrdentrabajoRequest $request) {
+    public function store(OrdentrabajoRequest $request)
+    {
         $user = Auth::User();
-        Myhelp::EscribirEnLog($this, 'STORE:Ordentrabajos','', false);
-        
+        Myhelp::EscribirEnLog($this, 'STORE:Ordentrabajos', '', false);
+
         DB::beginTransaction();
         try {
             $guardar = [];
@@ -110,16 +112,20 @@ class OrdentrabajosController extends Controller {
             DB::commit();
             Myhelp::EscribirEnLog($this, 'STORE:Ordentrabajos', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
             return back()->with('success', __('app.label.created_successfully', ['name' => $Ordentrabajo->name]));
-
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:Ordentrabajos', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Ordentrabajo')]) . $th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Ordentrabajo')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
     //fin store functions
 
-    public function show($id) { } public function edit($id) { }
+    public function show($id)
+    {
+    }
+    public function edit($id)
+    {
+    }
 
 
     public function update(OrdentrabajoRequest $request, $id)
@@ -141,7 +147,7 @@ class OrdentrabajosController extends Controller {
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Ordentrabajo->name]) . $th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => $Ordentrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
@@ -160,8 +166,8 @@ class OrdentrabajosController extends Controller {
             Myhelp::EscribirEnLog($this, 'DELETE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $Ordentrabajo->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . ' fallo en el borrado:: ' . $th->getMessage(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Ordentrabajo->name]) . $th->getMessage());
+            Myhelp::EscribirEnLog($this, 'DELETE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Ordentrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
@@ -172,7 +178,7 @@ class OrdentrabajosController extends Controller {
             $Ordentrabajo->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.Ordentrabajo')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Ordentrabajo')]) . $th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Ordentrabajo')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -262,8 +268,8 @@ class OrdentrabajosController extends Controller {
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:Ordentrabajos', ' Fallo importacion: ' . $th->getMessage(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage());
+            Myhelp::EscribirEnLog($this, 'IMPORT:Ordentrabajos', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 }

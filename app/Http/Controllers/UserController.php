@@ -12,17 +12,24 @@ use App\Models\Role;
 use App\Models\Universidad;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 
-class UserController extends Controller {
-    public function __construct() {
+class UserController extends Controller
+{
+    public $thisAtributos;
+
+    public function __construct()
+    {
         $this->middleware('permission:create user', ['only' => ['create', 'store']]);
         $this->middleware('permission:read user', ['only' => ['index', 'show']]);
         $this->middleware('permission:update user', ['only' => ['edit', 'update']]);
         $this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
+        $this->thisAtributos = (new User())->getFillable(); //not using
+
     }
 
     /**
@@ -30,7 +37,8 @@ class UserController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(UserIndexRequest $request) {
+    public function index(UserIndexRequest $request)
+    {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
 
@@ -39,8 +47,7 @@ class UserController extends Controller {
             $users->where(function ($query) use ($request) {
                 $query->where('name', 'LIKE', "%" . $request->search . "%")
                     ->orWhere('email', 'LIKE', "%" . $request->search . "%")
-                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
-                    ;
+                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%");
             })
                 ->where('name', '!=', 'admin')
                 ->where('name', '!=', 'Superadmin');
@@ -80,10 +87,10 @@ class UserController extends Controller {
      */
     public function create() { }
 
-
     //! STORE - UPDATE - DELETE
     //! STORE functions
-    public function updatingDate($date) {
+    public function updatingDate($date)
+    {
         if ($date === null || $date == '1969-12-31') {
             return null;
         }
@@ -93,21 +100,17 @@ class UserController extends Controller {
     public function store(UserStoreRequest $request)
     {
         $permissions = Myhelp::EscribirEnLog($this, 'STORE:users');
-
+        $user = Auth::user();
         DB::beginTransaction();
         try {
+            $sexo = is_string($request->sexo) ? $request->sexo : $request->sexo['value'];
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'name'      => $request->name,
+                'email'     => $request->email,
                 'identificacion' => $request->identificacion,
-                'sexo' => $request->sexo == 0 ? 'Masculino' : 'Femenino',
+                'sexo' => $sexo,
                 'fecha_nacimiento' => $this->updatingDate($request->fecha_nacimiento),
-                'semestre' => $request->semestre,
-                'semestre_mas_bajo' => $request->semestre_mas_bajo,
-                'limite_token_general' => 3,
-                'limite_token_leccion' => $request->limite_token_leccion,
-                'pgrado' => $request->pgrado,
+                'password' => Hash::make($request->identificacion.'*'),
             ]);
             $user->assignRole($request->role);
             DB::commit();
@@ -117,46 +120,36 @@ class UserController extends Controller {
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' fallo en el guardado', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]) . $th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
     //fin store functions
 
-    public function show($id)
-    {
-    }
-    public function edit($id)
-    {
-    }
+    public function show($id) { }
+    public function edit($id) { }
     public function update(UserUpdateRequest $request, $id)
     {
-        Myhelp::EscribirEnLog($this, 'UP:users', '', false);
+        Myhelp::EscribirEnLog($this, 'UPDATE:users', '', false);
         DB::beginTransaction();
         try {
+            $sexo = is_string($request->sexo) ? $request->sexo : $request->sexo['value'];
             $user = User::findOrFail($id);
             $user->update([
                 'name'      => $request->name,
                 'email'     => $request->email,
-                // 'password'  => $request->password ? Hash::make($request->password) : $user->password,
-
                 'identificacion' => $request->identificacion,
-                'sexo' => $request->sexo,
-                // 'sexo' => $request->sexo == 0 ? 'Masculino' : 'Femenino',
+                'sexo' => $sexo,
                 'fecha_nacimiento' => $this->updatingDate($request->fecha_nacimiento),
-                'semestre' => $request->semestre,
-                'semestre_mas_bajo' => $request->semestre_mas_bajo,
-                'limite_token_general' => $request->limite_token_general,
-                'limite_token_leccion' => $request->limite_token_leccion,
             ]);
+
             $user->syncRoles($request->role);
             DB::commit();
             Myhelp::EscribirEnLog($this, 'UPDATE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' actualizado', false);
-
             return back()->with('success', __('app.label.updated_successfully', ['name' => $user->name]));
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:users', 'usuario id:' . $user->id . ' | ' . $user->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
@@ -175,8 +168,8 @@ class UserController extends Controller {
             Myhelp::EscribirEnLog($this, 'DELETE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $user->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' fallo en el borrado:: ' . $th->getMessage(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage());
+            Myhelp::EscribirEnLog($this, 'DELETE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 
@@ -187,7 +180,7 @@ class UserController extends Controller {
             $user->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -277,8 +270,8 @@ class UserController extends Controller {
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:users', ' Fallo importacion: ' . $th->getMessage(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage());
+            Myhelp::EscribirEnLog($this, 'IMPORT:users', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
         }
     }
 }

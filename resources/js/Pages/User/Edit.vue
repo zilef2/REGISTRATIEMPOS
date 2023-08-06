@@ -7,33 +7,38 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { watchEffect } from 'vue';
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { watchEffect, onMounted, reactive } from 'vue';
+import VueDatePicker from '@vuepic/vue-datepicker'; import '@vuepic/vue-datepicker/dist/main.css'
+import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
 
 const props = defineProps({
     show: Boolean,
     title: String,
     user: Object,
+    titulos: Object, //parametros de la clase principal
     roles: Object,
 })
 
 const emit = defineEmits(["close"]);
-
-const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    role: '',
-
-    sexo:'',
-    identificacion:'',
-    fecha_nacimiento:'',
-    semestre:'',
-    semestre_mas_bajo:1,
-    limite_token_general:'',
-    limite_token_leccion:'',
+const data = reactive({
+    params: {
+        pregunta: ''
+    },
+    sexo:[ { title: 'Masculino', value: 'Masculino' }, { title: 'Femenino', value: 'Femenino' } ]
+})
+//very usefull
+const justNames = props.titulos.map(names => names['order'] )
+let form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) ,
+    role:''
 });
+
+const printForm =[];
+props.titulos.forEach(names => 
+    printForm.push ({
+        idd: names['order'], label: names['label'], type: names['type']
+        //, value: form[names['order']]
+    })
+);
 
 const update = () => {
     form.put(route('user.update', props.user?.id), {
@@ -57,97 +62,80 @@ watchEffect(() => {
         form.identificacion = props.user?.identificacion
         form.sexo = props.user?.sexo
         form.fecha_nacimiento = props.user?.fecha_nacimiento
-        form.semestre = props.user?.semestre
-        form.semestre_mas_bajo = props.user?.semestre_mas_bajo
-        form.limite_token_general = props.user?.limite_token_general
-        form.limite_token_leccion = props.user?.limite_token_leccion
 
         form.errors = {}
     }
 })
 
-const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
+onMounted(() => { });
 
-const sexos = [ { label: 'Masculino', value: 'Masculino' }, { label: 'Femenino', value: 'Femenino' } ];
+const roles = props.roles?.map(role => ({
+    label: role.name.replace(/_/g," "),
+    value: (role.name)
+}))
 
+const flow = ['year', 'month', 'calendar'];
 </script>
 
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')">
-            <form class="p-6" @submit.prevent="update">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <form class="p-6 mb-12" @submit.prevent="update" >
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
-                <div class="my-6 space-y-4">
-                    <div>
-                        <InputLabel for="name" :value="lang().label.name" />
-                        <TextInput id="name" type="text" class="mt-1 block w-full" v-model="form.name" required
-                            :placeholder="lang().placeholder.name" :error="form.errors.name" />
-                        <InputError class="mt-2" :message="form.errors.name" />
-                    </div>
-                    <div>
-                        <InputLabel for="email" :value="lang().label.email" />
-                        <TextInput id="email" type="email" class="mt-1 block w-full" v-model="form.email"
-                            :placeholder="lang().placeholder.email" :error="form.errors.email" />
-                        <InputError class="mt-2" :message="form.errors.email" />
-                    </div>
-                    <div>
-                        <InputLabel for="identificacion" :value="lang().label.identificacion" />
-                        <TextInput id="identificacion" type="text" class="mt-1 block w-full" v-model="form.identificacion"
-                            :placeholder="lang().placeholder.identificacion" :error="form.errors.identificacion" />
-                        <InputError class="mt-2" :message="form.errors.identificacion" />
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div v-for="(atributosform, indice) in printForm" :key="indice">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <InputLabel for="role" :value="lang().label.role" />
-                            <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles"> </SelectInput>
-                            <InputError class="mt-2" :message="form.errors.role" />
-                        </div>
-                        <!-- otros campos -->
-                        <div>
-                            <InputLabel for="sexo" :value="lang().label.sexo" />
-                            <SelectInput id="sexo" class="mt-1 block w-full" v-model="form.sexo" required :dataSet="sexos">
-                            </SelectInput>
-                            <InputError class="mt-2" :message="form.errors.sexo" />
+                        <!-- si es foreign -->
+                        <div v-if="atributosform.type =='foreign'" id="SelectVue">
+                            <label name="labelSelectVue"> {{atributosform.label}} </label>
+                            <v-select :options="data[atributosform.idd]" label="title"
+                                v-model="form[atributosform.idd]"></v-select>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
-                        <div>
-                            <InputLabel for="fecha_nacimiento" :value="lang().label.fecha_nacimiento" />
+
+                        <!-- tiempo -->
+                        <div v-else-if="atributosform.type =='time'" id="SelectVue">
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" step="3600" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                        </div>
+                        <div v-else-if="atributosform.type =='date'" id="SelectVue">
+
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <VueDatePicker :is-24="false" :day-names="daynames" :format="formatToVue" :flow="flow" auto-apply
-                                :enable-time-picker="false" id="fecha_nacimiento"
-                                class="mt-1 block w-full" v-model="form.fecha_nacimiento" required
-                                :placeholder="lang().placeholder.fecha_nacimiento" :error="form.errors.fecha_nacimiento" />
-                            <InputError class="mt-2" :message="form.errors.fecha_nacimiento" />
+                                :enable-time-picker="false" :id="atributosform.idd"
+                                class="mt-1 block w-full" v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
-                        <div class="">
-                            <InputLabel for="anio" :value="lang().label.anio" />
-                            <TextInput id="anio" type="number" disabled class="bg-gray-300 mt-1 block w-full" v-model="anio"
-                                placeholder="Años" />
-                        </div>
-                        <div class="">
-                            <InputLabel for="semestre" :value="lang().label.semestre" />
-                            <TextInput id="semestre" type="number" class="mt-1 block w-full" v-model="form.semestre"
-                                :placeholder="lang().placeholder.semestre" :error="form.errors.semestre" />
-                            <InputError class="mt-2" :message="form.errors.semestre" />
-                        </div>
-                        <div class="">
-                            <InputLabel for="semestre_mas_bajo" :value="lang().label.semestre_mas_bajo" />
-                            <TextInput id="semestre_mas_bajo" type="number" class="bg-gray-300 mt-1 block w-full"
-                                v-model="form.semestre_mas_bajo" disabled :placeholder="lang().placeholder.semestre_mas_bajo"
-                                :error="form.errors.semestre_mas_bajo" />
-                            <InputError class="mt-2" :message="form.errors.semestre_mas_bajo" />
+
+                        <!-- normal -->
+                        <div v-else class="">
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
+
                     <div>
-                        <InputLabel for="limite_token_leccion" :value="lang().label.limite_token_leccion" />
-                        <TextInput id="limite_token_leccion" type="number" class="mt-1 block w-full"
-                            v-model="form.limite_token_leccion" :placeholder="lang().placeholder.limite_token_leccion"
-                            :error="form.errors.limite_token_leccion" />
-                        <InputError class="mt-2" :message="form.errors.limite_token_leccion" />
+                        <InputLabel for="role" :value="lang().label.role" />
+                        <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
+                        </SelectInput>
+                        <InputError class="mt-2" :message="form.errors.role" />
                     </div>
+
+                </div>
+
+                        
+
                     <!-- limite_token_general -->
 
 
@@ -165,8 +153,7 @@ const sexos = [ { label: 'Masculino', value: 'Masculino' }, { label: 'Femenino',
                             :error="form.errors.password_confirmation" />
                         <InputError class="mt-2" :message="form.errors.password_confirmation" />
                     </div> -->
-                </div>
-                <div class="flex justify-end">
+                <div class="flex justify-end my-8">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"

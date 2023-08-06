@@ -54,14 +54,12 @@ class UserSeeder extends Seeder
         $trabajador->assignRole('trabajador');
 
         $nombresGenericos = [
+            'El alejo' => '1153388999',
             'jose' => '1152888999',
-            'madrid' => '1152194567',
-            'felizzola' => '1152194568',
-            'marta' => '1152194569',
-            'liliana' => '1152194510',
-            'mabel' => '1152194511',
-            'jorge' => '222',
-            'emerson' => '333',
+            'madrid' => '1052133567',
+            'amparo' => '1053333568',
+            'miriam' => '1052566569',
+            'Emerson' => '333444667',
         ];
 
         foreach ($nombresGenericos as $key => $value) {

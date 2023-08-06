@@ -15,14 +15,14 @@ import Pagination from '@/Components/Pagination.vue';
 import { ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
 // import { CursorArrowRippleIcon, ChevronUpDownIcon,QuestionMarkCircleIcon, EyeIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/vue/24/solid';
 
-import Create from '@/Pages/Actividad/Create.vue';
-import Edit from '@/Pages/Actividad/Edit.vue';
-import Delete from '@/Pages/Actividad/Delete.vue';
+import Create from '@/Pages/actividad/Create.vue';
+import Edit from '@/Pages/actividad/Edit.vue';
+import Delete from '@/Pages/actividad/Delete.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 
-import { PrimerasPalabras, vectorSelect, formatDate, CalcularAvg, number_format} from '@/global.ts';
+import { PrimerasPalabras, vectorSelect, formatDate, CalcularAvg, number_format } from '@/global.ts';
 
 const { _, debounce, pickBy } = pkg
 const props = defineProps({
@@ -31,9 +31,9 @@ const props = defineProps({
     filters: Object,
     breadcrumbs: Object,
     perPage: Number,
-    
+
     title: String,
-    
+
     numberPermissions: Number,
     Flash: String,
 })
@@ -93,8 +93,8 @@ const select = () => {
 
 // text // number // dinero // date // datetime // foreign
 const titulos = [
-    {order: 'codigo' , label: 'codigo', type: 'text'},
-    {order: 'nombre' , label: 'nombre', type:'text'},
+    { order: 'codigo', label: 'codigo', type: 'text' },
+    { order: 'nombre', label: 'nombre', type: 'text' },
 ];
 
 </script>
@@ -173,7 +173,7 @@ const titulos = [
                                         type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId" />
                                 </td>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-1 sm:py-3 w-12">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update user'])" type="button"
@@ -193,23 +193,24 @@ const titulos = [
                                 <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <span v-if="titulo['type'] == 'text'"> {{ clasegenerica[titulo['order']] }} </span>
                                     <span v-if="titulo['type'] == 'number'"> {{
-                                                                            number_format(clasegenerica[titulo['order']],0,false) }} </span>
+                                        number_format(clasegenerica[titulo['order']], 0, false) }} </span>
                                     <span v-if="titulo['type'] == 'dinero'"> {{
-                                                                            number_format(clasegenerica[titulo['order']],0,true) }} </span>
+                                        number_format(clasegenerica[titulo['order']], 0, true) }} </span>
                                     <span v-if="titulo['type'] == 'date'"> {{
-                                                                            formatDate(clasegenerica[titulo['order']],false) }} </span>
+                                        formatDate(clasegenerica[titulo['order']], false) }} </span>
                                     <span v-if="titulo['type'] == 'datetime'"> {{
-                                                                            formatDate(clasegenerica[titulo['order']],true) }} </span>
+                                        formatDate(clasegenerica[titulo['order']], true) }} </span>
                                     <span v-if="titulo['type'] == 'foreign'"> {{ clasegenerica[titulo['nameid']] }} </span>
                                 </td>
 
                             </tr>
-                            <tr>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> -
+                            <tr class="border-t border-gray-600">
+                                <td v-if="numberPermissions > 1"
+                                    class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> -
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> Total: </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    {{props.total}}
+                                    {{ props.total }}
                                 </td>
                             </tr>
                         </tbody>

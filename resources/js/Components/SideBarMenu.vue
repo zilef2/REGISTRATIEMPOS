@@ -25,13 +25,15 @@ const toggleContent2 = () => {
 
 const sidebarButtons = [ //SAME AS WEB.PHP
     'reporte',
+];
+const sidebarButtonsAdmin = [ //SAME AS WEB.PHP
     'ordentrabajo',
     'actividad',
-// 'centrotrabajo',
-// 'disponibilidad',
-// 'material',
-// 'pieza',
-// 'reproceso',
+    'centrotrabajo',
+    'disponibilidad',
+    'material',
+    'pieza',
+    'reproceso',
 ];
 
 </script>
@@ -116,7 +118,19 @@ const sidebarButtons = [ //SAME AS WEB.PHP
             <div class="" v-for="value in sidebarButtons">
                 <li v-show="can(['istrabajador'])"
                     class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                    :class="{ 'bg-sky-600 dark:bg-sky-600': route().current(value+'.index') }">
+                    :class="{ 'bg-blue-700 dark:bg-blue-700': route().current(value+'.index') }">
+                    <Link :href="route(value+'.index')" class="flex items-center py-1 px-4">
+                        <PresentationChartLineIcon class="w-6 h-5" />
+                        <span class="ml-3">{{ lang().label[value] }}</span>
+                    </Link>
+                </li>
+            </div>
+        </ul>
+        <ul v-show="can((['isAdmin']))" class="space-y-2 my-4">
+            <div class="" v-for="value in sidebarButtonsAdmin">
+                <li v-show="can(['istrabajador'])"
+                    class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                    :class="{ 'bg-blue-700 dark:bg-blue-700': route().current(value+'.index') }">
                     <Link :href="route(value+'.index')" class="flex items-center py-1 px-4">
                         <PresentationChartLineIcon class="w-6 h-5" />
                         <span class="ml-3">{{ lang().label[value] }}</span>

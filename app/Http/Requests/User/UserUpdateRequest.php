@@ -5,6 +5,7 @@ namespace App\Http\Requests\User;
 use App\Models\User;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class UserUpdateRequest extends FormRequest
@@ -26,19 +27,17 @@ class UserUpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $id = $this->route('user');
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
             // 'email' => 'required|string|email|max:255|unique:' . User::class,
-
-            'identificacion' => 'nullable|Integer',
-            'sexo' => 'nullable',
-            'fecha_nacimiento' => 'nullable',
-            'semestre' => 'nullable',
-            'semestre_mas_bajo' => 'nullable',
-            'limite_token_general' => 'nullable|Integer',
-            'limite_token_leccion' => 'nullable|Integer',
-            'pgrado' => 'nullable',
+            // 'identificacion' => 'required|Integer|unique:' . User::class, 
+            Rule::unique('users','identificacion')->ignore($id),
+            Rule::unique('users','email')->ignore($id),
+            'email' => 'required|string|email|max:255',
+            'identificacion' => 'required|Integer',
+            'sexo' => 'required',
+            'fecha_nacimiento' => 'required',
         ];
     }
 }
