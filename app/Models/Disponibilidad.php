@@ -15,6 +15,6 @@ class Disponibilidad extends Model
         'nombre',
     ];
 
-    public function centroTrabajos(): BelongsToMany { return $this->BelongsToMany(centroTrabajo::class); }
+    public function centroTrabajos(): BelongsToMany { return $this->BelongsToMany(Centrotrabajo::class); }
 
 }
