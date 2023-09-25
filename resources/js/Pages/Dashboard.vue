@@ -16,7 +16,7 @@ const props = defineProps({
 const dashboard =[
     'users',
     'reportes',
-    'roles',
+    // 'roles',
 ];
 const dashSinS = dashboard.map((value, index, array) => {
     return value.slice(0,-1)
@@ -24,12 +24,12 @@ const dashSinS = dashboard.map((value, index, array) => {
 const colores =[
     'bg-blue-500',
     'bg-green-500',
-    'bg-blue-500',
+    // 'bg-blue-500',
 ];
 const laImg =[ //todo:
     'KeyIcon',
     'KeyIcon',
-    'KeyIcon',
+    // 'KeyIcon',
 ];
 
 </script>
@@ -38,10 +38,10 @@ const laImg =[ //todo:
 
     <Head title="Dashboard" />
     <AuthenticatedLayout>
-        <Breadcrumb :title="'Dashboard'" :breadcrumbs="[]" />
+        <Breadcrumb :title="'Resumen'" :breadcrumbs="[]" />
         <div class="space-y-4">
             <div
-                class="text-white dark:text-gray-100 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4 overflow-hidden shadow-sm">
+                class="text-white dark:text-gray-100 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 overflow-hidden shadow-sm">
                 <div v-for="(modelo, index) in dashboard" :key="index">
                     <div
                         class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between items-center overflow-hidden"
@@ -85,7 +85,7 @@ const laImg =[ //todo:
                 </div> -->
 
 
-                <div v-if="can(['isAdmin'])">
+                <div v-if="can(['isSuper'])">
                     <div
                         class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-amber-600/70 dark:bg-amber-500/80 items-center overflow-hidden">
                         <div class="flex flex-col">

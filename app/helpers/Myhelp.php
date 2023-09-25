@@ -2,18 +2,25 @@
 
 namespace App\helpers;
 
+use Carbon\Carbon;
+use Carbon\Translator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+//JUST THIS PROJECT
+//STRING S
+//LARAVEL
+//dates
+
 class Myhelp {
 
     //JUST THIS PROJECT
-        public static function CargosYModelos()
-        {
+        public static function CargosYModelos() {
             //otros cargos NO_ADMIN
             $nombresDeCargos = [
                 'trabajador',
+                'supervisor',
             ];
             $isSome = [];
             foreach ($nombresDeCargos as $key => $value) {
@@ -47,6 +54,7 @@ class Myhelp {
         public static function getPermissionToNumber($permissions) {
 
             if($permissions == 'trabajador') return 1;
+            if($permissions == 'supervisor') return 2;
             if($permissions == 'admin') return 9;
             if($permissions == 'superadmin') return 10;
             return 0;
@@ -167,10 +175,23 @@ class Myhelp {
 
 
 
-
-
-
     //dates
+        public static function FechaCarbon($date) {
+            try {
+                // $translator = Translator::get('es_CO');
+                Carbon::setLocale('es');
+                $carbonDate = Carbon::createFromFormat('d/m/Y',$date);
+                $anioActual = Carbon::now()->year;
+                if($anioActual == $carbonDate->year){
+                    $result = $carbonDate->format('d \d\e M');
+                }else{
+                    $result = $carbonDate->format('d \d\e M \d\e Y');
+                }
+                return $result;
+            } catch (\Throwable $th) {
+                return $th->getMessage();
+            }
+        }
         public function ValidarFecha($laFecha) {
             if (strtotime($laFecha)) {
                 return $laFecha;
@@ -194,8 +215,9 @@ class Myhelp {
         return $Result;
     }
 
-    public static function NEW_turnInSelectID($theArrayofStrings,$selecc) {
+    public static function NEW_turnInSelectID($theArrayofStrings,$selecc,$theName = null) {
 
+        if($theName == null) $theName = 'nombre';
         if(count($theArrayofStrings) == 0) 
             return [
               [  'title' => 'No hay registros ', 'value' => 0,]
@@ -204,14 +226,16 @@ class Myhelp {
 
         $result = [
             [
-                'title' => 'Selecciona un '.$selecc, 'value' => 0,
-            // 'filtro' => 'General'
+                'title' => 'Selecciona un '.$selecc,
+                'value' => 0,
+                // 'filtro' => 'General'
             ]
         ];
         foreach ($theArrayofStrings as $value) {
             $result[] = 
             [
-                'title' => $value->codigo, 'value' => $value->id,
+                'title' => $value->{$theName},
+                'value' => $value->id,
                 // 'filtro' => $value->teoricaOpractica
             ];
         }

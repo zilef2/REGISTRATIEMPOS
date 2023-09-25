@@ -28,6 +28,8 @@
  vectorSelect
 */
 
+import { toInteger } from "lodash";
+
 // this Project
     export function LookForValueInArray(arrayOfObjects:Object[] , searchValue): String {
         //ex: { title: '123', value: 1 },
@@ -52,7 +54,20 @@
 // end this Project
 
 
-// DATE functions ->{
+// DATE functions 
+    export function IsDate_GOES_formatDate(text:string) : String{
+            const [day,month, year] = text.split('/').map(Number);
+            let date = new Date(year, month - 1, day);
+            let Ndate = toInteger(date)
+            const ANumber = !isNaN(Ndate);
+
+        if (!(ANumber)) {
+            return "No es una fecha";
+            // throw new Error("El texto no es una fecha válida");
+        }
+          
+        return formatToVue(date);
+    }
     export function formatToVue(date) : String{
         const day = date.getDate();
         const month = date.getMonth() + 1;
@@ -114,10 +129,12 @@
         // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000))
 
         let hora = validDate.getHours();
-        let hourAndtime =  hora + ':'+ (validDate.getMinutes() < 10 ? '0': '') + validDate.getMinutes() + ':00';
+        let hourAndtime =  (hora < 10 ? '0': '')+ hora + ':'+ (validDate.getMinutes() < 10 ? '0': '') + validDate.getMinutes() + ':00';
         
         return `${hourAndtime}`;
     }
+
+    
     export function monthName(monthNumber){
         if(monthNumber == 1) return 'Enero';
         if(monthNumber == 2) return 'Febrero';
@@ -143,7 +160,7 @@
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
-// fin DATE functions }
+// fin DATE functions 
 
 
 

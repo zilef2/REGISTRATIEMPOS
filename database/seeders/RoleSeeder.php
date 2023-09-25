@@ -46,6 +46,10 @@ class RoleSeeder extends Seeder
         $trabajador->givePermissionTo([
             'read reporte',  'create reporte',  // 'delete reporte',
         ]);
+        $supervisor->givePermissionTo([
+            'read reporte',  'create reporte', 'delete reporte', 'update reporte',
+            'read user',  //'create user', 'update reporte',
+        ]);
 
         // $role->revokePermissionTo($permission);
         // $permission->removeRole($role);

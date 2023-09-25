@@ -115,7 +115,7 @@ class OrdentrabajosController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:Ordentrabajos', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Ordentrabajo')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Ordentrabajo')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //fin store functions
@@ -147,7 +147,7 @@ class OrdentrabajosController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Ordentrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.updated_error', ['name' => $Ordentrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -166,8 +166,8 @@ class OrdentrabajosController extends Controller
             Myhelp::EscribirEnLog($this, 'DELETE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $Ordentrabajo->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Ordentrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'DELETE:Ordentrabajos', 'usuario id:' . $Ordentrabajo->id . ' | ' . $Ordentrabajo->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Ordentrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -178,7 +178,7 @@ class OrdentrabajosController extends Controller
             $Ordentrabajo->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.Ordentrabajo')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Ordentrabajo')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Ordentrabajo')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -268,8 +268,8 @@ class OrdentrabajosController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:Ordentrabajos', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'IMPORT:Ordentrabajos', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 }

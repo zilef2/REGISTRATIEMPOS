@@ -15,8 +15,9 @@ class ParametroSeeder extends Seeder
     public function run()
     {
         Parametro::create([
-            "Fecha_creacion_parametro" => "2023-07-16",
-            "nombre" => "Creacion de la base",
+            "Fecha_creacion_parametro" => date('Y-m-d'),
+            "nombre" => "Ultima migracion",
+            "valor" => date('Y-m-d H:i').'',
         ]);
     }
 }

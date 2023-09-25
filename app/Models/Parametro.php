@@ -12,5 +12,6 @@ class Parametro extends Model
     protected $fillable = [
         'Fecha_creacion_parametro',
         'nombre',
+        'valor',
     ];
 }

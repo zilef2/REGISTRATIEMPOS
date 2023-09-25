@@ -98,7 +98,11 @@ const titulos = [
     { order: 'identificacion', label: 'Identificacion', type: 'text' },
     // { order: 'sexo', label: 'Sexo', type: 'foreign' },
     { order: 'sexo', label: 'sexo', type: 'foreign', nameid: 'sexo_S' },
+    { order: 'celular', label: 'celular', type: 'text'},
+    { order: 'area', label: 'area', type: 'text'},
+    { order: 'cargo', label: 'cargo', type: 'text'},
 
+    //todo:area, cargo, centro_trabajo_id
 ];
 </script>
 
@@ -172,6 +176,21 @@ const titulos = [
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('celular')">
+                                    <div class="flex justify-between items-center"> <span>{{ lang().label.celular }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('area')">
+                                    <div class="flex justify-between items-center"> <span>{{ lang().label.area }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('cargo')">
+                                    <div class="flex justify-between items-center"> <span>{{ lang().label.cargo }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
 
                                 <th class="px-2 py-4">Accion</th>
                             </tr>
@@ -203,8 +222,10 @@ const titulos = [
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.identificacion }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.sexo }}</td>
-                                <td class="whitespace-nowrap text-center py-4 px-2 sm:py-3">{{
-                                                                    CalcularEdad(user.fecha_nacimiento) }}</td>
+                                <td class="whitespace-nowrap text-center py-4 px-2 sm:py-3">{{ CalcularEdad(user.fecha_nacimiento) }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.area }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">

@@ -24,7 +24,8 @@ class CreateReportesTable extends Migration
             $table->unsignedBigInteger('actividad_id')->nullable();
             $table->unsignedBigInteger('centrotrabajo_id')->nullable();
             $table->unsignedBigInteger('material_id')->nullable();
-            $table->unsignedBigInteger('ordentrabajo_id')->nullable();
+            // $table->unsignedBigInteger('ordentrabajo_id')->nullable();
+            $table->string('ordentrabajo_id')->nullable();
             $table->unsignedBigInteger('operario_id')->nullable();
 
             $table->unsignedBigInteger('pieza_id')->nullable();
@@ -33,11 +34,13 @@ class CreateReportesTable extends Migration
             $table->unsignedBigInteger('disponibilidad_id')->nullable();
             $table->unsignedBigInteger('reproceso_id')->nullable();
 
+			$table->integer('tipoFinalizacion')->default(1);
             // $table->unsignedBigInteger('calendario_id')->nullable();
 
             //relationsships in create_reprocesos_table
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

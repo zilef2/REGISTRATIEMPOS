@@ -24,6 +24,7 @@ const data = reactive({
     params: {
         pregunta: ''
     },
+    onceTime:true,
     sexo:[ { title: 'Masculino', value: 'Masculino' }, { title: 'Femenino', value: 'Femenino' } ]
 })
 //very usefull
@@ -36,7 +37,6 @@ const printForm =[];
 props.titulos.forEach(names => 
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
-        //, value: form[names['order']]
     })
 );
 
@@ -55,15 +55,31 @@ const update = () => {
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
-        form.name = props.user?.name
-        form.email = props.user?.email
-        form.role = props.user?.roles == 0 ? '' : props.user?.roles[0].name
+        // if(data.onceTime){
 
-        form.identificacion = props.user?.identificacion
-        form.sexo = props.user?.sexo
-        form.fecha_nacimiento = props.user?.fecha_nacimiento
+            form.name = props.user?.name
+            form.email = props.user?.email
+            form.role = props.user?.roles == 0 ? '' : props.user?.roles[0].name
+            
+            form.identificacion = props.user?.identificacion
+            form.sexo = props.user?.sexo
+            form.fecha_nacimiento = props.user?.fecha_nacimiento
+            form.celular = props.user?.celular
+            form.area = props.user?.area
+            form.cargo = props.user?.cargo
+            data.onceTime = false
+        // }
+    }else{
+        form.name = null
+        form.email = null
+        form.role = null
 
-        form.errors = {}
+        form.identificacion = null
+        form.sexo = null
+        form.fecha_nacimiento = null
+        form.celular = null
+        form.area = null
+        form.cargo = null
     }
 })
 

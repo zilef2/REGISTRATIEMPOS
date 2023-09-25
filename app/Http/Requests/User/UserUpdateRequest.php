@@ -6,7 +6,6 @@ use App\Models\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class UserUpdateRequest extends FormRequest
 {
@@ -34,7 +33,8 @@ class UserUpdateRequest extends FormRequest
             // 'identificacion' => 'required|Integer|unique:' . User::class, 
             Rule::unique('users','identificacion')->ignore($id),
             Rule::unique('users','email')->ignore($id),
-            'email' => 'required|string|email|max:255',
+
+            'email' => 'required|string|max:255',
             'identificacion' => 'required|Integer',
             'sexo' => 'required',
             'fecha_nacimiento' => 'required',

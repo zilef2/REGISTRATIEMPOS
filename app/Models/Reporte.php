@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Reporte extends Model
 {
-    use HasFactory;
+    use HasFactory,SoftDeletes;
+
 
     protected $fillable = [
-        'codigo',
+        // 'codigo',
         'fecha',
         'hora_inicial',
         'hora_final',
@@ -27,8 +29,10 @@ class Reporte extends Model
         'reproceso_id',
 
         'operario_id',
-
+        
         // 'calendario_id',
+        //19 sept2023
+        'tipoFinalizacion', //BOUNDED 1: primera del dia | 2:intermedia | 3:Ultima del dia
     ];
 
     // public function reportes() { return $this->hasMany('App\Models\Reporte'); }

@@ -37,7 +37,7 @@ const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])
 onMounted(() => {
     if(props.numberPermissions > 8){
 
-        const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
+        const valueRAn = Math.floor(Math.random() * (9 - 0) + 1)
         form.nombre = 'admin orden trabajo '+ (valueRAn);
         form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp

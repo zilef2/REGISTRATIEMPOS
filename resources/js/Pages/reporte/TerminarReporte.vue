@@ -9,7 +9,7 @@ import { useForm } from '@inertiajs/vue3';
 import { watchEffect, reactive } from 'vue';
 import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
 
-import { LookForValueInArray } from '@/global.ts';
+import { TimeTo12Format, formatTime, formatDate, TransformTdate } from '@/global.ts';
 
 const props = defineProps({
     show: Boolean,
@@ -34,7 +34,15 @@ const printForm = [
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
-        form.hora_final = props.generica?.hora_final
+
+        //# hora final como la hora del sistema
+        const validDate = new Date()
+        let hora = validDate.getHours();
+        let hourAndtime =  (hora < 10 ? '0': '')+ (hora) + ':'+ (validDate.getMinutes() < 10 ? '0': '') + validDate.getMinutes() + ':00';
+        form.hora_final = hourAndtime
+
+
+        // form.hora_final = props.generica?.hora_final
     }
 })
 

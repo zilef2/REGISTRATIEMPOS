@@ -116,7 +116,7 @@ class CentrotrabajosController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:Centrotrabajos', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Centrotrabajo')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Centrotrabajo')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //fin store functions
@@ -148,7 +148,7 @@ class CentrotrabajosController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Centrotrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.updated_error', ['name' => $Centrotrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -167,8 +167,8 @@ class CentrotrabajosController extends Controller
             Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $Centrotrabajo->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Centrotrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Centrotrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -179,7 +179,7 @@ class CentrotrabajosController extends Controller
             $Centrotrabajo->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.Centrotrabajo')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Centrotrabajo')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Centrotrabajo')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -269,8 +269,8 @@ class CentrotrabajosController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:Centrotrabajos', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'IMPORT:Centrotrabajos', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 }

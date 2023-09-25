@@ -37,6 +37,9 @@ const props = defineProps({
 
     numberPermissions: Number,
     losSelect: Object,
+    valuesGoogleCabeza: Object,
+    valuesGoogleBody: Object,
+    Trabajadores: Object,
 })
 
 const data = reactive({
@@ -101,17 +104,17 @@ watchEffect(() => {
 //text number dinero date datetime foreign
 // text // number // dinero // date // datetime // foreign
 const titulos = [
-    { order: 'codigo', label: 'codigo', type: 'text' },
+    // { order: 'codigo', label: 'codigo', type: 'text' },
     { order: 'fecha', label: 'fecha', type: 'date' },
     { order: 'hora_inicial', label: 'hora inicial', type: 'time' },
     { order: 'hora_final', label: 'hora final', type: 'time' },
     { order: 'actividad_id', label: 'actividad', type: 'foreign', nameid: 'actividad_s' },
     { order: 'centrotrabajo_id', label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s' },
-    { order: 'material_id', label: 'material', type: 'foreign', nameid: 'material_s' },
-    { order: 'ordentrabajo_id', label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_s' },
+    // { order: 'material_id', label: 'material', type: 'foreign', nameid: 'material_s' },
+    { order: 'ordentrabajo_id', label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_id' },
 
-    { order: 'pieza_id', label: 'pieza', type: 'foreign', nameid: 'pieza_s' },
-    { order: 'cantidad', label: 'cantidad', type: 'number' },
+    // { order: 'pieza_id', label: 'pieza', type: 'foreign', nameid: 'pieza_s' },
+    // { order: 'cantidad', label: 'cantidad', type: 'number' },
 
     { order: 'disponibilidad_id', label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s' },
     { order: 'reproceso_id', label: 'reproceso', type: 'foreign', nameid: 'reproceso_s' },
@@ -137,11 +140,19 @@ const titulos = [
 
                     <Create v-if="can(['create reporte'])" :numberPermissions="props.numberPermissions"
                         :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
-                        :losSelect=props.losSelect />
+                        :losSelect=props.losSelect
+                        :valuesGoogleCabeza=props.valuesGoogleCabeza
+                        :valuesGoogleBody=props.valuesGoogleBody
+                        :Trabajadores=props.Trabajadores
+                         />
 
                     <Edit v-if="can(['update reporte']) && numberPermissions > 1" :numberPermissions="props.numberPermissions" :show="data.editOpen"
                         @close="data.editOpen = false" :generica="data.generico" :title="props.title"
-                        :losSelect=props.losSelect />
+                        :losSelect=props.losSelect
+                        :valuesGoogleCabeza=props.valuesGoogleCabeza
+                        :valuesGoogleBody=props.valuesGoogleBody
+                        :Trabajadores=props.Trabajadores
+                         />
 
                     <TerminarReporte v-if="can(['read reporte'])" :numberPermissions="props.numberPermissions" :show="data.TerminarOpen"
                         @close="data.TerminarOpen = false" :generica="data.generico" :title="props.title"
@@ -190,6 +201,7 @@ const titulos = [
 
                             </tr>
                         </thead>
+                        <!-- {{ props.fromController.data[0] }} -->
                         <tbody>
                             <tr v-for="(clasegenerica, indexu) in props.fromController.data" :key="indexu"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
@@ -207,7 +219,7 @@ const titulos = [
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <InfoButton v-show="can(['update reporte'])" type="button"
+                                            <InfoButton v-if="!clasegenerica.hora_final" v-show="can(['update reporte'])" type="button"
                                                 @click="(data.TerminarOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <CheckCircleIcon class="w-4 h-4" />

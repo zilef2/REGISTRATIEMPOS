@@ -15,8 +15,24 @@ class CreateDisponibilidadsTable extends Migration
     {
         Schema::create('disponibilidads', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo');
             $table->string('nombre');
+            $table->string('codigo');
+            $table->timestamps();
+
+        });
+        Schema::create('centrotrabajo_disponibilidad', function (Blueprint $table) {
+            $table->id();
+            // $table->integer('Acti_dispo_repro')->nullable();
+            $table->unsignedBigInteger('disponibilidad_id');
+            $table->foreign('disponibilidad_id')
+                ->references('id')
+                ->on('disponibilidads')
+                ->onDelete('restrict'); //restrict | set null 
+            $table->unsignedBigInteger('centrotrabajo_id');
+            $table->foreign('centrotrabajo_id')
+                ->references('id')
+                ->on('centrotrabajos')
+                ->onDelete('restrict'); //restrict | set null  
             $table->timestamps();
         });
     }

@@ -11,18 +11,21 @@ use App\Http\Controllers\DisponibilidadsController;
 use App\Http\Controllers\MaterialsController;
 use App\Http\Controllers\OrdentrabajosController;
 use App\Http\Controllers\PiezasController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReadGoogleSheets;
 use App\Http\Controllers\ReprocesosController;
 use App\Models\Permission;
 use App\Models\Reporte;
 use App\Models\Role;
 use App\Models\User;
-
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
-
+use Google\Client;
+use Illuminate\Support\Facades\Auth;
+use Revolution\Google\Sheets\Sheets;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -33,8 +36,6 @@ use Inertia\Inertia;
 //     ]);
 // });
 Route::get('/', function () { return redirect('/login'); });
-
-
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
         'users'         => (int) User::count(),
@@ -79,8 +80,48 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource('/material', MaterialsController::class);
     Route::resource('/pieza', PiezasController::class);
     Route::resource('/reproceso', ReprocesosController::class);
+    Route::get('/gsheet', ReadGoogleSheets::class);
 
 });
+
+
+
+
+
+
+
+
+
+
+// Route::get('/this', function () {
+
+    // $spreadsheetId = '1EZkfkdQIMoiLewYhG8Qaw2JCc_jqnb_4_pOB75jJAT4';
+    // $spreadsheetId = '1j_eDVGjHHVjPlnsQxQBGdyQUH0CXj9HMnSNqp0tZRYU';
+    // $sheetName = 'Hoja 1';
+    // $service = new Sheets(new Client());
+    // $values = $service->spreadsheet($spreadsheetId)->sheet($sheetName)->range('A1:B2')->all();
+    // // $values = $service->spreadsheet($spreadsheetId)->sheet($sheetName)->all();
+    // dd($values);
+
+    // return view('sheets', compact('data'));
+//     return Inertia::render('Dashboard', [
+//         // 'values'         => $values,
+//         // 'columnas'         => count($values),
+//         'users'         => (int) User::count(),
+//     ]);
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+
+
+
+
+
+
+
+
+
+
+
 
 require __DIR__ . '/auth.php';
 

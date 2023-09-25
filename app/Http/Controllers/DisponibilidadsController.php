@@ -31,7 +31,7 @@ class DisponibilidadsController extends Controller
     public function MapearClasePP(&$Disponibilidads, $numberPermissions)
     {
         $Disponibilidads = $Disponibilidads->get()->map(function ($Disponibilidad) use ($numberPermissions) {
-            // $Disponibilidad->Disponibilidad_s = $Disponibilidad->Disponibilidad()->first() !== null ? $Disponibilidad->Disponibilidad()->first()->nombre : '';
+            $Disponibilidad->centros = implode(',', $Disponibilidad->centroTrabajos->pluck('nombre')->toArray());
 
             return $Disponibilidad;
         })->filter();
@@ -55,7 +55,7 @@ class DisponibilidadsController extends Controller
                     ->orWhere('nombre', 'LIKE', "%" . $request->search . "%");
             });
         }
-        if ($request->has(['field', 'order'])) {
+        if ($request->has(['field', 'order']) && $request->field != 'centros') {
             $Disponibilidads = $Disponibilidads->orderBy($request->field, $request->order);
         }
         $this->MapearClasePP($Disponibilidads, $numberPermissions);
@@ -116,7 +116,7 @@ class DisponibilidadsController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:Disponibilidads', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Disponibilidad')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Disponibilidad')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //fin store functions
@@ -148,7 +148,7 @@ class DisponibilidadsController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Disponibilidad->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.updated_error', ['name' => $Disponibilidad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -167,8 +167,8 @@ class DisponibilidadsController extends Controller
             Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $Disponibilidad->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Disponibilidad->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Disponibilidad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -179,7 +179,7 @@ class DisponibilidadsController extends Controller
             $Disponibilidad->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.Disponibilidad')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Disponibilidad')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Disponibilidad')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -269,8 +269,8 @@ class DisponibilidadsController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:Disponibilidads', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'IMPORT:Disponibilidads', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 }

@@ -21,12 +21,10 @@ class DatabaseSeeder extends Seeder
 
             PermissionSeeder::class,
             RoleSeeder::class,
-            UserSeeder::class,
-
-
-            // Seeder::class,
-            ActividadSeeder::class,
             CentroTrabajoSeeder::class,
+
+            UserSeeder::class,
+            ActividadSeeder::class,
             MaterialSeeder::class,
             OrdentrabajoSeeder::class,
             PiezaSeeder::class,

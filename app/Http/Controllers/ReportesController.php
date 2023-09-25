@@ -10,13 +10,13 @@ use App\Http\Requests\ReporteRequest;
 use App\Http\Requests\ReporteUpdateRequest;
 use App\Imports\PersonalImport;
 use App\Models\Reporte;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -26,17 +26,17 @@ class ReportesController extends Controller
     {
         $reportes = $reportes->get()->map(function ($reporte) use ($numberPermissions) {
             $reporte->actividad_s = $reporte->actividad()->first() !== null ? $reporte->actividad()->first()->nombre : '';
-            $reporte->centrotrabajo_s = $reporte->centrotrabajo()->first() !== null ? $reporte->centrotrabajo()->first()->codigo : '';
-            $reporte->material_s = $reporte->material()->first() !== null ? $reporte->material()->first()->codigo : '';
-            $reporte->ordentrabajo_s = $reporte->ordentrabajo()->first() !== null ? $reporte->ordentrabajo()->first()->codigo : '';
+            $reporte->centrotrabajo_s = $reporte->centrotrabajo()->first() !== null ? $reporte->centrotrabajo()->first()->nombre : '';
+            $reporte->material_s = $reporte->material()->first() !== null ? $reporte->material()->first()->nombre : '';
+            $reporte->ordentrabajo_s = $reporte->ordentrabajo()->first() !== null ? $reporte->ordentrabajo()->first()->nombre : '';
             $reporte->operario_s = $reporte->operario()->first() !== null ? $reporte->operario()->first()->name : '';
 
-            $reporte->pieza_s = $reporte->pieza()->first() !== null ? $reporte->pieza()->first()->codigo : '';
+            $reporte->pieza_s = $reporte->pieza()->first() !== null ? $reporte->pieza()->first()->nombre : '';
 
-            $reporte->disponibilidad_s = $reporte->disponibilidad()->first() !== null ? $reporte->disponibilidad()->first()->codigo : '';
-            $reporte->reproceso_s = $reporte->reproceso()->first() !== null ? $reporte->reproceso()->first()->codigo : '';
+            $reporte->disponibilidad_s = $reporte->disponibilidad()->first() !== null ? $reporte->disponibilidad()->first()->nombre : '';
+            $reporte->reproceso_s = $reporte->reproceso()->first() !== null ? $reporte->reproceso()->first()->nombre : '';
 
-            // $reporte->calendario_s = $reporte->calendario()->first() !== null ? $reporte->calendario()->first()->codigo : '';
+            // $reporte->calendario_s = $reporte->calendario()->first() !== null ? $reporte->calendario()->first()->nombre : '';
             return $reporte;
         })->filter();
         // dd($materias);
@@ -72,18 +72,20 @@ class ReportesController extends Controller
     }
 
 
-
     public function index(Request $request)
     {
         $permissions = Myhelp::EscribirEnLog($this, ' reportes');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();
+
+        $readGoogle = new ReadGoogleSheets();
+        [$valuesGoogleCabeza, $valuesGoogleBody] = $readGoogle->GetValuesFromSheets();
+
         if ($numberPermissions > 1) {
             $reportes = Reporte::query();
         } else {
             $reportes = Reporte::Where('operario_id', $user->id);
         }
-
 
         if ($request->has('search')) {
             $reportes->where(function ($query) use ($request) {
@@ -107,7 +109,6 @@ class ReportesController extends Controller
                     }
                 }
             });
-
             // $reportes->where('name', 'LIKE', "%" . $request->search . "%");
         }
 
@@ -116,6 +117,11 @@ class ReportesController extends Controller
         }
 
         $this->MapearClasePP($reportes, $numberPermissions);
+
+        $Trabajadores = User::WhereHas('roles', function ($query) {
+            return $query->whereIn('name', ['supervisor']);
+        })->get();
+        $Trabajadores = Myhelp::NEW_turnInSelectID($Trabajadores, ' operario', 'name');
 
         $reporteTemp = new Reporte();
         $atributos_id = $reporteTemp->getFillable();
@@ -140,20 +146,15 @@ class ReportesController extends Controller
             'fromController'        => $fromController,
             'total'                 => $total,
             'numberPermissions'     => $numberPermissions,
+            'Trabajadores'          => $Trabajadores,
             'losSelect'             => $losSelect ?? [],
+            'valuesGoogleCabeza'    => $valuesGoogleCabeza ?? [],
+            'valuesGoogleBody'      => $valuesGoogleBody ?? [],
         ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
     }
-
-
     //! STORE - UPDATE - DELETE
     //! STORE functions
     public function updatingDate($date)
@@ -164,113 +165,146 @@ class ReportesController extends Controller
         return date("Y-m-d", strtotime($date));
     }
 
-    public function store(ReporteRequest $request)
+    private function getLastReport($hoy, $user)
     {
-        $user = Auth::User();
-        $permissions = Myhelp::EscribirEnLog($this, 'STORE:reportes');
+        $hoyDate = date_create($hoy);
+        date_sub($hoyDate, date_interval_create_from_date_string('1 days'));
+        $ayer = date_format($hoyDate, 'Y-m-d');
+        $MainQuery = Reporte::Where('operario_id', $user->id);
 
-        // dd(
-        //         $request->pieza_id,
-        //         $request->piezaID,
-        //         $request->actividad_id,
-        //     );
+        $NoTieneReportes = $MainQuery->count() == 0;
+        if ($NoTieneReportes) return 1; //primera vez de su vida 
 
-        if ($request->pieza_id)
-            // $request->piezaID = $request->pieza_id['value'];
-            $request->validate([
-                'pieza_id.value' => 'nullable|integer',
-                'cantidad' => Rule::requiredIf(function () use ($request) {
-                    $temp = $request->pieza_id['value'] ?? null;
-                    return !is_null($temp);
-                }),
+        $ultimoReporte = $MainQuery->Where('fecha', $hoy)
+            ->latest()->first();
+        if ($ultimoReporte === null) { //hoy
+
+            $ultimoReporte = $MainQuery->Where('fecha', $ayer)->latest()->first();
+            $tipo = 1; //primera del dia 
+            if ($ultimoReporte === null) { //ayer
+                //leva dias sin reportar
+                //todo: actualizar la ultima para que sea tipoFinalizacion = 3
+
+            } else {
+                // $ultimoReporte = $MainQuery->latest()->first();
+                // $ultimoReporte->update([
+                //     'hora_final' => Carbon::now()
+                // ]);
+
+            }
+        } else {
+            $ultimoReporte->update([
+                'hora_final' => Carbon::now()
             ]);
+            $tipo = 2;
+        }
+        return $tipo;
+    }
+
+    public function store(ReporteRequest $request) {
+        $user = Auth::User();
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'STORE:reportes'));
+        if ($numberPermissions > 8) {
+            $userID = $request->user_id ? $request->user_id['value'] : $user->id;
+        } else {
+            $userID = $user->id;
+        }
+
+        // if ($request->pieza_id)
+        //     $request->validate([
+        //         'pieza_id.value' => 'nullable|integer',
+        //         'cantidad' => Rule::requiredIf(function () use ($request) {
+        //             $temp = $request->pieza_id['value'] ?? null;
+        //             return !is_null($temp);
+        //         }),
+        //     ]);
+
         DB::beginTransaction();
         try {
+            $hoy = date('Y-m-d');
+            $tipoFin = $this->getLastReport($hoy, $user); //BOUNDED 1: primera del dia | 2:intermedia | 3:Ultima del dia
 
             $reporte = Reporte::create([
-                'codigo' => $request->codigo,
+                // 'codigo' => $request->codigo,
                 'fecha' => $request->fecha,
                 'hora_inicial' => $request->hora_inicial,
                 'hora_final' => null,
-                'actividad_id' => $request->actividad_id['value'],
-                'centrotrabajo_id' => $request->centrotrabajo_id['value'],
-                'material_id' => $request->material_id['value'],
-                'ordentrabajo_id' => $request->ordentrabajo_id['value'],
+                'ordentrabajo_id' => $request->ordentrabajo_id['title'] ?? null,
+                'centrotrabajo_id' => $request->centrotrabajo_id['value'] ?? null,
 
-                'pieza_id' => $request->pieza_id ? $request->pieza_id['value'] : null,
-                'cantidad' => $request->cantidad,
+                // 'material_id' => $request->material_id['value'],
+                // 'pieza_id' => $request->pieza_id ? $request->pieza_id['value'] : null,
+                // 'cantidad' => $request->cantidad,
 
-                'operario_id' => $user->id,
-
+                'operario_id' => $userID,
+                'actividad_id' => $request->actividad_id['value'] ?? null,
                 'disponibilidad_id' => ($request->disponibilidad_id['value']) ?? null,
                 'reproceso_id' => ($request->reproceso_id['value']) ?? null,
+
+                'tipoFinalizacion' => $tipoFin
             ]);
+
             DB::commit();
             Myhelp::EscribirEnLog($this, 'STORE:reportes', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
 
-            return back()->with('success', __('app.label.created_successfully', ['name' => $reporte->codigo]));
+            return back()->with('success', __('app.label.created_successfully', ['name' => 'Reporte ']));
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:reportes', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.reporte')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.reporte')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //fin store functions
 
-    public function show($id)
-    {
-    }
-    public function edit($id)
-    {
-    }
-
+    public function show($id) { } public function edit($id) { }
 
     public function update(ReporteUpdateRequest $request, $id) {
         //todo: validate -> (for update) (for TerminarReporte)
         $user = Auth::User();
-        $permissions = Myhelp::EscribirEnLog($this, ' UPGRADE:reportes');
+        $permissions = Myhelp::EscribirEnLog($this, ' UPDATE:reportes');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
 
         DB::beginTransaction();
         try {
             $reporte = Reporte::findOrFail($id);
+
             $actualizar_reporte['hora_final'] = $request->hora_final;
-            if($actualizar_reporte['hora_final'] == null){
 
-                if($numberPermissions > 8){
-                    $actualizar_reporte['codigo'] = $request->codigo == '' ? null : $request->codigo;
-                    $actualizar_reporte['fecha'] = $request->fecha == '' ? null : $request->fecha;
-                    $actualizar_reporte['hora_inicial'] = $request->hora_inicial == '' ? null : $request->hora_inicial;
-                }
+            //todo: preguntar a carlos, no creo que tengan que poner 4pm
+            if( substr($request->hora_final,0,2) == '16'){
+                $reporte->update($actualizar_reporte);
+                
+            }else{
+                return back()->with('error', 'No son las 4pm');
 
-                $request->actividad_id == '' ? null : $actualizar_reporte['actividad_id'] = $request->actividad_id;
-                $request->centrotrabajo_id == '' ? null : $actualizar_reporte['centrotrabajo_id'] = $request->centrotrabajo_id;
-                $request->material_id == '' ? null : $actualizar_reporte['material_id'] = $request->material_id;
-                $request->ordentrabajo_id == '' ? null : $actualizar_reporte['ordentrabajo_id'] = $request->ordentrabajo_id;
-                $request->pieza_id == '' ? null : $actualizar_reporte['pieza_id'] = $request->pieza_id;
-                $request->cantidad == '' ? null : $actualizar_reporte['cantidad'] = $request->cantidad;
-                $request->disponibilidad_id == '' ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
-                $request->reproceso_id == '' ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
-                unset($actualizar_reporte['hora_final']);
             }
-            $reporte->update( $actualizar_reporte );
+
+                if ($actualizar_reporte['hora_final'] == null) {
+
+                    if ($numberPermissions > 8) {
+                        $actualizar_reporte['codigo'] = $request->codigo == '' ? null : $request->codigo;
+                        $actualizar_reporte['fecha'] = $request->fecha == '' ? null : $request->fecha;
+                        $actualizar_reporte['hora_inicial'] = $request->hora_inicial == '' ? null : $request->hora_inicial;
+                    }
+                    $request->actividad_id == '' ? null : $actualizar_reporte['actividad_id'] = $request->actividad_id;
+                    $request->centrotrabajo_id == '' ? null : $actualizar_reporte['centrotrabajo_id'] = $request->centrotrabajo_id;
+                    $request->ordentrabajo_id == '' ? null : $actualizar_reporte['ordentrabajo_id'] = $request->ordentrabajo_id;
+                    $request->disponibilidad_id == '' ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
+                    $request->reproceso_id == '' ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
+                    unset($actualizar_reporte['hora_final']);
+                }
+                $reporte->update($actualizar_reporte);
 
             DB::commit();
-            Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id . ' | ' . $reporte->codigo . ' actualizado', false);
-            return back()->with('success', __('app.label.updated_successfully', ['name' => $reporte->codigo]));
+            Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id . ' | reporteid: ' . $reporte->id . ' actualizado', false);
+            return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
-            Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id . ' |reporte.codigo: ' . $reporte->codigo . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $reporte->codigo]) . $th->getMessage() . ' L:' . $th->getLine() );
+            Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id . ' |reporteid: ' . $reporte->id . '  fallo en el actualizado', false);
+            return back()->with('error', __('app.label.updated_error', ['name' => $reporte->id]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(reporte $reporte)
     {
         $permissions = Myhelp::EscribirEnLog($this, 'DELETE:reportes');
@@ -278,10 +312,10 @@ class ReportesController extends Controller
         try {
             $reporte->delete();
             Myhelp::EscribirEnLog($this, 'DELETE:reportes', 'usuario id:' . $reporte->id . ' | ' . $reporte->codigo . ' borrado', false);
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $reporte->codigo]));
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:reportes', 'usuario id:' . $reporte->id . ' | ' . $reporte->codigo . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $reporte->codigo]) . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'DELETE:reportes', 'usuario id:' . $reporte->id . ' | ' . $reporte->codigo . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $reporte->codigo]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -292,7 +326,7 @@ class ReportesController extends Controller
             $reporte->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.reporte')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.reporte')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.reporte')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -382,8 +416,8 @@ class ReportesController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:reportes', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'IMPORT:reportes', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 }

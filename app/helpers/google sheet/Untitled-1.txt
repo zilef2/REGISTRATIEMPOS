@@ -1,0 +1,49 @@
+php artisan make:controller ReadGoogleSheets --invokable
+
+
+//paso a paso 
+https://console.developers.google.com/.
+new project
+google sheets api
+
+Client ID = 130079120425-kf3255imk36iig67rpeg7ef96l9rmm88.apps.googleusercontent.com
+
+$spreadsheet = Sheets::spreadsheet('YOUR_SPREADSHEET_ID');
+$sheet = $spreadsheet->sheet('YOUR_SHEET_NAME');
+$data = $sheet->getData();
+
+return view('sheets', compact('data'));
+
+
+
+--------------*--------------*--------------*--------------*--------------*--------------
+
+composer require revolution/laravel-google-sheets
+Set up Google API OAuth Key.
+Go to the Google Developers Console: https://console.developers.google.com/.
+Sign in to your Google account.
+Click the Create Project button.
+Give your project a name and click the Create button.
+Click the Enable APIs and Services tab.
+Search for the Google Sheets API and click the Enable button.
+Click the Credentials tab.
+Click the Create Credentials button and select OAuth client ID.
+Select the Web application type and click the Create client ID button.
+Click the Download JSON button and save the file as credentials.json in your Laravel project's root directory.
+Set up Google Service Account.
+Click the Credentials tab again.
+Click the Create Credentials button and select Service account key.
+Select the JSON key type and click the Create button.
+Click the Download JSON button and save the file as service-account.json in your Laravel project's root directory.
+Setup a Google Spreadsheet to integrate with.
+Create a new Google Spreadsheet file.
+In the top left corner of the spreadsheet, click the Share button.
+In the Who has access? section, click the Add people and groups button.
+Enter your email address and click the Send button.
+You should now have access to the spreadsheet.
+Enable required Google APIs.
+In the Google Developers Console, click the APIs & Services tab.
+In the Library section, search for the following APIs and click the Enable button for each one:
+Google Sheets API
+Google Drive API
+Test it.

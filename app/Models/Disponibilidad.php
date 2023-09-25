@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Disponibilidad extends Model
 {
@@ -13,4 +14,7 @@ class Disponibilidad extends Model
         'codigo',
         'nombre',
     ];
+
+    public function centroTrabajos(): BelongsToMany { return $this->BelongsToMany(centroTrabajo::class); }
+
 }

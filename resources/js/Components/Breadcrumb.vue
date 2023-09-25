@@ -13,7 +13,7 @@ defineProps({
         <p>{{ title }}</p>
         <div class="hidden sm:flex space-x-2 items-center">
             <Link :href="route('dashboard')" v-show="breadcrumbs.length != 0">
-            Dashboard
+            Resumen
             </Link>
             <div v-for="(breadcrumb, index) in breadcrumbs" :key="index" class="flex items-center space-x-2">
                 <ChevronRightIcon class="w-3 h-3" />

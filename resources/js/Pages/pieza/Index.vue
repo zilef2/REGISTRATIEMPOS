@@ -93,7 +93,7 @@ const select = () => {
 
 // text // number // dinero // date // datetime // foreign
 const titulos = [
-    { order: 'codigo', label: 'codigo', type: 'text' },
+    // { order: 'codigo', label: 'codigo', type: 'text' },
     { order: 'nombre', label: 'nombre', type: 'text' },
 ];
 

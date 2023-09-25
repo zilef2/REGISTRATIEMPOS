@@ -36,24 +36,28 @@ const anio18 = anioHoy - 18;
 
 
 const form = useForm({
-    name: 'alejo pruebas',
-    email: 'ajelof22@gmail.com',
-    role: 'trabajador',
-
-    identificacion: 123456654,
-    // sexo: 0,
-    sexo: 'Masculino',
-    fecha_nacimiento: anio18+'-12-01T00:00',
-
-    // name: '',
-    // email: '',
+    // name: 'alejo pruebas', //temp
+    // email: 'ajelof22@gmail.com',
     // role: 'trabajador',
+
+    // identificacion: 123456654,
+    // sexo: 'Masculino',
+    // fecha_nacimiento: anio18+'-12-01T00:00',
+    // celular: '',
+    // area: '',
+    // cargo: '',
+
+    name: '',
+    email: '',
+    role: 'trabajador',
     
-    // sexo:'',
-    // fecha_nacimiento:'',
+    sexo:'',
+    fecha_nacimiento:'',
     
-    // password: '',
-    // password_confirmation: '',
+    cargo: '',
+    area: '',
+    password: '',
+    password_confirmation: '',
 
 })
 
@@ -140,6 +144,19 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
                             <SelectInput id="sexo" class="mt-1 block w-full" v-model="form.sexo" required :dataSet="sexos">
                             </SelectInput>
                             <InputError class="mt-2" :message="form.errors.sexo" />
+                        </div>
+
+                        <div>
+                            <InputLabel for="area" :value="lang().label.area" />
+                            <TextInput id="area" type="text" class="mt-1 block w-full" v-model="form.area"
+                                :placeholder="lang().placeholder.area" :error="form.errors.area" />
+                            <InputError class="mt-2" :message="form.errors.area" />
+                        </div>
+                        <div>
+                            <InputLabel for="cargo" :value="lang().label.cargo" />
+                            <TextInput id="cargo" type="text" class="mt-1 block w-full" v-model="form.cargo"
+                                :placeholder="lang().placeholder.cargo" :error="form.errors.cargo" />
+                            <InputError class="mt-2" :message="form.errors.cargo" />
                         </div>
 
                         

@@ -48,10 +48,7 @@ class UserController extends Controller
                 $query->where('name', 'LIKE', "%" . $request->search . "%")
                     ->orWhere('email', 'LIKE', "%" . $request->search . "%")
                     ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%");
-            })
-                ->where('name', '!=', 'admin')
-                ->where('name', '!=', 'Superadmin');
-
+            })->where('name', '!=', 'admin')->where('name', '!=', 'Superadmin');
             // $users->where('name', 'LIKE', "%" . $request->search . "%");
         }
 
@@ -61,22 +58,29 @@ class UserController extends Controller
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $role = auth()->user()->roles->pluck('name')[0];
-        $roles = Role::get();
+        $roles = Role::where('name', '<>', 'superadmin')->where('name', '<>', 'admin')->get();
         if ($role != 'superadmin') {
+            $users->whereHas('roles', function ($query) {
+                return $query->whereNotIn('name', ['superadmin', 'admin']);
+            });
+        } else {
+            $roles = Role::get();
+        }
+
+        if ($role == 'admin') {
             $users->whereHas('roles', function ($query) {
                 return $query->where('name', '<>', 'superadmin');
             });
-            $roles = Role::where('name', '<>', 'superadmin')->where('name', '<>', 'admin')->get();
         }
 
         return Inertia::render('User/Index', [
-            'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
-            'title'         => __('app.label.user'),
-            'filters'       => $request->all(['search', 'field', 'order']),
-            'perPage'       => (int) $perPage,
-            'users'         => $users->with('roles')->paginate($perPage),
-            'roles'         => $roles,
-            'numberPermissions'         => $numberPermissions,
+            'breadcrumbs'           => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+            'title'                 => __('app.label.user'),
+            'filters'               => $request->all(['search', 'field', 'order']),
+            'perPage'               => (int) $perPage,
+            'users'                 => $users->with('roles')->paginate($perPage),
+            'roles'                 => $roles,
+            'numberPermissions'     => $numberPermissions,
         ]);
     }
 
@@ -85,7 +89,9 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create() { }
+    public function create()
+    {
+    }
 
     //! STORE - UPDATE - DELETE
     //! STORE functions
@@ -107,10 +113,13 @@ class UserController extends Controller
             $user = User::create([
                 'name'      => $request->name,
                 'email'     => $request->email,
+                'area'     => $request->area,
+                'cargo'     => $request->cargo,
                 'identificacion' => $request->identificacion,
+                'celular' => $request->celular,
                 'sexo' => $sexo,
                 'fecha_nacimiento' => $this->updatingDate($request->fecha_nacimiento),
-                'password' => Hash::make($request->identificacion.'*'),
+                'password' => Hash::make($request->identificacion . '*'),
             ]);
             $user->assignRole($request->role);
             DB::commit();
@@ -120,15 +129,20 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' fallo en el guardado', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //fin store functions
 
-    public function show($id) { }
-    public function edit($id) { }
+    public function show($id)
+    {
+    }
+    public function edit($id)
+    {
+    }
     public function update(UserUpdateRequest $request, $id)
     {
+
         Myhelp::EscribirEnLog($this, 'UPDATE:users', '', false);
         DB::beginTransaction();
         try {
@@ -137,7 +151,10 @@ class UserController extends Controller
             $user->update([
                 'name'      => $request->name,
                 'email'     => $request->email,
+                'area'     => $request->area,
+                'cargo'     => $request->cargo,
                 'identificacion' => $request->identificacion,
+                'celular' => $request->celular,
                 'sexo' => $sexo,
                 'fecha_nacimiento' => $this->updatingDate($request->fecha_nacimiento),
             ]);
@@ -149,7 +166,7 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:users', 'usuario id:' . $user->id . ' | ' . $user->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -168,8 +185,8 @@ class UserController extends Controller
             Myhelp::EscribirEnLog($this, 'DELETE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $user->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'DELETE:users', 'usuario id:' . $user->id . ' | ' . $user->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -180,7 +197,7 @@ class UserController extends Controller
             $user->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -270,8 +287,8 @@ class UserController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:users', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'IMPORT:users', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 }

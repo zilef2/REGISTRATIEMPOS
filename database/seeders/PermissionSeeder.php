@@ -20,9 +20,8 @@ class PermissionSeeder extends Seeder
 
         //otros cargos NO_ADMIN
         $nombresDeCargos = [
-            'trabajador',//to change massive
-            'jefe',//to change massive (corregir los reportes)
-            'consulta_reporte',//to change massive (ver reportes y descargar excel)
+            'trabajador',
+            'supervisor',
         ];
         $constantes = Myhelp::CargosYModelos();
 

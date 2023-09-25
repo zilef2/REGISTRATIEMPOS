@@ -125,6 +125,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'Sheets' => 'Google\Service\Sheets',
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 

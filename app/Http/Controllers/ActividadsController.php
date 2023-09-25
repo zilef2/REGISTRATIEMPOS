@@ -32,8 +32,7 @@ class ActividadsController extends Controller
     public function MapearClasePP(&$Actividads, $numberPermissions)
     {
         $Actividads = $Actividads->get()->map(function ($Actividad) use ($numberPermissions) {
-            // $Actividad->actividad_s = $Actividad->actividad()->first() !== null ? $Actividad->actividad()->first()->nombre : '';
-
+            $Actividad->centros = implode(',', $Actividad->centroTrabajos->pluck('nombre')->toArray());
             return $Actividad;
         })->filter();
     }
@@ -52,18 +51,19 @@ class ActividadsController extends Controller
 
         if ($request->has('search')) {
             $Actividads->where(function ($query) use ($request) {
-                $query->where('codigo', 'LIKE', "%" . $request->search . "%")
-                    ->orWhere('nombre', 'LIKE', "%" . $request->search . "%");
+                $query->where('nombre', 'LIKE', "%" . $request->search . "%")
+                    // ->orWhere('nombre', 'LIKE', "%" . $request->search . "%")
+                ;
             });
         }
-        if ($request->has(['field', 'order'])) {
+        if ($request->has(['field', 'order']) && $request->field != 'centros') {
             $Actividads = $Actividads->orderBy($request->field, $request->order);
         }
         $this->MapearClasePP($Actividads, $numberPermissions);
 
         // $losSelect = $this->SelectsMasivos($numberPermissions, $atributos_id);
 
-        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $perPage = $request->has('perPage') ? $request->perPage : 20;
         $total = $Actividads->count();
         $page = request('page', 1); // Current page number
         $fromController =  new LengthAwarePaginator(
@@ -117,7 +117,7 @@ class ActividadsController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'STORE:Actividads', false);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Actividad')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Actividad')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //fin store functions
@@ -149,7 +149,7 @@ class ActividadsController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             Myhelp::EscribirEnLog($this, 'UPDATE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.updated_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -168,8 +168,8 @@ class ActividadsController extends Controller
             Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $Actividad->name]));
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -180,7 +180,7 @@ class ActividadsController extends Controller
             $Actividad->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.Actividad')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Actividad')]) . $th->getMessage() . ' L:' . $th->getLine());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.Actividad')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
     //FIN : STORE - UPDATE - DELETE
@@ -270,8 +270,8 @@ class ActividadsController extends Controller
                 return back()->with('error', __('app.label.op_not_successfully') . ' archivo no seleccionado');
             }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'IMPORT:Actividads', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine(), false);
-            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine());
+            Myhelp::EscribirEnLog($this, 'IMPORT:Actividads', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 }

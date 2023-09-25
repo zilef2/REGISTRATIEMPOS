@@ -17,6 +17,7 @@ class CreateParametrosTable extends Migration
             $table->id();
 			$table->date('Fecha_creacion_parametro');
 			$table->text('nombre');
+			$table->string('valor');
             $table->timestamps();
         });
     }

@@ -2,6 +2,12 @@
 
 return [
     'label' => [
+        //actividad
+        'centros' => 'Centros',
+
+        //google sheets
+        'sheet' => 'Hojas de google',
+
         //clases simples
         'ordentrabajo' => 'orden de trabajo',
         'Ordentrabajo' => 'Orden de trabajo',
@@ -47,6 +53,9 @@ return [
         'reproceso' => 'Reproceso',
 
         //user
+        'area' => 'Area',
+        'cargo' => 'Cargo',
+        'celular' => 'Celular',
         'pgrado' => 'Nivel',
         'identificacion' => 'identificacion',
         'edad' => 'edad',

@@ -27,20 +27,21 @@ class ReporteRequest extends FormRequest
         return
         [
 			// 'nombre' => 'required',
-            'codigo' => 'required|unique:reportes,codigo,'.$reporteId,
+            // 'codigo' => 'required|unique:reportes,codigo,'.$reporteId,
             'fecha' => 'required',
             'hora_inicial' => 'required',
             'hora_final' => 'nullable',
-            'actividad_id' => 'required',
             'centrotrabajo_id' => 'required',
-            'material_id' => 'required',
-            'ordentrabajo_id' => 'required',
-
-            'pieza_id' => 'nullable',
-            'cantidad' => 'nullable',
+            'ordentrabajo_id' => 'nullable',
             
+            // 'material_id' => 'required',
+            // 'pieza_id' => 'nullable',
+            // 'cantidad' => 'nullable',
+            
+            'actividad_id' => 'nullable',
             'disponibilidad_id' => 'nullable',
             'reproceso_id' => 'nullable',
+            'user_id' => 'nullable',
         ];
     }
 }

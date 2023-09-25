@@ -93,7 +93,7 @@ const select = () => {
 
 // text // number // dinero // date // datetime // foreign
 const titulos = [
-    { order: 'codigo', label: 'codigo', type: 'text' },
+    // { order: 'codigo', label: 'codigo', type: 'text' },
     { order: 'nombre', label: 'nombre', type: 'text' },
 ];
 
@@ -113,9 +113,9 @@ const titulos = [
                         {{ lang().button.add }}
                     </PrimaryButton>
 
-                    <!-- <Create v-if="can(['create centrotrabajo'])" :numberPermissions="props.numberPermissions"
+                    <Create v-if="can(['create centrotrabajo'])" :numberPermissions="props.numberPermissions"
                         :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
-                        :losSelect=props.losSelect /> -->
+                        :losSelect=props.losSelect />
 
                     <Edit v-if="can(['update centrotrabajo'])" :titulos="titulos"
                         :numberPermissions="props.numberPermissions" :show="data.editOpen" @close="data.editOpen = false"

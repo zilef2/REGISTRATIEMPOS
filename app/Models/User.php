@@ -26,7 +26,12 @@ class User extends Authenticatable
         'identificacion',
         'sexo',
         'fecha_nacimiento',
-        //proponer 'fecha_ingreso',
+        'celular',
+
+        // 19 sept
+        'area',
+        'cargo',
+        'centro_trabajo_id',
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -60,28 +65,29 @@ class User extends Authenticatable
         });
     }
 
-    public function reportes() { return $this->hasMany('App\Models\Reporte'); }
+    // public function reportes() { return $this->hasMany('App\Models\Reporte'); }
+    public function Centrotrabajos(): BelongsTo { return $this->BelongsTo(Centrotrabajo::class); }
 
-    //# belongs to many
-    public function universidades(): BelongsToMany { return $this->BelongsToMany(Universidad::class); }
-    public function carreras(): BelongsToMany { return $this->BelongsToMany(Carrera::class); }
-    public function materias(): BelongsToMany { return $this->BelongsToMany(Materia::class); }
+    // //# belongs to many
 
-    public function unidads() {
-        $result = $this->materias->flatMap(function ($materia) {
-            return collect($materia->unidads);
-        });
-        // dd($result);
-        return $result;
-    }
+    // public function carreras(): BelongsToMany { return $this->BelongsToMany(Carrera::class); }
+    // public function materias(): BelongsToMany { return $this->BelongsToMany(Materia::class); }
 
-    public function trabajadorsSinUniversidad($elrol) {
-        $this->doesntHave('universidad')
-            ->WhereHas('roles', function ($query) use ($elrol) {
-                $query->where('name', $elrol);
-            })
-            ->get();
-    }
+    // public function unidads() {
+    //     $result = $this->materias->flatMap(function ($materia) {
+    //         return collect($materia->unidads);
+    //     });
+    //     // dd($result);
+    //     return $result;
+    // }
+
+    // public function trabajadorsSinUniversidad($elrol) {
+    //     $this->doesntHave('universidad')
+    //         ->WhereHas('roles', function ($query) use ($elrol) {
+    //             $query->where('name', $elrol);
+    //         })
+    //         ->get();
+    // }
 
 
     // public function actividad(): BelongsToMany { return $this->BelongsToMany(Actividad::class); }
