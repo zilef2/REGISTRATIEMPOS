@@ -39,18 +39,18 @@ class GuardarGoogleSheetsComercialsController extends Controller
     public function store(GuardarGoogleSheetsComercialRequest $request)
     {
         $guardargooglesheetscomercial = new GuardarGoogleSheetsComercial;
-		$guardargooglesheetscomercial->Nombre tablero = $request->input('Nombre tablero');
-		$guardargooglesheetscomercial->OT+Item = $request->input('OT+Item');
-		$guardargooglesheetscomercial->avance = $request->input('avance');
-		$guardargooglesheetscomercial->Tiempo estimado Ing. mecanica = $request->input('Tiempo estimado Ing. mecanica');
-		$guardargooglesheetscomercial->Tiempo estimado Ing. electrica = $request->input('Tiempo estimado Ing. electrica');
-		$guardargooglesheetscomercial->Tiempo estimado corte = $request->input('Tiempo estimado corte');
-		$guardargooglesheetscomercial->Tiempo estimado doblez = $request->input('Tiempo estimado doblez');
-		$guardargooglesheetscomercial->Tiempo estimado soldadura = $request->input('Tiempo estimado soldadura');
-		$guardargooglesheetscomercial->Tiempo estimado pulida = $request->input('Tiempo estimado pulida');
-		$guardargooglesheetscomercial->Tiempo estimado ensamble = $request->input('Tiempo estimado ensamble');
-		$guardargooglesheetscomercial->Tiempo estimado cableado = $request->input('Tiempo estimado cableado');
-		$guardargooglesheetscomercial->Tiempo estimado cobre = $request->input('Tiempo estimado cobre');
+		$guardargooglesheetscomercial->Nombre_tablero = $request->input('Nombre tablero');
+		// $guardargooglesheetscomercial->OT+Item = $request->input('OT+Item');
+		// $guardargooglesheetscomercial->avance = $request->input('avance');
+		// $guardargooglesheetscomercial->Tiempo estimado Ing. mecanica = $request->input('Tiempo estimado Ing. mecanica');
+		// $guardargooglesheetscomercial->Tiempo estimado Ing. electrica = $request->input('Tiempo estimado Ing. electrica');
+		// $guardargooglesheetscomercial->Tiempo estimado corte = $request->input('Tiempo estimado corte');
+		// $guardargooglesheetscomercial->Tiempo estimado doblez = $request->input('Tiempo estimado doblez');
+		// $guardargooglesheetscomercial->Tiempo estimado soldadura = $request->input('Tiempo estimado soldadura');
+		// $guardargooglesheetscomercial->Tiempo estimado pulida = $request->input('Tiempo estimado pulida');
+		// $guardargooglesheetscomercial->Tiempo estimado ensamble = $request->input('Tiempo estimado ensamble');
+		// $guardargooglesheetscomercial->Tiempo estimado cableado = $request->input('Tiempo estimado cableado');
+		// $guardargooglesheetscomercial->Tiempo estimado cobre = $request->input('Tiempo estimado cobre');
         $guardargooglesheetscomercial->save();
 
         return to_route('guardargooglesheetscomercials.index');
@@ -90,18 +90,18 @@ class GuardarGoogleSheetsComercialsController extends Controller
     public function update(GuardarGoogleSheetsComercialRequest $request, $id)
     {
         $guardargooglesheetscomercial = GuardarGoogleSheetsComercial::findOrFail($id);
-		$guardargooglesheetscomercial->Nombre tablero = $request->input('Nombre tablero');
-		$guardargooglesheetscomercial->OT+Item = $request->input('OT+Item');
-		$guardargooglesheetscomercial->avance = $request->input('avance');
-		$guardargooglesheetscomercial->Tiempo estimado Ing. mecanica = $request->input('Tiempo estimado Ing. mecanica');
-		$guardargooglesheetscomercial->Tiempo estimado Ing. electrica = $request->input('Tiempo estimado Ing. electrica');
-		$guardargooglesheetscomercial->Tiempo estimado corte = $request->input('Tiempo estimado corte');
-		$guardargooglesheetscomercial->Tiempo estimado doblez = $request->input('Tiempo estimado doblez');
-		$guardargooglesheetscomercial->Tiempo estimado soldadura = $request->input('Tiempo estimado soldadura');
-		$guardargooglesheetscomercial->Tiempo estimado pulida = $request->input('Tiempo estimado pulida');
-		$guardargooglesheetscomercial->Tiempo estimado ensamble = $request->input('Tiempo estimado ensamble');
-		$guardargooglesheetscomercial->Tiempo estimado cableado = $request->input('Tiempo estimado cableado');
-		$guardargooglesheetscomercial->Tiempo estimado cobre = $request->input('Tiempo estimado cobre');
+		// $guardargooglesheetscomercial->Nombre tablero = $request->input('Nombre tablero');
+		// $guardargooglesheetscomercial->OT+Item = $request->input('OT+Item');
+		// $guardargooglesheetscomercial->avance = $request->input('avance');
+		// $guardargooglesheetscomercial->Tiempo estimado Ing. mecanica = $request->input('Tiempo estimado Ing. mecanica');
+		// $guardargooglesheetscomercial->Tiempo estimado Ing. electrica = $request->input('Tiempo estimado Ing. electrica');
+		// $guardargooglesheetscomercial->Tiempo estimado corte = $request->input('Tiempo estimado corte');
+		// $guardargooglesheetscomercial->Tiempo estimado doblez = $request->input('Tiempo estimado doblez');
+		// $guardargooglesheetscomercial->Tiempo estimado soldadura = $request->input('Tiempo estimado soldadura');
+		// $guardargooglesheetscomercial->Tiempo estimado pulida = $request->input('Tiempo estimado pulida');
+		// $guardargooglesheetscomercial->Tiempo estimado ensamble = $request->input('Tiempo estimado ensamble');
+		// $guardargooglesheetscomercial->Tiempo estimado cableado = $request->input('Tiempo estimado cableado');
+		// $guardargooglesheetscomercial->Tiempo estimado cobre = $request->input('Tiempo estimado cobre');
         $guardargooglesheetscomercial->save();
 
         return to_route('guardargooglesheetscomercials.index');
