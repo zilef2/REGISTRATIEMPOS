@@ -1,5 +1,5 @@
 <?php
-
+// esto es prueba
 use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ReportesController;
@@ -84,44 +84,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
 });
 
-
-
-
-
-
-
-
-
-
-// Route::get('/this', function () {
-
-    // $spreadsheetId = '1EZkfkdQIMoiLewYhG8Qaw2JCc_jqnb_4_pOB75jJAT4';
-    // $spreadsheetId = '1j_eDVGjHHVjPlnsQxQBGdyQUH0CXj9HMnSNqp0tZRYU';
-    // $sheetName = 'Hoja 1';
-    // $service = new Sheets(new Client());
-    // $values = $service->spreadsheet($spreadsheetId)->sheet($sheetName)->range('A1:B2')->all();
-    // // $values = $service->spreadsheet($spreadsheetId)->sheet($sheetName)->all();
-    // dd($values);
-
-    // return view('sheets', compact('data'));
-//     return Inertia::render('Dashboard', [
-//         // 'values'         => $values,
-//         // 'columnas'         => count($values),
-//         'users'         => (int) User::count(),
-//     ]);
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-
-
-
-
-
-
-
-
-
-
-
+// ultimo comit 25sept
 
 require __DIR__ . '/auth.php';
 
