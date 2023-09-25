@@ -27,7 +27,7 @@ class ReportesController extends Controller
         $reportes = $reportes->get()->map(function ($reporte) use ($numberPermissions) {
             $reporte->actividad_s = $reporte->actividad()->first() !== null ? $reporte->actividad()->first()->nombre : '';
             $reporte->centrotrabajo_s = $reporte->centrotrabajo()->first() !== null ? $reporte->centrotrabajo()->first()->nombre : '';
-            $reporte->material_s = $reporte->material()->first() !== null ? $reporte->material()->first()->nombre : '';
+            // $reporte->material_s = $reporte->material()->first() !== null ? $reporte->material()->first()->nombre : '';
             $reporte->ordentrabajo_s = $reporte->ordentrabajo()->first() !== null ? $reporte->ordentrabajo()->first()->nombre : '';
             $reporte->operario_s = $reporte->operario()->first() !== null ? $reporte->operario()->first()->name : '';
 

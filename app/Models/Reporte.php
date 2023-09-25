@@ -19,7 +19,7 @@ class Reporte extends Model
         'hora_final',
         'actividad_id',
         'centrotrabajo_id',
-        'material_id',
+        // 'material_id',
         'ordentrabajo_id',
         
         'pieza_id',
@@ -39,7 +39,7 @@ class Reporte extends Model
 
     public function actividad(): BelongsTo { return $this->BelongsTo(Actividad::class); }
     public function centrotrabajo(): BelongsTo { return $this->BelongsTo(Centrotrabajo::class,'centrotrabajo_id'); }
-    public function material(): BelongsTo { return $this->BelongsTo(Material::class, 'material_id'); }
+    // public function material(): BelongsTo { return $this->BelongsTo(Material::class, 'material_id'); }
     public function ordentrabajo(): BelongsTo { return $this->BelongsTo(Ordentrabajo::class); }
     public function operario(): BelongsTo { return $this->BelongsTo(User::class, 'operario_id'); }
 
