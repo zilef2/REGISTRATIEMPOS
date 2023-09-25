@@ -38,7 +38,7 @@ class Myhelp {
                 'actividad',
                 'centrotrabajo',
                 'disponibilidad',
-                'material',
+                // 'material',
                 'pieza',
                 'reproceso',
                 // 'operario',
