@@ -17,7 +17,7 @@ class Actividad extends Model
     ];
 
     //centrotrabajo_id
-    public function centroTrabajos(): BelongsToMany { return $this->BelongsToMany(centroTrabajo::class); }
+    public function centroTrabajos(): BelongsToMany { return $this->BelongsToMany(CentroTrabajo::class); }
     // public function ActividadTipo($centroid,$ADR) {
     //     return 
     //     DB::table('actividad_centrotrabajo')->insert([

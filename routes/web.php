@@ -1,5 +1,4 @@
 <?php
-// esto es prueba
 use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ReportesController;
@@ -23,9 +22,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
-use Google\Client;
-use Illuminate\Support\Facades\Auth;
-use Revolution\Google\Sheets\Sheets;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
