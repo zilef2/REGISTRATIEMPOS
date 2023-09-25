@@ -25,7 +25,6 @@ class ReprocesoRequest extends FormRequest
     {
         return
         [
-			'codigo' => 'required',
 			'nombre' => 'required',
         ];
     }

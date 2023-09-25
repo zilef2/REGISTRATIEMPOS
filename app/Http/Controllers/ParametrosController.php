@@ -72,10 +72,9 @@ class parametrosController extends Controller
 
         try {
             $parametro = Parametro::create([
+                'Fecha_creacion_parametro' => $request->Fecha_creacion_parametro,
                 'nombre' => $request->nombre,
-                //otrosCampos
-                'descripcion' => $request->descripcion,
-                'materia_id' => $request->materia_id,
+                'valor' => $request->valor,
             ]);
             DB::commit();
             Log::info("U -> " . Auth::user()->name . " Guardo parametro " . $request->nombre . " correctamente");
@@ -105,10 +104,9 @@ class parametrosController extends Controller
             // dd($parametro,$request->nombre);
             $numticke = $request->NumeroTicketDefecto < 0 ? $request->NumeroTicketDefecto * -1 : $request->NumeroTicketDefecto;
             $parametro->update([
-                'prompEjercicios' => $request->prompEjercicios,
-                'prompObjetivos' => $request->prompObjetivos,
-                'pMejoraContinua' => $request->pMejoraContinua,
-                'NumeroTicketDefecto' => $numticke
+                'Fecha_creacion_parametro' => $request->Fecha_creacion_parametro,
+                'nombre' => $request->nombre,
+                'valor' => $request->valor,
             ]);
 
             DB::commit();

@@ -25,8 +25,9 @@ class ParametroRequest extends FormRequest
     {
         return
         [
-			'prompEjercicios' => 'required',
-			'NumeroTicketDefecto' => 'required',
+			'Fecha_creacion_parametro' => 'nullable',
+			'nombre' => 'nullable',
+			'valor' => 'nullable',
         ];
     }
 }

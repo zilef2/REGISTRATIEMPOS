@@ -25,7 +25,7 @@ class CentrotrabajoRequest extends FormRequest
     {
         return
         [
-			'codigo' => 'required',
+			'nombre' => 'required',
         ];
     }
 }

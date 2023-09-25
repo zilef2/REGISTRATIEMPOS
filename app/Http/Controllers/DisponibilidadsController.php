@@ -23,13 +23,11 @@ class DisponibilidadsController extends Controller
     public $MayusnombreClase = 'Disponibilidad';
     public $thisAtributos;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->thisAtributos = (new Disponibilidad())->getFillable();
     }
 
-    public function MapearClasePP(&$Disponibilidads, $numberPermissions)
-    {
+    public function MapearClasePP(&$Disponibilidads, $numberPermissions) {
         $Disponibilidads = $Disponibilidads->get()->map(function ($Disponibilidad) use ($numberPermissions) {
             $Disponibilidad->centros = implode(',', $Disponibilidad->centroTrabajos->pluck('nombre')->toArray());
 
@@ -37,8 +35,7 @@ class DisponibilidadsController extends Controller
         })->filter();
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $permissions = Myhelp::EscribirEnLog($this, $this->nombreClase);
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();

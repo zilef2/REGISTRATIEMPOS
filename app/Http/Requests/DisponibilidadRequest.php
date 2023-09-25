@@ -25,7 +25,7 @@ class DisponibilidadRequest extends FormRequest
     {
         return
         [
-			'codigo' => 'required',
+			'nombre' => 'required',
         ];
     }
 }

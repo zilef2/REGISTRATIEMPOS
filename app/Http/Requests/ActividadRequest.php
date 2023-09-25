@@ -25,7 +25,7 @@ class ActividadRequest extends FormRequest
     {
         return
         [
-			'codigo' => 'required',
+			'nombre' => 'required',
         ];
     }
 }
