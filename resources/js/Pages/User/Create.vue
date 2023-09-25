@@ -46,15 +46,17 @@ const form = useForm({
     // celular: '',
     // area: '',
     // cargo: '',
-
+    
     name: '',
     email: '',
     role: 'trabajador',
     
+    identificacion:'',
     sexo:'',
     fecha_nacimiento:'',
     
     cargo: '',
+    celular: '',
     area: '',
     password: '',
     password_confirmation: '',
