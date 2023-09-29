@@ -20,9 +20,9 @@ return new class extends Migration
             $table->string('password');
 
             $table->string('identificacion')->unique();
-            $table->string('sexo')->nullable();
+            $table->string('sexo')->default('Masculino');
             $table->string('celular')->nullable();
-            $table->string('area')->nullable();
+            $table->string('area')->default('PRODUCCION');
             $table->string('cargo')->nullable();
           $table->dateTime('fecha_nacimiento')->nullable();
             
