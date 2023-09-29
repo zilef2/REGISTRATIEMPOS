@@ -42,6 +42,7 @@ class ReporteRequest extends FormRequest
             'disponibilidad_id' => 'nullable',
             'reproceso_id' => 'nullable',
             'user_id' => 'nullable',
+            'tipoReporte' => 'required',
         ];
     }
 }

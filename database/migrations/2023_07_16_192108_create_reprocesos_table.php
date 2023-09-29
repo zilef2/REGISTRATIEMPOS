@@ -50,10 +50,14 @@ class CreateReprocesosTable extends Migration
                 ->references('id')
                 ->on('disponibilidads')
                 ->onDelete('restrict'); //cascade| restrict | set null
-            $table->foreign('material_id')
-                ->references('id')
-                ->on('materials')
-                ->onDelete('restrict'); //cascade| restrict | set null
+
+
+            // $table->foreign('material_id')
+            //     ->references('id')
+            //     ->on('materials')
+            //     ->onDelete('restrict'); 
+
+
             $table->foreign('operario_id')
                 ->references('id')
                 ->on('users')
@@ -62,10 +66,14 @@ class CreateReprocesosTable extends Migration
             //     ->references('id')
             //     ->on('ordentrabajos')
             //     ->onDelete('restrict'); //cascade| restrict | set null
-            $table->foreign('pieza_id')
-                ->references('id')
-                ->on('piezas')
-                ->onDelete('restrict'); //cascade| restrict | set null
+
+
+            // $table->foreign('pieza_id')
+            //     ->references('id')
+            //     ->on('piezas')
+            //     ->onDelete('restrict'); 
+            
+            
             $table->foreign('reproceso_id')
                 ->references('id')
                 ->on('reprocesos')

@@ -16,15 +16,17 @@ class GuardarGoogleSheetsComercial extends Model
 
         'Nombre_tablero',
         'Item',
+        'Item_vue',
         'avance',
-        'Tiempo_estimado_Ing_mec',
-        'Tiempo_estimado_Ing_elec',
-        'Tiempo_estimado_corte',
-        'Tiempo_estimado_doblez',
-        'Tiempo_estimado_soldadura',
-        'Tiempo_estimado_pulida',
-        'Tiempo_estimado_ensamble',
-        'Tiempo_estimado_cableado',
-        'Tiempo_estimado_cobre',
+
+        'Tiempo_estimado_corte', //1 -4
+        'Tiempo_estimado_doblez', //2 -5
+        'Tiempo_estimado_soldadura', //3 -8 
+        'Tiempo_estimado_pulida', //4 -7
+        'Tiempo_estimado_ensamble', //5 -6
+        'Tiempo_estimado_cobre', //6 -3
+        'Tiempo_estimado_cableado', //7 -2
+        'Tiempo_estimado_Ing_mec', //8 -0
+        'Tiempo_estimado_Ing_elec', //9 -1
     ];
 }

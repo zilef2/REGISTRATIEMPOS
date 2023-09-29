@@ -18,55 +18,49 @@ const props = defineProps({
     title: String,
     generica: Object,
     losSelect: Object,
-
+    numberPermissions: Number,
+    valuesGoogleCabeza: Object,
+    valuesGoogleBody: Object,
+    Trabajadores: Object,
 })
 
 const emit = defineEmits(["close"]);
 const data = reactive({
+    actualizarCadaReporte:true,
     justNames: [
-        'codigo',
-        'cantidad',
+        // 'codigo',
+        // 'cantidad',
         'fecha',
         'hora_inicial',
 
         'actividad_id',
         'centrotrabajo_id',
         'disponibilidad_id',
-        'material_id',
+        // 'material_id',
         'operario_id',
         'ordentrabajo_id',
-        'calendario_id',
-        'pieza_id',
+        // 'calendario_id',
+        // 'pieza_id',
         'reproceso_id'
     ],
+    tipoReporte:{ title: 'Actividad', value: 0 },
+
+    valorInactivo:'NA',
+    cabeza: props.valuesGoogleCabeza,
+    nombresOT: Object.values(props.valuesGoogleBody),
+
+    // select
     actividad_id:props.losSelect.actividad,
     centrotrabajo_id:props.losSelect.centrotrabajo,
     disponibilidad_id:props.losSelect.disponibilidad,
-    material_id:props.losSelect.material,
     ordentrabajo_id:props.losSelect.ordentrabajo,
-    pieza_id:props.losSelect.pieza,
     reproceso_id:props.losSelect.reproceso,
-})
+    ordentrabajo_ids: [],
+    mensajeFalta: '',
 
-const form = useForm({ ...Object.fromEntries(data.justNames.map(field => [field, ''])) });
-const printForm = [
-    { idd: 'codigo', label: 'codigo', type: 'text', value: form.codigo , elif:null},
-    { idd: 'fecha', label: 'fecha', type: 'date', value: form.fecha , elif:null},
-    { idd: 'hora_inicial', label: 'hora inicial', type: 'time', value: form.hora_inicial , elif:null},
-    
-    { idd: 'actividad_id', label: 'Actividad', type: 'id', value: form.actividad_id , elif:null},
-    { idd: 'centrotrabajo_id', label: 'Centrotrabajo', type: 'id', value: form.centrotrabajo_id , elif:null},
-    { idd: 'material_id', label: 'Material', type: 'id', value: form.material_id , elif:null},
-    { idd: 'ordentrabajo_id', label: 'Ordentrabajo', type: 'id', value: form.ordentrabajo_id , elif:null},
+});const form = useForm({ ...Object.fromEntries(data.justNames.map(field => [field, ''])) });
 
-    { idd: 'pieza_id', label: 'Pieza', type: 'id', value: form.pieza_id, elif:null },
-    { idd: 'cantidad', label: 'cantidad (pieza)', type: 'text', value: form.cantidad, elif:'pieza_id' },
-    //opcionales
-    { idd: 'disponibilidad_id', label: 'Disponibilidad', type: 'id', value: form.disponibilidad_id, elif:null },
-    { idd: 'reproceso_id', label: 'Reproceso', type: 'id', value: form.reproceso_id, elif:null },
-
-    // { idd: 'operario_id', label: 'Operario', type: 'id', value: form.operario_id },
-];
+const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
 
 watchEffect(() => {
     if (props.show) {
@@ -74,27 +68,44 @@ watchEffect(() => {
         //     form[element] =  props.generica[element]
         // });
         form.errors = {}
-        form.codigo = props.generica?.codigo
-        form.cantidad = props.generica?.cantidad
-        form.fecha = props.generica?.fecha
-        form.hora_inicial = props.generica?.hora_inicial
 
-        form.actividad_id = props.generica?.actividad_s
-        form.centrotrabajo_id = props.generica?.centrotrabajo_s
-        form.disponibilidad_id = props.generica?.disponibilidad_s
-        form.material_id = props.generica?.material_s
-        form.operario_id = props.generica?.operario_s
-        form.ordentrabajo_id = props.generica?.ordentrabajo_s
-        form.calendario_id = props.generica?.calendario_s
-        form.pieza_id = props.generica?.pieza_s
-        form.reproceso_id = props.generica?.reproceso_s
+        if(data.actualizarCadaReporte){
+            form.tipoReporte = opcinesActividadOTros[props.generica?.tipoReporte]
+            data.tipoReporte = form.tipoReporte
+            data.ordentrabajo_ids = data.nombresOT.map((val,inde) => ({
+                title: val.Item?.replace(/_/g, " "),
+                value: inde,
+            }))
+            
+            form.ordentrabajo_id = data.ordentrabajo_ids[props.generica?.ordentrabajo_id]['title']
+            console.log("🧈 debu data:", data.ordentrabajo_ids[0]);
+
+            
+            form.centrotrabajo_id = data.centrotrabajo_id[props.generica?.centrotrabajo_id]['title']
+            form.actividad_id = props.generica?.actividad_s
+
+            form.cantidad = props.generica?.cantidad
+            form.fecha = props.generica?.fecha
+            form.hora_inicial = props.generica?.hora_inicial
+
+            form.disponibilidad_id = props.generica?.disponibilidad_s
+            form.material_id = props.generica?.material_s
+            form.operario_id = props.generica?.operario_s
+            form.calendario_id = props.generica?.calendario_s
+            form.pieza_id = props.generica?.pieza_s
+            form.reproceso_id = props.generica?.reproceso_s
+
+            data.actualizarCadaReporte=false
+        }
+
+    }else{
+        data.actualizarCadaReporte=true
     }
 })
 
 
 const update = () => {
 
-    // form.actividad_id = data.losSelect.actividad_id
     let StringResultAny = LookForValueInArray(props.losSelect.actividad,form.actividad_id)
     form.actividad_id = StringResultAny != '' ? StringResultAny : '';
 
@@ -104,19 +115,13 @@ const update = () => {
     StringResultAny = LookForValueInArray(props.losSelect.disponibilidad,form.disponibilidad_id)
     form.disponibilidad_id = StringResultAny != '' ? StringResultAny : '';
 
-    StringResultAny = LookForValueInArray(props.losSelect.material,form.material_id)
-    form.material_id = StringResultAny != '' ? StringResultAny : '';
-
-    StringResultAny = LookForValueInArray(props.losSelect.ordentrabajo,form.ordentrabajo_id)
+    StringResultAny = LookForValueInArray(data['ordentrabajo_ids'],form.ordentrabajo_id)
     form.ordentrabajo_id = StringResultAny != '' ? StringResultAny : '';
-
-    StringResultAny = LookForValueInArray(props.losSelect.pieza,form.pieza_id)
-    form.pieza_id = StringResultAny != '' ? StringResultAny : '';
 
     StringResultAny = LookForValueInArray(props.losSelect.reproceso,form.reproceso_id)
     form.reproceso_id = StringResultAny != '' ? StringResultAny : '';
 
-
+    
     //     form.centrotrabajo_id = props.generica?.centrotrabajo_s
     //     form.disponibilidad_id = props.generica?.disponibilidad_s
     //     form.material_id = props.generica?.material_s
@@ -135,53 +140,124 @@ const update = () => {
     })
 }
 
-const sexos = [ { label: 'Masculino', value: 'Masculino' }, { label: 'Femenino', value: 'Femenino' } ];
-const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+const arrayMostrarDelCodigo = ['Nombre Tablero','OT+Item','% avance','Tiempo estimado'];
+const Cabezera = ['Nombre_tablero','avance'];
+const CT_Num_to_Tiempo = [
+    'Tiempo_estimado_cableado',
+    'Tiempo_estimado_cobre',
+    'Tiempo_estimado_corte',
+    'Tiempo_estimado_doblez',
+    'Tiempo_estimado_ensamble',
+    'Tiempo_estimado_pulida',
+    'Tiempo_estimado_soldadura',
 
+    'Tiempo_estimado_Ing_elec',
+    'Tiempo_estimado_Ing_mec',
+];
 </script>
 
 
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')">
-            <form class="p-6" @submit.prevent="create">
+            <form class="px-6 my-8" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.edit }} {{ props.title }}
+                    {{ lang().label.add }} {{ props.title }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div v-if="props.numberPermissions > 1" id="opcinesActividadO" class="xl:col-span-2">
+                        <label name=""> Reportar en nombre de: </label>
+                        <v-select :options="props.Trabajadores" label="title"
+                        v-model="form.user_id"></v-select>
+                    </div>
+                    <div id="opcinesActividadO" class="xl:col-span-2">
+                        <label name=""> Tipo de reporte </label>
+                        <v-select :options="opcinesActividadOTros" label="title"
+                        v-model="data.tipoReporte" disabled></v-select>
+                    </div>
+                    <!-- empieza -->
 
-                    <div v-for="(atributosform, indice) in printForm" :key="indice">
-                        <div v-if="atributosform.type =='id'" id="SelectVue">
-                            <label name="labelSelectVue"> {{atributosform.label}} </label>
-                            <v-select :options="data[atributosform.idd]" label="title"
-                            v-model="form[atributosform.idd]" :value="data[atributosform.idd][props.generica.actividad_id]"></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
-
-                        <div v-else-if="atributosform.type =='time'" id="SelectVue">
-                            <InputLabel
-                                :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput
-                                :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" 
-                                step="3600"
-                            />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
-                        <div v-else class="">
-                            <InputLabel
-                                :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput
-                                 :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" />
-                                <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
+                    <div class="xl:col-span-1">
+                        <InputLabel for="fecha" :value="lang().label['fecha']" />
+                        <TextInput id="fecha" type="date" class="mt-1 block w-full bg-gray-200"
+                            v-model="form['fecha']" disabled placeholder="fecha"
+                            :error="form.errors['fecha']" />
+                        <InputError class="mt-2" :message="form.errors['fecha']" />
+                    </div>
+                    <div class="">
+                        <InputLabel for="hora_inicial" :value="lang().label['hora inicial']" />
+                        <TextInput id="hora_inicial" type="time" class="mt-1 block w-full bg-gray-200"
+                            v-model="form['hora_inicial']" disabled placeholder="hora_inicial"
+                            :error="form.errors['hora_inicial']" step="3600" />
+                        <InputError class="mt-2" :message="form.errors['hora_inicial']" />
                     </div>
 
+                    <div id="Sordentrabajo" v-if="data.tipoReporte.value != 2" class="xl:col-span-2">
+                        <label name="ordentrabajo_ids"> Orden de trabajo </label>
+                        <v-select :options="data['ordentrabajo_ids']" label="title"
+                            v-model="form['ordentrabajo_id']"
+                        ></v-select>
+                        <InputError class="mt-2" :message="form.errors['ordentrabajo_id']" />
+                    </div>
+                    <div v-if="form.ordentrabajo_id && data.tipoReporte.value != 2" class="w-full col-span-2">
+                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[0]" />
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
+                            :value="data.nombresOT[props.generica?.ordentrabajo_id][Cabezera[0]]" 
+                        />
+                    </div> 
+
+                    <div v-if="form.ordentrabajo_id && data.tipoReporte.value != 2" class="w-full col-span-1">
+                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[1]" />
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
+                            :value="data.nombresOT[props.generica?.ordentrabajo_id][Cabezera[1]]" 
+                        />
+                    </div>
+
+                    <div id="Scentrotrabajo" >
+                        <label name="centrotrabajo_id"> Centro de trabajo </label>
+                        <v-select :options="data['centrotrabajo_id']" label="title"
+                            v-model="form['centrotrabajo_id']"
+                        ></v-select>
+                        <InputError class="mt-2" :message="form.errors['centrotrabajo_id']" />
+                    </div>
+                    <!-- tiempo estimado -->
+                    <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && data.tipoReporte.value != 2">
+                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
+                            :value="data.nombresOT[form.ordentrabajo_ids.value][CT_Num_to_Tiempo[form['centrotrabajo_id']['value']]]" />
+                    </div>
+
+                    <!-- eleccion -->
+                    <div id="actividad" v-if="data.tipoReporte.value == 0 || data.tipoReporte.value == 1" class="col-span-2">
+                        <label name="actividad_id"> Actividad </label>
+                        <v-select :options="data['actividad_id']" label="title" required
+                            v-model="form['actividad_id']"
+                        ></v-select>
+                        <InputError class="mt-2" :message="form.errors['actividad_id']" />
+                    </div>
+                    <div id="reproceso" v-if="data.tipoReporte.value == 1" class="col-span-2">
+                        <label name="reproceso_id"> Reproceso</label>
+                        <v-select :options="data['reproceso_id']" label="title" required
+                            v-model="form['reproceso_id']"
+                        ></v-select>
+                        <InputError class="mt-2" :message="form.errors['reproceso_id']" />
+                    </div>
+                    <div id="disponibilidad" v-if="data.tipoReporte.value == 2" class="col-span-3">
+                        <label name="disponibilidad_id"> Disponibilidad</label>
+                        <v-select :options="data['disponibilidad_id']" label="title" required
+                            v-model="form['disponibilidad_id']"
+                        ></v-select>
+                        <InputError class="mt-2" :message="form.errors['disponibilidad_id']" />
+                    </div>
+                    <!-- termina -->
                 </div>
-                <div class=" my-8 flex justify-end">
+
+
+                <div class=" mb-8 mt-[290px] flex justify-end">
+                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-700 bg-red-50 dark:text-gray-100"> 
+                        {{ data.mensajeFalta }} 
+                    </h2>
+
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"

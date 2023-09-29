@@ -13,10 +13,11 @@ class ReporteUpdateRequest extends FormRequest {
      * @return array<string, mixed>
      */
     public function rules() {
-        $reporteId = $this->route('reporte') ?? null;
+        // $reporteId = $this->route('reporte') ?? null;
         return [
 			// 'nombre' => 'required',
-            'codigo' => 'nullable|unique:reportes,codigo,'.$reporteId,
+            // 'codigo' => 'nullable|unique:reportes,codigo,'.$reporteId,
+            'codigo' => 'nullable',
             'fecha' => 'nullable',
             'hora_inicial' => 'nullable',
             'hora_final' => 'nullable',
@@ -31,6 +32,7 @@ class ReporteUpdateRequest extends FormRequest {
             
             'disponibilidad_id' => 'nullable',
             'reproceso_id' => 'nullable',
+            'tipoReporte' => 'nullable',
         ];
     }
 }

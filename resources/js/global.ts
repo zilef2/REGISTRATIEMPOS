@@ -34,14 +34,16 @@ import { toInteger } from "lodash";
     export function LookForValueInArray(arrayOfObjects:Object[] , searchValue): String {
         //ex: { title: '123', value: 1 },
         let foundObject = '';
-        for (const obj of arrayOfObjects) {
-            
-            if(typeof searchValue == 'string'){
-                // if (obj['title'] === searchValue) {
-                //     foundObject = obj['value'];
-                // }
-                return '';
-            }else{
+        if(typeof searchValue == 'string'){
+            for (const obj of arrayOfObjects) {
+                if (obj['title'] === searchValue) {
+                    console.log("🧈 "+ obj['value'] +" searchValue:", searchValue);
+                    foundObject = obj['value'];
+                    break;
+                }
+            }
+        }else{
+            for (const obj of arrayOfObjects) {
                 if (obj['title'] === searchValue['title']) {
                     foundObject = obj['value'];
                     break;

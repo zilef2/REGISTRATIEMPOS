@@ -25,9 +25,9 @@ class DatabaseSeeder extends Seeder
 
             UserSeeder::class,
             ActividadSeeder::class,
-            MaterialSeeder::class,
+            // MaterialSeeder::class,
             OrdentrabajoSeeder::class,
-            PiezaSeeder::class,
+            // PiezaSeeder::class,
             DisponibilidadSeeder::class,
             ReprocesoSeeder::class,
 

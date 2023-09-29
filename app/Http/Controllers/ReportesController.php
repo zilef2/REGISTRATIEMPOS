@@ -22,16 +22,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
 {
-    public function MapearClasePP(&$reportes, $numberPermissions)
-    {
-        $reportes = $reportes->get()->map(function ($reporte) use ($numberPermissions) {
+    public function MapearClasePP(&$reportes, $numberPermissions, $valuesGoogleBody) {
+        $reportes = $reportes->get()->map(function ($reporte) use ($numberPermissions,$valuesGoogleBody) {
+
+            // $reporte->ordentrabajo_s = $valuesGoogleBody->Where('Item_vue',$reporte->ordentrabajo_id)->first()->Item ?? '';
+
             $reporte->actividad_s = $reporte->actividad()->first() !== null ? $reporte->actividad()->first()->nombre : '';
             $reporte->centrotrabajo_s = $reporte->centrotrabajo()->first() !== null ? $reporte->centrotrabajo()->first()->nombre : '';
-            // $reporte->material_s = $reporte->material()->first() !== null ? $reporte->material()->first()->nombre : '';
-            $reporte->ordentrabajo_s = $reporte->ordentrabajo()->first() !== null ? $reporte->ordentrabajo()->first()->nombre : '';
             $reporte->operario_s = $reporte->operario()->first() !== null ? $reporte->operario()->first()->name : '';
-
-            $reporte->pieza_s = $reporte->pieza()->first() !== null ? $reporte->pieza()->first()->nombre : '';
 
             $reporte->disponibilidad_s = $reporte->disponibilidad()->first() !== null ? $reporte->disponibilidad()->first()->nombre : '';
             $reporte->reproceso_s = $reporte->reproceso()->first() !== null ? $reporte->reproceso()->first()->nombre : '';
@@ -39,11 +37,9 @@ class ReportesController extends Controller
             // $reporte->calendario_s = $reporte->calendario()->first() !== null ? $reporte->calendario()->first()->nombre : '';
             return $reporte;
         })->filter();
-        // dd($materias);
     }
 
-    public function SelectsMasivos($numberPermissions, $atributos_id)
-    {
+    public function SelectsMasivos($numberPermissions, $atributos_id) {
         // $usuario = Auth::User();
         // if($numberPermissions < 9){
         /* por ahora el trae todas 
@@ -72,8 +68,7 @@ class ReportesController extends Controller
     }
 
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $permissions = Myhelp::EscribirEnLog($this, ' reportes');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();
@@ -114,9 +109,12 @@ class ReportesController extends Controller
 
         if ($request->has(['field', 'order'])) {
             $reportes = $reportes->orderBy($request->field, $request->order);
+        }else{
+            $reportes = $reportes->orderby('hora_final')->orderByDesc('updated_at');
+
         }
 
-        $this->MapearClasePP($reportes, $numberPermissions);
+        $this->MapearClasePP($reportes, $numberPermissions,$valuesGoogleBody);
 
         $Trabajadores = User::WhereHas('roles', function ($query) {
             return $query->whereIn('name', ['supervisor']);
@@ -152,21 +150,16 @@ class ReportesController extends Controller
             'valuesGoogleBody'      => $valuesGoogleBody ?? [],
         ]);
     }
-    public function create()
-    {
-    }
-    //! STORE - UPDATE - DELETE
-    //! STORE functions
-    public function updatingDate($date)
-    {
+    public function create() { }
+    
+    public function updatingDate($date) {
         if ($date === null || $date == '1969-12-31') {
             return null;
         }
         return date("Y-m-d", strtotime($date));
     }
 
-    private function getLastReport($hoy, $user)
-    {
+    private function getLastReport($hoy, $user) {
         $hoyDate = date_create($hoy);
         date_sub($hoyDate, date_interval_create_from_date_string('1 days'));
         $ayer = date_format($hoyDate, 'Y-m-d');
@@ -204,44 +197,36 @@ class ReportesController extends Controller
     public function store(ReporteRequest $request) {
         $user = Auth::User();
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'STORE:reportes'));
-        if ($numberPermissions > 8) {
+        if ($numberPermissions > 1) {
             $userID = $request->user_id ? $request->user_id['value'] : $user->id;
         } else {
             $userID = $user->id;
         }
 
-        // if ($request->pieza_id)
-        //     $request->validate([
-        //         'pieza_id.value' => 'nullable|integer',
-        //         'cantidad' => Rule::requiredIf(function () use ($request) {
-        //             $temp = $request->pieza_id['value'] ?? null;
-        //             return !is_null($temp);
-        //         }),
-        //     ]);
-
         DB::beginTransaction();
         try {
             $hoy = date('Y-m-d');
             $tipoFin = $this->getLastReport($hoy, $user); //BOUNDED 1: primera del dia | 2:intermedia | 3:Ultima del dia
-
+            $tipoReport = $request->tipoReporte['value'];
             $reporte = Reporte::create([
                 // 'codigo' => $request->codigo,
                 'fecha' => $request->fecha,
+                'tipoReporte' => $tipoReport,
                 'hora_inicial' => $request->hora_inicial,
                 'hora_final' => null,
-                'ordentrabajo_id' => $request->ordentrabajo_id['title'] ?? null,
+                // 'ordentrabajo_id' => $request->ordentrabajo_id['title'] ?? null,
+                'ordentrabajo_id' => $request->ordentrabajo_id['value'] ?? null,
                 'centrotrabajo_id' => $request->centrotrabajo_id['value'] ?? null,
-
-                // 'material_id' => $request->material_id['value'],
-                // 'pieza_id' => $request->pieza_id ? $request->pieza_id['value'] : null,
-                // 'cantidad' => $request->cantidad,
 
                 'operario_id' => $userID,
                 'actividad_id' => $request->actividad_id['value'] ?? null,
                 'disponibilidad_id' => ($request->disponibilidad_id['value']) ?? null,
                 'reproceso_id' => ($request->reproceso_id['value']) ?? null,
 
-                'tipoFinalizacion' => $tipoFin
+                'tipoFinalizacion' => $tipoFin,
+                'nombreTablero' => $request->nombreTablero,
+                'OTItem' => $request->OTItem,
+                'TiempoEstimado' => $request->TiempoEstimado,
             ]);
 
             DB::commit();
@@ -268,32 +253,31 @@ class ReportesController extends Controller
         try {
             $reporte = Reporte::findOrFail($id);
 
-            $actualizar_reporte['hora_final'] = $request->hora_final;
+            if ($request->hora_final == null) {
 
-            //todo: preguntar a carlos, no creo que tengan que poner 4pm
-            if( substr($request->hora_final,0,2) == '16'){
-                $reporte->update($actualizar_reporte);
-                
-            }else{
-                return back()->with('error', 'No son las 4pm');
-
-            }
-
-                if ($actualizar_reporte['hora_final'] == null) {
-
-                    if ($numberPermissions > 8) {
-                        $actualizar_reporte['codigo'] = $request->codigo == '' ? null : $request->codigo;
-                        $actualizar_reporte['fecha'] = $request->fecha == '' ? null : $request->fecha;
-                        $actualizar_reporte['hora_inicial'] = $request->hora_inicial == '' ? null : $request->hora_inicial;
-                    }
-                    $request->actividad_id == '' ? null : $actualizar_reporte['actividad_id'] = $request->actividad_id;
-                    $request->centrotrabajo_id == '' ? null : $actualizar_reporte['centrotrabajo_id'] = $request->centrotrabajo_id;
-                    $request->ordentrabajo_id == '' ? null : $actualizar_reporte['ordentrabajo_id'] = $request->ordentrabajo_id;
-                    $request->disponibilidad_id == '' ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
-                    $request->reproceso_id == '' ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
-                    unset($actualizar_reporte['hora_final']);
+                if ($numberPermissions > 8) {
+                    $actualizar_reporte['codigo'] = $request->codigo == '' ? null : $request->codigo;
+                    $actualizar_reporte['fecha'] = $request->fecha == '' ? null : $request->fecha;
+                    $actualizar_reporte['hora_inicial'] = $request->hora_inicial == '' ? null : $request->hora_inicial;
                 }
+                $request->actividad_id == '' ? null : $actualizar_reporte['actividad_id'] = $request->actividad_id;
+                $request->centrotrabajo_id == '' ? null : $actualizar_reporte['centrotrabajo_id'] = $request->centrotrabajo_id;
+                $request->ordentrabajo_id == '' ? null : $actualizar_reporte['ordentrabajo_id'] = $request->ordentrabajo_id;
+                $request->disponibilidad_id == '' ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
+                $request->reproceso_id == '' ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
+                // unset($actualizar_reporte['hora_final']);
+            }else{
+                $DigitosHoraFinal = intval(substr($request->hora_final,0,2));
+                // if($DigitosHoraFinal > 15){ //toask: deberia negar que se reporte antes de 4pm?
+                $actualizar_reporte['hora_final'] = $request->hora_final;
+                
                 $reporte->update($actualizar_reporte);
+                    
+                // }else{
+                //     return back()->with('error', 'No son las 4pm');
+                // }
+            }
+            $reporte->update($actualizar_reporte);
 
             DB::commit();
             Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id . ' | reporteid: ' . $reporte->id . ' actualizado', false);

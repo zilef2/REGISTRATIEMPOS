@@ -35,6 +35,8 @@ watchEffect(() => {
     if (props.show) {
         form.errors = {}
 
+        form.hora_final = formatTime()
+
         //# hora final como la hora del sistema
         const validDate = new Date()
         let hora = validDate.getHours();
@@ -64,19 +66,19 @@ const update = () => {
         <Modal :show="props.show" @close="emit('close')">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.edit }} {{ props.title }}
+                    {{ lang().label.finLaboral }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-1 md:mx-[100px] mt-8 gap-6">
 
                     <div v-for="(atributosform, indice) in printForm" :key="indice">
 
                         <div v-if="atributosform.type =='time'" id="SelectVue">
-                            <InputLabel
+                            <InputLabel class="text-center"
                                 :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput
-                                :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
+                                :id="atributosform.idd" :type="atributosform.type" class="mt-1 pl-4 ml-7 block w-full text-xl text-center"
                                 v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" 
+                                :error="form.errors[atributosform.idd]" disabled
                                 step="3600"
                             />
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]" />

@@ -110,8 +110,9 @@ const titulos = [
     { order: 'hora_final', label: 'hora final', type: 'time' },
     { order: 'actividad_id', label: 'actividad', type: 'foreign', nameid: 'actividad_s' },
     { order: 'centrotrabajo_id', label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s' },
-    // { order: 'material_id', label: 'material', type: 'foreign', nameid: 'material_s' },
-    { order: 'ordentrabajo_id', label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_id' },
+    // { order: 'ordentrabajo_id', label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_s' },
+    { order: 'OTItem', label: 'ordentrabajo', type: 'text' },
+    { order: 'TiempoEstimado', label: 'TiempoEstimado', type: 'text' },
 
     // { order: 'pieza_id', label: 'pieza', type: 'foreign', nameid: 'pieza_s' },
     // { order: 'cantidad', label: 'cantidad', type: 'number' },
@@ -144,15 +145,16 @@ const titulos = [
                         :valuesGoogleCabeza=props.valuesGoogleCabeza
                         :valuesGoogleBody=props.valuesGoogleBody
                         :Trabajadores=props.Trabajadores
-                         />
+                    />
 
-                    <Edit v-if="can(['update reporte']) && numberPermissions > 1" :numberPermissions="props.numberPermissions" :show="data.editOpen"
+                    <Edit v-if="can(['update reporte']) && numberPermissions > 1" :numberPermissions="props.numberPermissions" 
+                        :show="data.editOpen"
                         @close="data.editOpen = false" :generica="data.generico" :title="props.title"
                         :losSelect=props.losSelect
                         :valuesGoogleCabeza=props.valuesGoogleCabeza
                         :valuesGoogleBody=props.valuesGoogleBody
                         :Trabajadores=props.Trabajadores
-                         />
+                    />
 
                     <TerminarReporte v-if="can(['read reporte'])" :numberPermissions="props.numberPermissions" :show="data.TerminarOpen"
                         @close="data.TerminarOpen = false" :generica="data.generico" :title="props.title"
@@ -251,9 +253,7 @@ const titulos = [
                                 <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Hora inicial
-                                    Promedio: </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Hora inicial Promedio: </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     {{ CalcularAvg(props.fromController.data, 'hora_inicial', true) }}
                                 </td>

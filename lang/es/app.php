@@ -35,7 +35,9 @@ return [
         //parametros
         'parametros' => 'parametros',
         //reporte
+        'finLaboral' => 'Finalización jornada laboral',
         'cantidad (pieza)' => 'Cantidad (pieza)',
+        'TiempoEstimado' => 'Tiempo Estimado',
         'reporte' => 'Reporte',
         'codigo' => 'Codigo',
         'cantidad' => 'Cantidad',
@@ -155,7 +157,7 @@ return [
     ],
     'button' => [
 
-        'subir' => 'subir',
+        'subir' => 'Subir',
         'login' => 'Ingresar',
         'loading' => 'Cargando...',
         'register' => 'Registrar',
@@ -214,13 +216,13 @@ return [
         'resend_email_verification' => 'Click here to re-send the verification email.',
         'sent_verification_email' => 'A new verification link has been sent to your email address.',
         'saved' => 'Guardado.',
-        'update_password' => 'Update Password',
-        'update_password_caption' => 'Ensure your account is using a long, random password to stay secure.',
-        'current_password' => 'Current Password',
-        'new_password' => 'New Password',
+        'update_password' => 'Actualizar contraseña',
+        'update_password_caption' => 'Asegurese de usar una contraseña de mas de 8 digitos, con caracteres especiales y mayusculas para permanecer seguro.',
+        'current_password' => 'Actual contraseña',
+        'new_password' => 'Nueva contraseña',
         'delete_account' => 'Borrar Cuenta',
         'delete_account_caption' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
         'delete_account_modal_title' => 'Are you sure you want to delete your account?',
-        'delete_account_modal_caption' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+        'delete_account_modal_caption' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your contraseña to confirm you would like to permanently delete your account.',
     ],
 ];

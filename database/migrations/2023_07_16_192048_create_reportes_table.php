@@ -35,10 +35,14 @@ class CreateReportesTable extends Migration
             $table->unsignedBigInteger('reproceso_id')->nullable();
 
 			$table->integer('tipoFinalizacion')->default(1);
-            // $table->unsignedBigInteger('calendario_id')->nullable();
+			$table->integer('tipoReporte')->default(1);
+
+
+			$table->string('nombreTablero')->nullable();
+			$table->string('OTItem')->nullable();
+			$table->string('TiempoEstimado')->nullable();
 
             //relationsships in create_reprocesos_table
-
             $table->timestamps();
             $table->softDeletes();
         });

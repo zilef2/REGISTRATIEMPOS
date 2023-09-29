@@ -20,16 +20,18 @@ class CreateGuardarGoogleSheetsComercialsTable extends Migration
 
             $table->string('Nombre_tablero')->nullable();
             $table->string('Item')->nullable();
+            $table->integer('Item_vue')->nullable();
             $table->string('avance')->nullable();
-            $table->string('Tiempo_estimado_Ing_mec')->nullable();
-            $table->string('Tiempo_estimado_Ing_elec')->nullable();
+            
             $table->string('Tiempo_estimado_corte')->nullable();
             $table->string('Tiempo_estimado_doblez')->nullable();
             $table->string('Tiempo_estimado_soldadura')->nullable();
             $table->string('Tiempo_estimado_pulida')->nullable();
             $table->string('Tiempo_estimado_ensamble')->nullable();
-            $table->string('Tiempo_estimado_cableado')->nullable();
             $table->string('Tiempo_estimado_cobre')->nullable();
+            $table->string('Tiempo_estimado_cableado')->nullable();
+            $table->string('Tiempo_estimado_Ing_mec')->nullable();
+            $table->string('Tiempo_estimado_Ing_elec')->nullable();
 
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')

@@ -13,17 +13,12 @@ class Reporte extends Model
 
 
     protected $fillable = [
-        // 'codigo',
         'fecha',
         'hora_inicial',
         'hora_final',
         'actividad_id',
         'centrotrabajo_id',
-        // 'material_id',
         'ordentrabajo_id',
-        
-        'pieza_id',
-        'cantidad',
         
         'disponibilidad_id',
         'reproceso_id',
@@ -33,6 +28,12 @@ class Reporte extends Model
         // 'calendario_id',
         //19 sept2023
         'tipoFinalizacion', //BOUNDED 1: primera del dia | 2:intermedia | 3:Ultima del dia
+        'tipoReporte', //acti, repro,disponibilidad
+
+        //info de la orden de trabajo
+        'nombreTablero',
+        'OTItem',
+        'TiempoEstimado',
     ];
 
     // public function reportes() { return $this->hasMany('App\Models\Reporte'); }
