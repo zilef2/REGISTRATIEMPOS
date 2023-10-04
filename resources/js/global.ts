@@ -168,10 +168,11 @@ import { toInteger } from "lodash";
 
 // MATH 
     export function CalcularAvg(TheArray,NameValue = '',isTime = false) {
-        let sum = 0
+        let sum: number
+        sum = 0
         if(NameValue === ''){
             TheArray.forEach((value, index, array) => {
-                sum += value;
+                sum += parseFloat(value);
             })
         }else{
             if(isTime){ //time like: 14:18
@@ -183,11 +184,13 @@ import { toInteger } from "lodash";
                 })
             }else{
                 TheArray.forEach((value, index, array) => {
-                    sum += value[NameValue];
+                    let val = value[NameValue].replace(',','.')
+                    sum += parseFloat(val);
                 })
             }
         }
-        const result = number_format(sum/TheArray.length,1,false);
+        let NewSum = sum/TheArray.length
+        const result = number_format(NewSum,1,false);
         return result;
     }
     export function number_format(amount, decimals, isPesos: boolean) {

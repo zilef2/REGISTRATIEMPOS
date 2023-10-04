@@ -110,7 +110,7 @@ class ReportesController extends Controller
         if ($request->has(['field', 'order'])) {
             $reportes = $reportes->orderBy($request->field, $request->order);
         }else{
-            $reportes = $reportes->orderby('hora_final')->orderByDesc('updated_at');
+            $reportes = $reportes->orderbyDesc('fecha')->orderby('hora_final')->orderByDesc('updated_at');
 
         }
 
@@ -222,7 +222,6 @@ class ReportesController extends Controller
                 'actividad_id' => $request->actividad_id['value'] ?? null,
                 'disponibilidad_id' => ($request->disponibilidad_id['value']) ?? null,
                 'reproceso_id' => ($request->reproceso_id['value']) ?? null,
-
                 'tipoFinalizacion' => $tipoFin,
                 'nombreTablero' => $request->nombreTablero,
                 'OTItem' => $request->OTItem,
@@ -265,7 +264,12 @@ class ReportesController extends Controller
                 $request->ordentrabajo_id == '' ? null : $actualizar_reporte['ordentrabajo_id'] = $request->ordentrabajo_id;
                 $request->disponibilidad_id == '' ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
                 $request->reproceso_id == '' ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
-                // unset($actualizar_reporte['hora_final']);
+
+                //tipoF no va 
+                $request->nombreTablero == '' ? null : $actualizar_reporte['nombreTablero'] = $request->nombreTablero;
+                $request->OTItem == '' ? null : $actualizar_reporte['OTItem'] = $request->OTItem;
+                $request->TiempoEstimado == '' ? null : $actualizar_reporte['TiempoEstimado'] = $request->TiempoEstimado;
+                
             }else{
                 $DigitosHoraFinal = intval(substr($request->hora_final,0,2));
                 // if($DigitosHoraFinal > 15){ //toask: deberia negar que se reporte antes de 4pm?

@@ -106,6 +106,7 @@ watchEffect(() => {
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
     { order: 'fecha', label: 'fecha', type: 'date' },
+    { order: 'operario_id', label: 'operario', type: 'foreign', nameid: 'operario_s' },
     { order: 'hora_inicial', label: 'hora inicial', type: 'time' },
     { order: 'hora_final', label: 'hora final', type: 'time' },
     { order: 'actividad_id', label: 'actividad', type: 'foreign', nameid: 'actividad_s' },
@@ -121,7 +122,6 @@ const titulos = [
     { order: 'reproceso_id', label: 'reproceso', type: 'foreign', nameid: 'reproceso_s' },
 
     // {order: 'calendario_id' , label: 'calendario', type: 'foreign', nameid: 'calendario_s'},
-    { order: 'operario_id', label: 'operario', type: 'foreign', nameid: 'operario_s' },
 ];
 
 </script>
@@ -249,13 +249,23 @@ const titulos = [
                                     </span>
                                 </td>
                             </tr>
+
+                            <!-- resultados -->
                             <tr>
+                                <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Hora inicial Promedio: </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     {{ CalcularAvg(props.fromController.data, 'hora_inicial', true) }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-extrabold text-center"> Tiempo Estimado Promedio: </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                                    {{ CalcularAvg(props.fromController.data, 'TiempoEstimado') }}
                                 </td>
                             </tr>
                         </tbody>

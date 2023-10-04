@@ -7,11 +7,11 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { watchEffect, reactive } from 'vue';
+import { onMounted, reactive, watch, watchEffect } from 'vue';
 import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
 import VueDatePicker from '@vuepic/vue-datepicker';
 
-import { LookForValueInArray } from '@/global.ts';
+import { LookForValueInArray,TransformTdate, formatTime } from '@/global.ts';
 
 const props = defineProps({
     show: Boolean,
@@ -25,45 +25,73 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["close"]);
+
+const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
+const arrayMostrarDelCodigo = ['Nombre Tablero','OT+Item','% avance','Tiempo estimado'];
+const Cabezera = ['Nombre_tablero','avance'];
+
+
 const data = reactive({
-    actualizarCadaReporte:true,
-    justNames: [
-        'fecha',
-        'hora_inicial',
-
-        'actividad_id',
-        'centrotrabajo_id',
-        'disponibilidad_id',
-        'operario_id',
-        'ordentrabajo_id',
-        'reproceso_id',
-
-        'ordentrabajo_ids',
-        'otitem',
-        'user_id',
-
-        'nombreTablero',
-        'OTItem',
-        'TiempoEstimado',
-    ],
-    tipoReporte:{ title: 'Actividad', value: 0 },
-
-    valorInactivo:'NA',
-    cabeza: props.valuesGoogleCabeza,
-    nombresOT: Object.values(props.valuesGoogleBody),
-
-    // select
+    params: {
+        pregunta: ''
+    },
+    // tipoReporte:{ title: 'Actividad', value: 0 },
     actividad_id:props.losSelect.actividad,
     centrotrabajo_id:props.losSelect.centrotrabajo,
     disponibilidad_id:props.losSelect.disponibilidad,
+    // material_id:props.losSelect.material,
     ordentrabajo_id:props.losSelect.ordentrabajo,
+    // pieza_id:props.losSelect.pieza,
     reproceso_id:props.losSelect.reproceso,
+    temp_disponibilidad_id:null,
+    temp_reproceso_id:null,
+    temp_actividad_id:null,
+    valorInactivo:'NA',
+    cabeza: props.valuesGoogleCabeza,
+    nombresOT: Object.values(props.valuesGoogleBody),
     ordentrabajo_ids: [],
     mensajeFalta: '',
+    BanderaTipo:true,
+    mensajeTiemposAuto: '',
+    soloUnaVez:true
+})
 
-});const form = useForm({ ...Object.fromEntries(data.justNames.map(field => [field, ''])) });
 
-const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
+//very usefull
+const justNames = [
+    // 'codigo',
+    'tipoReporte',
+    'fecha',
+    'hora_inicial',
+    'hora_final',
+    'actividad_id',
+    'centrotrabajo_id',
+    'disponibilidad_id',
+    'operario_id',
+    'ordentrabajo_id',
+    'reproceso_id',
+
+    'ordentrabajo_ids',
+    'otitem',
+    'user_id',
+
+    'nombreTablero',
+    'OTItem',
+    'TiempoEstimado',
+
+]; const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
+
+onMounted(() => {
+    if(props.numberPermissions > 8){
+
+        // const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
+        // form.codigo = 'AdminCod'+ (valueRAn);
+        // form.hora_inicial = '0'+valueRAn+':00'//temp
+        // form.fecha = '2023-06-01'
+    }
+
+});
+
 const tiemposEstimados = [
     "Tiempo_estimado_corte",
     "Tiempo_estimado_doblez", //2
@@ -81,10 +109,11 @@ function GetTiempoNotNull(){
     form.centrotrabajo_id = data.centrotrabajo_id[1]
     
 
-    while( data.nombresOT[form.ordentrabajo_id.value][tiemposEstimados[contador]] === "" && contador <= tiemposEstimados.length){
+
+    while( data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]] === "" && contador <= tiemposEstimados.length){
         contador++
     }
-    form.TiempoEstimado = data.nombresOT[form.ordentrabajo_id.value][tiemposEstimados[contador]];
+    form.TiempoEstimado = data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]];
     
     if(contador !== tiemposEstimados.length){
         form.centrotrabajo_id = data.centrotrabajo_id[contador+1];
@@ -96,27 +125,19 @@ function GetTiempoNotNull(){
     data.soloUnaVez = false
 }
 
-
 watchEffect(() => {
+    console.log("🧈🧈 ", form.centrotrabajo_id);
     if (props.show) {
-        // data.justNames.forEach(element => {
-        //     form[element] =  props.generica[element]
-        // });
-        console.clear()
-        console.log("🧈🧈 ", form.centrotrabajo_id);
-        form.errors = {}
+        if(data.BanderaTipo){
 
-        if(data.actualizarCadaReporte){
             form.tipoReporte = opcinesActividadOTros[props.generica?.tipoReporte]
-            data.tipoReporte = form.tipoReporte
+            data.BanderaTipo = false
             data.ordentrabajo_ids = data.nombresOT.map((val,inde) => ({
                 title: val.Item?.replace(/_/g, " "),
                 value: inde,
             }))
-            
+            form.ordentrabajo_ids = data.ordentrabajo_ids[props.generica?.ordentrabajo_id]
             form.ordentrabajo_id = data.ordentrabajo_ids[props.generica?.ordentrabajo_id]['title']
-            console.log("🧈 debu data:", data.ordentrabajo_ids[0]);
-
             
             form.centrotrabajo_id = data.centrotrabajo_id[props.generica?.centrotrabajo_id]['title']
             form.actividad_id = props.generica?.actividad_s
@@ -132,30 +153,89 @@ watchEffect(() => {
             form.pieza_id = props.generica?.pieza_s
             form.reproceso_id = props.generica?.reproceso_s
 
-            data.actualizarCadaReporte=false
-        }
-
-
-        if(form.ordentrabajo_id && form.ordentrabajo_id.value != null){
-            form.nombreTablero = data.nombresOT[form.ordentrabajo_id.value][Cabezera[0]]
-            form.OTItem = data.nombresOT[form.ordentrabajo_id.value]['Item']
             
-            if(data.soloUnaVez) {
-                GetTiempoNotNull();
-            }else{
-                let tempCentro = form.centrotrabajo_id.value - 1
-                form.TiempoEstimado = data.nombresOT[form.ordentrabajo_id.value][tiemposEstimados[tempCentro]];
+            form.user_id = props.generica?.user_id
+            form.TiempoEstimado = props.generica?.TiempoEstimado
+            console.log("🧈 debu props.generica?.TiempoEstimado:", props.generica?.TiempoEstimado);
+
+            data.actualizarCadaReporte=false
+        }else{
+            if(form.ordentrabajo_ids && form.ordentrabajo_ids.value != null){
+                form.nombreTablero = data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]
+                form.OTItem = data.nombresOT[form.ordentrabajo_ids.value]['Item']
+                
+                if(data.soloUnaVez) {
+                    GetTiempoNotNull();
+                }else{
+                    let tempCentro = form.centrotrabajo_id.value - 1
+                    form.TiempoEstimado = data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[tempCentro]];
+                }
             }
         }
 
+        form.errors = {}
+         
     }else{
-        data.actualizarCadaReporte=true
+        data.BanderaTipo = true
     }
 })
 
+let ValidarNotNull = (campos) =>{
+    let sonObligatorios = '';
+    try{
+        campos.forEach((value,i) => {
+            if(typeof form[value] === 'undefined' || form[value] === null || form[value].length === 0){ //&& form[value] != ''
+                sonObligatorios = value
+                throw new Error('BreakException');
+            }
+        })
+    } catch (e) {
+        // if (e.message !== 'BreakException') throw e;
+    }
+    return sonObligatorios;
+}
+
+let ValidarCreateReporte = () =>{
+    let tipo = form.tipoReporte.value;
+    let result = true;
+    const mensaje = ' es obligatorio'
+    if(tipo == 0){
+        result = ValidarNotNull([
+            'ordentrabajo_ids',
+            'centrotrabajo_id',
+            'actividad_id',
+        ])
+    } //acti
+
+    if(tipo == 1) {
+        result = ValidarNotNull([
+            'centrotrabajo_id',
+            'ordentrabajo_ids',
+            'actividad_id',
+            'reproceso_id',
+        ])
+    } //reproceso
+
+    if(tipo == 2) {
+        result = ValidarNotNull([
+            'centrotrabajo_id',
+            'disponibilidad_id',
+        ])
+    } //disponibilidad
+
+    let objectMessages = {
+        'ordentrabajo_ids':'Orden trabajo',
+        'actividad_id':'Actividad',
+        'reproceso_id':'Reproceso',
+        'centrotrabajo_id':'Centro de trabajo',
+        'disponibilidad_id':'Disponibilidad',
+    }
+    if(result != '') return objectMessages[result] + mensaje
+    else return result
+}
 
 const update = () => {
-
+    data.mensajeFalta = ValidarCreateReporte();
     let StringResultAny = LookForValueInArray(props.losSelect.actividad,form.actividad_id)
     form.actividad_id = StringResultAny != '' ? StringResultAny : '';
 
@@ -171,7 +251,7 @@ const update = () => {
     StringResultAny = LookForValueInArray(props.losSelect.reproceso,form.reproceso_id)
     form.reproceso_id = StringResultAny != '' ? StringResultAny : '';
 
-    
+
     //     form.centrotrabajo_id = props.generica?.centrotrabajo_s
     //     form.disponibilidad_id = props.generica?.disponibilidad_s
     //     form.material_id = props.generica?.material_s
@@ -190,21 +270,10 @@ const update = () => {
     })
 }
 
-const arrayMostrarDelCodigo = ['Nombre Tablero','OT+Item','% avance','Tiempo estimado'];
-const Cabezera = ['Nombre_tablero','avance'];
+watch(() => form.ordentrabajo_id, (newX) => { 
+    data.soloUnaVez = true
+})
 
-const CT_Num_to_Tiempo = [
-    'Tiempo_estimado_cableado',
-    'Tiempo_estimado_cobre',
-    'Tiempo_estimado_corte',
-    'Tiempo_estimado_doblez',
-    'Tiempo_estimado_ensamble',
-    'Tiempo_estimado_pulida',
-    'Tiempo_estimado_soldadura',
-
-    'Tiempo_estimado_Ing_elec',
-    'Tiempo_estimado_Ing_mec',
-];
 </script>
 
 
@@ -215,27 +284,27 @@ const CT_Num_to_Tiempo = [
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                    <div v-if="props.numberPermissions > 1" id="opcinesActividadO" class="xl:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+                    <div v-if="props.numberPermissions > 8" id="opcinesActividadO" class="xl:col-span-2 col-span-1">
                         <label name=""> Reportar en nombre de: </label>
                         <v-select :options="props.Trabajadores" label="title"
                         v-model="form.user_id"></v-select>
                     </div>
-                    <div id="opcinesActividadO" class="xl:col-span-2">
+                    <div id="opcinesActividadO" class="xl:col-span-2 col-span-1">
                         <label name=""> Tipo de reporte </label>
-                        <v-select :options="opcinesActividadOTros" label="title"
-                        v-model="data.tipoReporte" disabled></v-select>
+                        <v-select :options="opcinesActividadOTros" label="title" disabled
+                        v-model="form.tipoReporte"></v-select>
                     </div>
                     <!-- empieza -->
 
-                    <div class="xl:col-span-1">
+                    <div class="xl:col-span-1 col-span-1">
                         <InputLabel for="fecha" :value="lang().label['fecha']" />
                         <TextInput id="fecha" type="date" class="mt-1 block w-full bg-gray-200"
                             v-model="form['fecha']" disabled placeholder="fecha"
                             :error="form.errors['fecha']" />
                         <InputError class="mt-2" :message="form.errors['fecha']" />
                     </div>
-                    <div class="">
+                    <div class=" col-span-1">
                         <InputLabel for="hora_inicial" :value="lang().label['hora inicial']" />
                         <TextInput id="hora_inicial" type="time" class="mt-1 block w-full bg-gray-200"
                             v-model="form['hora_inicial']" disabled placeholder="hora_inicial"
@@ -243,59 +312,63 @@ const CT_Num_to_Tiempo = [
                         <InputError class="mt-2" :message="form.errors['hora_inicial']" />
                     </div>
 
-                    <div id="Sordentrabajo" v-if="data.tipoReporte.value != 2" class="xl:col-span-2">
+
+                    <div id="Sordentrabajo" v-if="form.tipoReporte.value != 2" class="xl:col-span-2 col-span-1">
                         <label name="ordentrabajo_ids"> Orden de trabajo </label>
                         <v-select :options="data['ordentrabajo_ids']" label="title"
-                            v-model="form['ordentrabajo_id']"
+                            v-model="form['ordentrabajo_ids']"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['ordentrabajo_id']" />
                     </div>
-                    <div v-if="form.ordentrabajo_id && data.tipoReporte.value != 2" class="w-full col-span-2">
+
+                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value != 2" class="w-full lg:col-span-2 col-span-1">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[0]" />
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
-                            :value="data.nombresOT[props.generica?.ordentrabajo_id][Cabezera[0]]" 
-                        />
-                    </div> 
-
-                    <div v-if="form.ordentrabajo_id && data.tipoReporte.value != 2" class="w-full col-span-1">
-                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[1]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
-                            :value="data.nombresOT[props.generica?.ordentrabajo_id][Cabezera[1]]" 
+                            :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]" 
                         />
                     </div>
 
-                    <div id="Scentrotrabajo" >
+                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value != 2" class="w-full col-span-1">
+                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[1]" />
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
+                            :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[1]]" 
+                        />
+                    </div>
+
+                    <div id="Scentrotrabajo" class=" col-span-1">
                         <label name="centrotrabajo_id"> Centro de trabajo </label>
                         <v-select :options="data['centrotrabajo_id']" label="title"
                             v-model="form['centrotrabajo_id']"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['centrotrabajo_id']" />
                     </div>
-                    <!-- tiempo estimado -->
 
-                    <div v-if="form.ordentrabajo_id && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1">
+
+                    <!-- tiempo estimado -->
+                    <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
                             v-model="form.TiempoEstimado"
                         />
                     </div>
 
+
                     <!-- eleccion -->
-                    <div id="actividad" v-if="data.tipoReporte.value == 0 || data.tipoReporte.value == 1" class="col-span-2">
+                    <div id="actividad" v-if="form.tipoReporte.value == 0 || form.tipoReporte.value == 1" class="xl:col-span-2 col-span-1">
                         <label name="actividad_id"> Actividad </label>
                         <v-select :options="data['actividad_id']" label="title" required
                             v-model="form['actividad_id']"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['actividad_id']" />
                     </div>
-                    <div id="reproceso" v-if="data.tipoReporte.value == 1" class="col-span-2">
+                    <div id="reproceso" v-if="form.tipoReporte.value == 1" class="xl:col-span-2 col-span-1">
                         <label name="reproceso_id"> Reproceso</label>
                         <v-select :options="data['reproceso_id']" label="title" required
                             v-model="form['reproceso_id']"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['reproceso_id']" />
                     </div>
-                    <div id="disponibilidad" v-if="data.tipoReporte.value == 2" class="col-span-3">
+                    <div id="disponibilidad" v-if="form.tipoReporte.value == 2" class="xl:col-span-3  col-span-1">
                         <label name="disponibilidad_id"> Disponibilidad</label>
                         <v-select :options="data['disponibilidad_id']" label="title" required
                             v-model="form['disponibilidad_id']"
@@ -306,9 +379,12 @@ const CT_Num_to_Tiempo = [
                 </div>
 
 
-                <div class=" mb-8 mt-[290px] flex justify-end">
-                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-700 bg-red-50 dark:text-gray-100"> 
+                <div class=" mb-8 mt-[230px] flex justify-end">
+                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100"> 
                         {{ data.mensajeFalta }} 
+                    </h2>
+                    <h2 v-if="data.mensajeTiemposAuto != ''" class="mx-12 px-8 text-lg font-medium text-gray-800 dark:text-gray-100"> 
+                        {{ data.mensajeTiemposAuto }} 
                     </h2>
 
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

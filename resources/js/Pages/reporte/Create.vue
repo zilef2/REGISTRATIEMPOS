@@ -89,7 +89,6 @@ onMounted(() => {
 
 });
 
-//aquiiii : como seleccionar el tiempo moviendolo dese el select
 const tiemposEstimados = [
     "Tiempo_estimado_corte",
     "Tiempo_estimado_doblez", //2
@@ -254,18 +253,6 @@ watch(() => form.ordentrabajo_ids, (newX) => {
 const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
 const arrayMostrarDelCodigo = ['Nombre Tablero','OT+Item','% avance','Tiempo estimado'];
 const Cabezera = ['Nombre_tablero','avance'];
-const CT_Num_to_Tiempo = [
-    'Tiempo_estimado_cableado',
-    'Tiempo_estimado_cobre',
-    'Tiempo_estimado_corte',
-    'Tiempo_estimado_doblez',
-    'Tiempo_estimado_ensamble',
-    'Tiempo_estimado_pulida',
-    'Tiempo_estimado_soldadura',
-
-    'Tiempo_estimado_Ing_elec',
-    'Tiempo_estimado_Ing_mec',
-];
 
 </script>
 
@@ -342,7 +329,6 @@ const CT_Num_to_Tiempo = [
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
                             v-model="form.TiempoEstimado"
                         />
-                        <!-- :value="data.nombresOT[form.ordentrabajo_ids.value][CT_Num_to_Tiempo[form['centrotrabajo_id']['value']]]"  -->
                     </div>
 
 
