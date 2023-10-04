@@ -34,8 +34,7 @@ let form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) 
 });
 
 const printForm =[];
-props.titulos.forEach(names => 
-    printForm.push ({
+props.titulos.forEach(names => printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
     })
 );

@@ -28,20 +28,23 @@ const emit = defineEmits(["close"]);
 const data = reactive({
     actualizarCadaReporte:true,
     justNames: [
-        // 'codigo',
-        // 'cantidad',
         'fecha',
         'hora_inicial',
 
         'actividad_id',
         'centrotrabajo_id',
         'disponibilidad_id',
-        // 'material_id',
         'operario_id',
         'ordentrabajo_id',
-        // 'calendario_id',
-        // 'pieza_id',
-        'reproceso_id'
+        'reproceso_id',
+
+        'ordentrabajo_ids',
+        'otitem',
+        'user_id',
+
+        'nombreTablero',
+        'OTItem',
+        'TiempoEstimado',
     ],
     tipoReporte:{ title: 'Actividad', value: 0 },
 
@@ -61,12 +64,46 @@ const data = reactive({
 });const form = useForm({ ...Object.fromEntries(data.justNames.map(field => [field, ''])) });
 
 const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
+const tiemposEstimados = [
+    "Tiempo_estimado_corte",
+    "Tiempo_estimado_doblez", //2
+    "Tiempo_estimado_soldadura",
+    "Tiempo_estimado_pulida",
+    "Tiempo_estimado_ensamble", //5
+    "Tiempo_estimado_cobre",
+    "Tiempo_estimado_cableado",//7
+    "Tiempo_estimado_Ing_mec",
+    "Tiempo_estimado_Ing_elec", //9
+];
+
+function GetTiempoNotNull(){
+    let contador = 0
+    form.centrotrabajo_id = data.centrotrabajo_id[1]
+    
+
+    while( data.nombresOT[form.ordentrabajo_id.value][tiemposEstimados[contador]] === "" && contador <= tiemposEstimados.length){
+        contador++
+    }
+    form.TiempoEstimado = data.nombresOT[form.ordentrabajo_id.value][tiemposEstimados[contador]];
+    
+    if(contador !== tiemposEstimados.length){
+        form.centrotrabajo_id = data.centrotrabajo_id[contador+1];
+        data.mensajeTiemposAuto = ''
+    }else{
+        data.mensajeTiemposAuto = 'Tiempos vacios!'
+    }
+    
+    data.soloUnaVez = false
+}
+
 
 watchEffect(() => {
     if (props.show) {
         // data.justNames.forEach(element => {
         //     form[element] =  props.generica[element]
         // });
+        console.clear()
+        console.log("🧈🧈 ", form.centrotrabajo_id);
         form.errors = {}
 
         if(data.actualizarCadaReporte){
@@ -96,6 +133,19 @@ watchEffect(() => {
             form.reproceso_id = props.generica?.reproceso_s
 
             data.actualizarCadaReporte=false
+        }
+
+
+        if(form.ordentrabajo_id && form.ordentrabajo_id.value != null){
+            form.nombreTablero = data.nombresOT[form.ordentrabajo_id.value][Cabezera[0]]
+            form.OTItem = data.nombresOT[form.ordentrabajo_id.value]['Item']
+            
+            if(data.soloUnaVez) {
+                GetTiempoNotNull();
+            }else{
+                let tempCentro = form.centrotrabajo_id.value - 1
+                form.TiempoEstimado = data.nombresOT[form.ordentrabajo_id.value][tiemposEstimados[tempCentro]];
+            }
         }
 
     }else{
@@ -142,6 +192,7 @@ const update = () => {
 
 const arrayMostrarDelCodigo = ['Nombre Tablero','OT+Item','% avance','Tiempo estimado'];
 const Cabezera = ['Nombre_tablero','avance'];
+
 const CT_Num_to_Tiempo = [
     'Tiempo_estimado_cableado',
     'Tiempo_estimado_cobre',
@@ -162,7 +213,7 @@ const CT_Num_to_Tiempo = [
         <Modal :show="props.show" @close="emit('close')">
             <form class="px-6 my-8" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.add }} {{ props.title }}
+                    {{ lang().label.edit }} {{ props.title }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                     <div v-if="props.numberPermissions > 1" id="opcinesActividadO" class="xl:col-span-2">
@@ -221,10 +272,12 @@ const CT_Num_to_Tiempo = [
                         <InputError class="mt-2" :message="form.errors['centrotrabajo_id']" />
                     </div>
                     <!-- tiempo estimado -->
-                    <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && data.tipoReporte.value != 2">
+
+                    <div v-if="form.ordentrabajo_id && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
-                            :value="data.nombresOT[form.ordentrabajo_ids.value][CT_Num_to_Tiempo[form['centrotrabajo_id']['value']]]" />
+                            v-model="form.TiempoEstimado"
+                        />
                     </div>
 
                     <!-- eleccion -->

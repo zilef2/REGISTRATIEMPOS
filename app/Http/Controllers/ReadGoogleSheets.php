@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Revolution\Google\Sheets\Sheets;
 
-class ReadGoogleSheets extends Controller
-{
-
+class ReadGoogleSheets extends Controller {
 
     public function NecesitaActualizaF() {
         if(GuardarGoogleSheetsComercial::exists()){
@@ -25,12 +23,17 @@ class ReadGoogleSheets extends Controller
             }else{
                 $difHoras = Carbon::now()->diffInHours($ultimaGuardada);
                 $NecesitaActualizar = $difHoras > 4; //todo: hacer ese 4 un parametro
+
+//                 dd(
+//                     $ultimaGuardada,
+// $difHoras,
+// $NecesitaActualizar
+                // );
                 return $NecesitaActualizar;
             }
         }else{
             return true;
         }
-
     }
 
     public function vamoABusca() {
@@ -39,32 +42,14 @@ class ReadGoogleSheets extends Controller
         // $range = 'AI1:AT30000';
         $spreadsheet = $service->spreadsheets->get($spreadsheetId);
         $sheet = $spreadsheet->getSheets()[0];
-        $range = 'AI1:AT' . $sheet->getProperties()->getGridProperties()->rowCount;//4688
+        $lastRow = $sheet->getProperties()->getGridProperties()->rowCount;//4688  : ¿? 1249
+        $range = 'AI1:AT' . $lastRow;
         $values = $service->spreadsheet($spreadsheetId)->sheet($sheetName)->range($range)->all();
 
         $cabeza =  $values[0];
         unset($values[0]);
         return [$cabeza,$values];
     }
-
-    public function vamoAlUltimo($Grupo) {
-        if(GuardarGoogleSheetsComercial::exists()) {
-
-            $values = GuardarGoogleSheetsComercial::Where('Grupo', $Grupo)->get();
-            if(!isset($values[0])){
-                $Grupo = date('Y-m-d',strtotime("-1 days"));
-                $values = GuardarGoogleSheetsComercial::Where('Grupo', $Grupo)->get();
-            }
-            
-            $cabeza =  $values[0];
-            unset($values[0]);
-            return [$cabeza,$values];
-        }
-        return null;
-    }
-
-
-
     public function validarItemsNuevos($valuesGoogle,$Grupo) {
 
         $queryUltimo = GuardarGoogleSheetsComercial::latest();
@@ -73,21 +58,25 @@ class ReadGoogleSheets extends Controller
         $ultimoGrupo = $queryUltimo->first()->Grupo;
         $ValuesUltimoGrupo = GuardarGoogleSheetsComercial::Where('Grupo',$ultimoGrupo)->pluck('Item')->count();
         // VALIDACION 1 : NUMERO DE ITEMS
-        if($ValuesUltimoGrupo == count($valuesGoogle)) return 0;
 
+
+        if($ValuesUltimoGrupo == count($valuesGoogle)) return 1; //todo: debe actualizar en caso que sea la misma cantidad
         //todo: validar con carlos, si es posible solo recuperar las que no tengan el 100%
+
+
+        return 1;
     }
 
 
-    public function vamoAGuardaComercial($valuesGoogle,$Grupo) {
+    public function vamoAGuardaComercial($cabezaYvalues,$Grupo) {
         // $numberPermissions = Myhelp::getPermissionToNumber(auth()->user()->roles->pluck('name')[0]);
 
         $HayTiemposEstimados = 0;
         $contador_Item_vue = 0; //! carefull with changing a counting 
-        $hayQueGuardar = $this->validarItemsNuevos($valuesGoogle,$Grupo);
+        $hayQueGuardar = $this->validarItemsNuevos($cabezaYvalues,$Grupo);
         if($hayQueGuardar){
 
-            foreach ($valuesGoogle as $key => $value) {
+            foreach ($cabezaYvalues[1] as $key => $value) {
                 if(
                     (isset($value[3])  && strcasecmp($value[3], '') !== 0) ||
                     (isset($value[4])  && strcasecmp($value[4], '') !== 0) ||
@@ -125,22 +114,9 @@ class ReadGoogleSheets extends Controller
                 ]);
                 $contador_Item_vue++;
             }
-        }
-
-        return GuardarGoogleSheetsComercial::Where('Grupo',$Grupo)->get();
-    }
-
-
-    public function GetValuesFromSheets() {
-        $Grupo = date('Y-m-d');
-        $NecesitaActualizar = $this->NecesitaActualizaF();
-        if($NecesitaActualizar){
-            $cabezaYvalues = $this->vamoABusca();
 
             $valueCabeza = $cabezaYvalues[0];
-            
-            $cabezaYvalues[1] = $this->vamoAGuardaComercial($cabezaYvalues[1],$Grupo);
-            $cabezaYvalues[0] = GuardarGoogleSheetsComercial::create([
+            $Eloquentvalues[0] = GuardarGoogleSheetsComercial::create([
                 'HayTiemposEstimados' => 2, //0 no hay tiempos | 1 hay almenos 0,0 | 2 es la cabeza
                 'Item_vue' => -1,
                 'Grupo' => $Grupo,
@@ -158,14 +134,45 @@ class ReadGoogleSheets extends Controller
                 'Tiempo_estimado_cableado' => $valueCabeza[10] ?? '',
                 'Tiempo_estimado_cobre' => $valueCabeza[11] ?? '',
             ]);
-        }else{
-            $cabezaYvalues = $this->vamoAlUltimo($Grupo);
+            $Eloquentvalues[1] = GuardarGoogleSheetsComercial::Where('Grupo',$Grupo)->get();
 
         }
-        // dd(
-        //     $cabezaYvalues[0],
-        //     $cabezaYvalues[1],
-        // );
+        return $Eloquentvalues;
+    }
+
+
+    public function Ultimo($Grupo) {
+        if(GuardarGoogleSheetsComercial::exists()) {
+
+            $values = GuardarGoogleSheetsComercial::Where('Grupo', $Grupo)->get();
+            $BuscarXDias = 1;
+            while(!isset($values[0]) || $values->count() === 1 || $BuscarXDias > 5){
+                $Grupo = date('Y-m-d',strtotime("-$BuscarXDias days"));
+                $values = GuardarGoogleSheetsComercial::Where('Grupo', $Grupo)->get();
+
+                $BuscarXDias++;
+            }
+            
+            $cabeza =  $values[0];
+            unset($values[0]);
+            return [$cabeza,$values];
+        }
+        return null;
+    }
+
+
+    // # main function
+    public function GetValuesFromSheets() {
+        $Grupo = date('Y-m-d');
+        $NecesitaActualizar = $this->NecesitaActualizaF();
+        if($NecesitaActualizar){
+            $cabezaYvalues = $this->vamoABusca();
+
+            $cabezaYvalues = $this->vamoAGuardaComercial($cabezaYvalues,$Grupo);
+            
+        }else{
+            $cabezaYvalues = $this->Ultimo($Grupo);
+        }
         return $cabezaYvalues;
     }
     

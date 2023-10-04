@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
         $admin = User::create([
             'name'              => "$nombreAdmin $App",
             'email'             => "$nombreAdmin$App"."@gmail.com", //Admindemco@gmail.com
-            'password'          => bcrypt($genPa.'0.+-*'.$genPa),  //123_demco0.+-*123_demco
+            'password'          => bcrypt($genPa.'0.+-*'.$genPa),
             'email_verified_at' => date('Y-m-d H:i'),
             'sexo' => $sexos[rand(0, 1)],
             'identificacion' => '11232411',
@@ -58,7 +58,6 @@ class UserSeeder extends Seeder
 
         $nombresGenericos = [
             'jose' => '1152888999',
-            'Emerson' => '333444667',
         ];
 
         $genero = 'Masculino';
@@ -96,6 +95,8 @@ class UserSeeder extends Seeder
     // 'CABLEADO', //7
     // 'INGENIERIA MECANICA', //8
     // 'INGENIERIA ELECTRICA' //9
+
+        $tempuser = User::create(['sexo' => 'Masculino','password'=>bcrypt('Emerson Giraldo+*'),  'area' => 'INGENIERIA', 'cargo'=> 'Pruebas de sofware','name' => 'Emerson Giraldo', 'identificacion'=> '1235665', 'email'=> 'emerson.giraldo@consult-ing.com.co', 'celular' => '3002738152', 'centrotrabajo_id' => 1 ]); $tempuser->assignRole('admin');
 
         $tempuser = User::create(['sexo' => 'Masculino','password'=>bcrypt('1066749869'.'*'),  'area' => 'INGENIERIA', 'cargo'=> 'DISEÑADOR MECANICO A','name' => 'JOSE LUIS SUAREZ PALENCIA', 'identificacion'=> '1066749869', 'email'=> 'joseluissp18@gmail.com', 'celular' => '3506299070', 'centrotrabajo_id' => 8 ]); $tempuser->assignRole('supervisor');
         $tempuser = User::create(['sexo' => 'Masculino','password'=>bcrypt('1117534477'.'*'),  'area' => 'INGENIERIA', 'cargo'=> 'AUXILIAR DE INGENIERIA','name' => 'LUIS MIGUEL CARDENAS ORTIZ', 'identificacion'=> '1117534477', 'email'=> 'luismcartiz@gmail.com', 'celular' => '3013489695', 'centrotrabajo_id' => 8 ]); $tempuser->assignRole('supervisor');

@@ -49,7 +49,8 @@ const data = reactive({
     ordentrabajo_ids: [],
     mensajeFalta: '',
     BanderaTipo:true,
-    mensajeTiemposAuto: ''
+    mensajeTiemposAuto: '',
+    soloUnaVez:true
 })
 
 
@@ -66,10 +67,6 @@ const justNames = [
     'operario_id',
     'ordentrabajo_id',
     'reproceso_id',
-
-    // 'material_id',
-    // 'pieza_id',
-    // 'cantidad',
 
     'ordentrabajo_ids',
     'otitem',
@@ -92,57 +89,43 @@ onMounted(() => {
 
 });
 
+//aquiiii : como seleccionar el tiempo moviendolo dese el select
 const tiemposEstimados = [
-   
-    "Tiempo_estimado_Ing_elec",
-    "Tiempo_estimado_Ing_mec",
-    "Tiempo_estimado_cableado",
-    "Tiempo_estimado_cobre",
     "Tiempo_estimado_corte",
-    "Tiempo_estimado_doblez",
-    "Tiempo_estimado_ensamble",
-    "Tiempo_estimado_pulida",
+    "Tiempo_estimado_doblez", //2
     "Tiempo_estimado_soldadura",
+    "Tiempo_estimado_pulida",
+    "Tiempo_estimado_ensamble", //5
+    "Tiempo_estimado_cobre",
+    "Tiempo_estimado_cableado",//7
+    "Tiempo_estimado_Ing_mec",
+    "Tiempo_estimado_Ing_elec", //9
 ];
 
-let soloUnaVez = true
 function GetTiempoNotNull(){
     let contador = 0
-    let formOriginal = form.centrotrabajo_id
     form.centrotrabajo_id = data.centrotrabajo_id[1]
+    
 
-    // console.log("🧈 debu tiemposEstimados2:", data.nombresOT[form.ordentrabajo_ids.value]['Tiempo_estimado_cableado']);
-    // console.log("🧈 debu tiemposEstimados3:", data.nombresOT[form.ordentrabajo_ids.value]);
 
-    while( data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]] === "" && contador < 10){
+    while( data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]] === "" && contador <= tiemposEstimados.length){
         contador++
     }
     form.TiempoEstimado = data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]];
     
-    if(contador !== 9){
-        let conti
-        if(contador == 4 ) conti = 1;
-        if(contador == 5 ) conti = 2;
-        if(contador == 8 ) conti = 3;
-        if(contador == 7 ) conti = 4;
-        if(contador == 6 ) conti = 5;
-        if(contador == 3 ) conti = 6;
-        if(contador == 2 ) conti = 7;
-        if(contador == 0 ) conti = 8;
-        if(contador == 1 ) conti = 9;
-
-        //buscamos en el select orden de trabajo
-        form.centrotrabajo_id = data.centrotrabajo_id[conti];
-
+    if(contador !== tiemposEstimados.length){
+        form.centrotrabajo_id = data.centrotrabajo_id[contador+1];
+        data.mensajeTiemposAuto = ''
     }else{
         data.mensajeTiemposAuto = 'Tiempos vacios!'
     }
-    soloUnaVez = false
+    
+    data.soloUnaVez = false
 }
 
 watchEffect(() => {
+    console.log("🧈🧈 ", form.centrotrabajo_id);
     if (props.show) {
-
         if(data.BanderaTipo){
 
             form.tipoReporte = { title: 'Actividad', value: 0 };
@@ -150,28 +133,33 @@ watchEffect(() => {
         }
 
         form.errors = {}
-        let currentDate = new Date();
         if(form.fecha === null || form.fecha === ''){
+            let currentDate = new Date();
             form.fecha = (TransformTdate(currentDate,'')).substring(0,10);
             form.hora_inicial = formatTime()
+
+            data.ordentrabajo_ids = data.nombresOT.map((val,inde) => ({
+                title: val.Item?.replace(/_/g, " "),
+                value: inde,
+            }))
         }
 
-        data.ordentrabajo_ids = data.nombresOT.map((val,inde) => ({
-            title: val.Item?.replace(/_/g, " "),
-            value: inde,
-        }))
-
         //valores implicitos
+        // console.clear();
         if(form.ordentrabajo_ids && form.ordentrabajo_ids.value != null){
             form.nombreTablero = data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]
             form.OTItem = data.nombresOT[form.ordentrabajo_ids.value]['Item']
             
-            if(soloUnaVez) GetTiempoNotNull()
+            console.log("🧈 debu data.nombresOT[form.ordentrabajo_ids.value]:", data.nombresOT[form.ordentrabajo_ids.value]);
+            if(data.soloUnaVez) {
+                GetTiempoNotNull();
+            }else{
+                let tempCentro = form.centrotrabajo_id.value - 1
+                form.TiempoEstimado = data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[tempCentro]];
+            }
         }
-
     }else{
         data.BanderaTipo = true
-
     }
 })
 
@@ -232,12 +220,6 @@ let ValidarCreateReporte = () =>{
 
 const create = () => {
 
-    form.nombreTablero
-    // console.log("🧈 debu form.nombreTablero:", form.nombreTablero);
-    form.OTItem
-    console.log("🧈 debu form.OTItem:", form.OTItem);
-    form.TiempoEstimado
-    // console.log("🧈 debu form.TiempoEstimado:", form.TiempoEstimado);
     form.ordentrabajo_id = form.ordentrabajo_ids
 
     data.mensajeFalta = ValidarCreateReporte();
@@ -263,10 +245,9 @@ watch(() => form.tipoReporte, (newX) => {
     form.ordentrabajo_id = null
     form.reproceso_id = null
     form.ordentrabajo_ids = null
-
 })
 watch(() => form.ordentrabajo_ids, (newX) => { 
-    soloUnaVez = true
+    data.soloUnaVez = true
 })
 
 //very usefull
