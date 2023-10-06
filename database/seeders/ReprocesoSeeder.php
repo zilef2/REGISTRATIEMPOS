@@ -13,25 +13,24 @@ class ReprocesoSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
-    {
+    public function run() {
         $actividades_reproceso = [
             [
                 // # actividades en reprocesos
-                'REPROCESO POR INGENERIA MECANICA',
-                'REPROCESO POR INGENERIA ELECTRICA',
-                'REPROCESO CHAPISTERIA',
+                'REPROCESO POR INGENIERÍA MECÁNICA',
+                'REPROCESO POR INGENIERÍA ELÉCTRICA',
+                'REPROCESO CHAPISTERÍA',
                 'REPROCESO ENSAMBLE',
                 'REPROCESO COBRE',
                 'REPROCESO CABLEADO',
                 'REPROCESO COMERCIAL',
-                'REPROCESO ALMACEN',
+                'REPROCESO ALMACÉN',
             ],[
-                'PLANOS MECANICOS',
-                'PLANOS ELECTRICOS',
+                'PLANOS MECÁNICOS',
+                'PLANOS ELÉCTRICOS',
                 'CAMBIOS DEL CLIENTE',
                 'CAMBIOS DEL COMERCIAL',
-                'CAMBIOS DE PRODUCCION',
+                'CAMBIOS DE PRODUCCIÓN',
             ]
         ];
         $IngMeca = Centrotrabajo::Where('nombre','INGENIERIA MECANICA')->first()->id;

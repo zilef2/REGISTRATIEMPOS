@@ -35,6 +35,7 @@ return [
         //parametros
         'parametros' => 'parametros',
         //reporte
+        'delete_confirm_quantity' => 'Por seguridad e integridad, no esta permitido borrar tantos reportes al tiempo',
         'finLaboral' => 'Finalización jornada laboral',
         'cantidad (pieza)' => 'Cantidad (pieza)',
         'TiempoEstimado' => 'Tiempo Estimado',

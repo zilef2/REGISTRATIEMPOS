@@ -24,11 +24,6 @@ class ReadGoogleSheets extends Controller {
                 $difHoras = Carbon::now()->diffInHours($ultimaGuardada);
                 $NecesitaActualizar = $difHoras > 4; //todo: hacer ese 4 un parametro
 
-//                 dd(
-//                     $ultimaGuardada,
-// $difHoras,
-// $NecesitaActualizar
-                // );
                 return $NecesitaActualizar;
             }
         }else{
@@ -76,47 +71,8 @@ class ReadGoogleSheets extends Controller {
         $hayQueGuardar = $this->validarItemsNuevos($cabezaYvalues,$Grupo);
         if($hayQueGuardar){
 
-            foreach ($cabezaYvalues[1] as $key => $value) {
-                if(
-                    (isset($value[3])  && strcasecmp($value[3], '') !== 0) ||
-                    (isset($value[4])  && strcasecmp($value[4], '') !== 0) ||
-                    (isset($value[5])  && strcasecmp($value[5], '') !== 0) ||
-                    (isset($value[6])  && strcasecmp($value[6], '') !== 0) ||
-                    (isset($value[7])  && strcasecmp($value[7], '') !== 0) ||
-                    (isset($value[8])  && strcasecmp($value[8], '') !== 0) ||
-                    (isset($value[9])  && strcasecmp($value[9], '') !== 0) ||
-                    (isset($value[10]) && strcasecmp($value[10], '') !== 0) ||
-                    (isset($value[11]) && strcasecmp($value[11], '') !== 0)
-                ){
-                    $HayTiemposEstimados = 1;
-                }
-
-                //todo: solo cambiar los valores diff
-                // if('OT+Item' != $value[1])
-                GuardarGoogleSheetsComercial::create([
-                    'Item_vue' => $contador_Item_vue,
-
-                    'HayTiemposEstimados' => $HayTiemposEstimados,
-                    'Grupo' => $Grupo,
-                    'user_id' => auth()->user()->id,
-                    'Nombre_tablero' => $value[0] ?? '',
-                    'Item' => $value[1] ?? '',
-                    'avance' => $value[2] ?? '',
-                    'Tiempo_estimado_Ing_mec' => $value[3] ?? '',
-                    'Tiempo_estimado_Ing_elec' => $value[4] ?? '',
-                    'Tiempo_estimado_corte' => $value[5] ?? '',
-                    'Tiempo_estimado_doblez' => $value[6] ?? '',
-                    'Tiempo_estimado_soldadura' => $value[7] ?? '',
-                    'Tiempo_estimado_pulida' => $value[8] ?? '',
-                    'Tiempo_estimado_ensamble' => $value[9] ?? '',
-                    'Tiempo_estimado_cableado' => $value[10] ?? '',
-                    'Tiempo_estimado_cobre' => $value[11] ?? '',
-                ]);
-                $contador_Item_vue++;
-            }
-
             $valueCabeza = $cabezaYvalues[0];
-            $Eloquentvalues[0] = GuardarGoogleSheetsComercial::create([
+            $Eloquentvalues[0] = GuardarGoogleSheetsComercial::updateOrCreate([
                 'HayTiemposEstimados' => 2, //0 no hay tiempos | 1 hay almenos 0,0 | 2 es la cabeza
                 'Item_vue' => -1,
                 'Grupo' => $Grupo,
@@ -134,6 +90,51 @@ class ReadGoogleSheets extends Controller {
                 'Tiempo_estimado_cableado' => $valueCabeza[10] ?? '',
                 'Tiempo_estimado_cobre' => $valueCabeza[11] ?? '',
             ]);
+
+            foreach ($cabezaYvalues[1] as $key => $value) {
+                if(
+                    (isset($value[3])  && strcasecmp($value[3], '') !== 0) ||
+                    (isset($value[4])  && strcasecmp($value[4], '') !== 0) ||
+                    (isset($value[5])  && strcasecmp($value[5], '') !== 0) ||
+                    (isset($value[6])  && strcasecmp($value[6], '') !== 0) ||
+                    (isset($value[7])  && strcasecmp($value[7], '') !== 0) ||
+                    (isset($value[8])  && strcasecmp($value[8], '') !== 0) ||
+                    (isset($value[9])  && strcasecmp($value[9], '') !== 0) ||
+                    (isset($value[10]) && strcasecmp($value[10], '') !== 0) ||
+                    (isset($value[11]) && strcasecmp($value[11], '') !== 0)
+                ){
+                    $HayTiemposEstimados = 1;
+                }
+
+                //todo: solo cambiar los valores diff
+                // if('OT+Item' != $value[1])
+                GuardarGoogleSheetsComercial::updateOrCreate(
+                    [
+                        'Nombre_tablero' => $value[0] ?? '',
+                        'Item' => $value[1] ?? '',
+                    ],
+                    [
+                        'Item_vue' => $contador_Item_vue,
+                        'HayTiemposEstimados' => $HayTiemposEstimados,
+                        'Grupo' => $Grupo,
+                        'user_id' => auth()->user()->id,
+                        'Nombre_tablero' => $value[0] ?? '',
+                        'Item' => $value[1] ?? '',
+                        'avance' => $value[2] ?? '',
+                        'Tiempo_estimado_Ing_mec' => $value[3] ?? '',
+                        'Tiempo_estimado_Ing_elec' => $value[4] ?? '',
+                        'Tiempo_estimado_corte' => $value[5] ?? '',
+                        'Tiempo_estimado_doblez' => $value[6] ?? '',
+                        'Tiempo_estimado_soldadura' => $value[7] ?? '',
+                        'Tiempo_estimado_pulida' => $value[8] ?? '',
+                        'Tiempo_estimado_ensamble' => $value[9] ?? '',
+                        'Tiempo_estimado_cableado' => $value[10] ?? '',
+                        'Tiempo_estimado_cobre' => $value[11] ?? '',
+                    ]);
+                $contador_Item_vue++;
+            }
+
+            
             $Eloquentvalues[1] = GuardarGoogleSheetsComercial::Where('Grupo',$Grupo)->get();
 
         }
@@ -165,6 +166,7 @@ class ReadGoogleSheets extends Controller {
     public function GetValuesFromSheets() {
         $Grupo = date('Y-m-d');
         $NecesitaActualizar = $this->NecesitaActualizaF();
+        // $NecesitaActualizar = true;
         if($NecesitaActualizar){
             $cabezaYvalues = $this->vamoABusca();
 

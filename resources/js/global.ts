@@ -32,6 +32,7 @@ import { toInteger } from "lodash";
 
 // this Project
     export function LookForValueInArray(arrayOfObjects:Object[] , searchValue): String {
+        if(arrayOfObjects === null) return null
         //ex: { title: '123', value: 1 },
         let foundObject = '';
         if(typeof searchValue == 'string'){

@@ -9,6 +9,7 @@ use App\helpers\HelpExcel;
 use App\Http\Requests\ReporteRequest;
 use App\Http\Requests\ReporteUpdateRequest;
 use App\Imports\PersonalImport;
+use App\Models\GuardarGoogleSheetsComercial;
 use App\Models\Reporte;
 use App\Models\User;
 use Carbon\Carbon;
@@ -22,6 +23,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
 {
+
+    // public $valuesGoogleCabeza, $valuesGoogleBody;
+
+
     public function MapearClasePP(&$reportes, $numberPermissions, $valuesGoogleBody) {
         $reportes = $reportes->get()->map(function ($reporte) use ($numberPermissions,$valuesGoogleBody) {
 
@@ -117,7 +122,7 @@ class ReportesController extends Controller
         $this->MapearClasePP($reportes, $numberPermissions,$valuesGoogleBody);
 
         $Trabajadores = User::WhereHas('roles', function ($query) {
-            return $query->whereIn('name', ['supervisor']);
+            return $query->whereIn('name', ['supervisor','trabajador']);
         })->get();
         $Trabajadores = Myhelp::NEW_turnInSelectID($Trabajadores, ' operario', 'name');
 
@@ -195,6 +200,11 @@ class ReportesController extends Controller
     }
 
     public function store(ReporteRequest $request) {
+
+        if($request->ordentrabajo_id)
+            $ordenID = GuardarGoogleSheetsComercial::Where('Item',$request->ordentrabajo_id['title'])->first()->id;
+        else $ordenID = null;
+
         $user = Auth::User();
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'STORE:reportes'));
         if ($numberPermissions > 1) {
@@ -215,7 +225,7 @@ class ReportesController extends Controller
                 'hora_inicial' => $request->hora_inicial,
                 'hora_final' => null,
                 // 'ordentrabajo_id' => $request->ordentrabajo_id['title'] ?? null,
-                'ordentrabajo_id' => $request->ordentrabajo_id['value'] ?? null,
+                'ordentrabajo_id' => $ordenID,
                 'centrotrabajo_id' => $request->centrotrabajo_id['value'] ?? null,
 
                 'operario_id' => $userID,
@@ -229,7 +239,7 @@ class ReportesController extends Controller
             ]);
 
             DB::commit();
-            Myhelp::EscribirEnLog($this, 'STORE:reportes', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
+            Myhelp::EscribirEnLog($this, 'STORE:reportes', 'usuario id:' . $user->id . ' | ' . $user->name . ' ha guardado el reporte '.$reporte->id, false);
 
             return back()->with('success', __('app.label.created_successfully', ['name' => 'Reporte ']));
         } catch (\Throwable $th) {
@@ -243,39 +253,42 @@ class ReportesController extends Controller
     public function show($id) { } public function edit($id) { }
 
     public function update(ReporteUpdateRequest $request, $id) {
-        //todo: validate -> (for update) (for TerminarReporte)
         $user = Auth::User();
         $permissions = Myhelp::EscribirEnLog($this, ' UPDATE:reportes');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
-
         DB::beginTransaction();
         try {
             $reporte = Reporte::findOrFail($id);
-
+            
             if ($request->hora_final == null) {
+                $orden = null;
+
+                if(isset($request->tipoReporte['value']) && $request->tipoReporte['value'] != 2)
+                    $orden = GuardarGoogleSheetsComercial::Where('Item',$request->ordentrabajo_id['title'])->first();
 
                 if ($numberPermissions > 8) {
                     $actualizar_reporte['codigo'] = $request->codigo == '' ? null : $request->codigo;
                     $actualizar_reporte['fecha'] = $request->fecha == '' ? null : $request->fecha;
                     $actualizar_reporte['hora_inicial'] = $request->hora_inicial == '' ? null : $request->hora_inicial;
                 }
-                $request->actividad_id == '' ? null : $actualizar_reporte['actividad_id'] = $request->actividad_id;
-                $request->centrotrabajo_id == '' ? null : $actualizar_reporte['centrotrabajo_id'] = $request->centrotrabajo_id;
-                $request->ordentrabajo_id == '' ? null : $actualizar_reporte['ordentrabajo_id'] = $request->ordentrabajo_id;
-                $request->disponibilidad_id == '' ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
-                $request->reproceso_id == '' ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
+                $request->ordentrabajo_id == null ? null : $actualizar_reporte['ordentrabajo_id'] = $orden->id;
+
+                $request->centrotrabajo_id == null ? null : $actualizar_reporte['centrotrabajo_id'] = $request->centrotrabajo_id;
+                $request->actividad_id == null ? null : $actualizar_reporte['actividad_id'] = $request->actividad_id;
+                $request->disponibilidad_id == null ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
+                $request->reproceso_id == null ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
 
                 //tipoF no va 
-                $request->nombreTablero == '' ? null : $actualizar_reporte['nombreTablero'] = $request->nombreTablero;
-                $request->OTItem == '' ? null : $actualizar_reporte['OTItem'] = $request->OTItem;
-                $request->TiempoEstimado == '' ? null : $actualizar_reporte['TiempoEstimado'] = $request->TiempoEstimado;
+                $actualizar_reporte['nombreTablero'] = $orden->Nombre_tablero ?? null;
+                $actualizar_reporte['OTItem'] = $orden->Item ?? null;
+                $request->TiempoEstimado == null ? null : $actualizar_reporte['TiempoEstimado'] = $request->TiempoEstimado;
                 
-            }else{
-                $DigitosHoraFinal = intval(substr($request->hora_final,0,2));
+            }else{ //se esta reportando solo la hora fin
+                $DigitosHoraFinal = intval(substr($request->hora_final,0,2)); //deberia retornar 16
                 // if($DigitosHoraFinal > 15){ //toask: deberia negar que se reporte antes de 4pm?
                 $actualizar_reporte['hora_final'] = $request->hora_final;
                 
-                $reporte->update($actualizar_reporte);
+                // $reporte->update($actualizar_reporte);
                     
                 // }else{
                 //     return back()->with('error', 'No son las 4pm');
@@ -288,8 +301,8 @@ class ReportesController extends Controller
             return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
-            Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id . ' |reporteid: ' . $reporte->id . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $reporte->id]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'UPDATE:reportes', 'usuario id:' . $user->id ?? ' nottuser ' . ' |reporteid: ' . ($reporte->id ?? 'nottreporte') . '  fallo en el actualizado', false);
+            return back()->with('error', __('app.label.updated_error', ['name' => ($reporte->id ?? 'no id')]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -307,8 +320,7 @@ class ReportesController extends Controller
         }
     }
 
-    public function destroyBulk(Request $request)
-    {
+    public function destroyBulk(Request $request) {
         try {
             $reporte = Reporte::whereIn('id', $request->id);
             $reporte->delete();
@@ -319,8 +331,7 @@ class ReportesController extends Controller
     }
     //FIN : STORE - UPDATE - DELETE
 
-    public function subirexceles()
-    { //just  a view
+    public function subirexceles() { //just  a view
         $permissions = Myhelp::EscribirEnLog($this, ' reporte');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
 
@@ -332,10 +343,7 @@ class ReportesController extends Controller
         ]);
     }
 
-
-    // Duplicate entry '1152194566' for key 'reportes_identificacion_unique'
-    private function MensajeWar()
-    {
+    private function MensajeWar() {
         $bandera = false;
         $contares = [
             'contar1',

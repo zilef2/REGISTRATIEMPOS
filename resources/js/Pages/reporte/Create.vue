@@ -123,7 +123,7 @@ function GetTiempoNotNull(){
 }
 
 watchEffect(() => {
-    console.log("🧈🧈 ", form.centrotrabajo_id);
+    console.log("✅", form.centrotrabajo_id);
     if (props.show) {
         if(data.BanderaTipo){
 
@@ -140,7 +140,12 @@ watchEffect(() => {
             data.ordentrabajo_ids = data.nombresOT.map((val,inde) => ({
                 title: val.Item?.replace(/_/g, " "),
                 value: inde,
+                // value2: val.id,
             }))
+            console.log("🧈 debu data.nombresOT:", data.nombresOT);
+            console.log("🧈 debu  data.ordentrabajo_ids:",  data.ordentrabajo_ids);
+
+            // console.log("form.ordentrabajo_ids:",  form.ordentrabajo_ids);
         }
 
         //valores implicitos
@@ -149,7 +154,7 @@ watchEffect(() => {
             form.nombreTablero = data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]
             form.OTItem = data.nombresOT[form.ordentrabajo_ids.value]['Item']
             
-            console.log("🧈 debu data.nombresOT[form.ordentrabajo_ids.value]:", data.nombresOT[form.ordentrabajo_ids.value]);
+            // console.log("🧈✅ debu data.nombresOT[form.ordentrabajo_ids.value]:", data.ordentrabajo_ids[form.ordentrabajo_ids.value]);
             if(data.soloUnaVez) {
                 GetTiempoNotNull();
             }else{
@@ -251,14 +256,14 @@ watch(() => form.ordentrabajo_ids, (newX) => {
 
 //very usefull
 const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
-const arrayMostrarDelCodigo = ['Nombre Tablero','OT+Item','% avance','Tiempo estimado'];
+const arrayMostrarDelCodigo = ['Nombre Tablero','% avance','OT+Item','Tiempo estimado'];
 const Cabezera = ['Nombre_tablero','avance'];
 
 </script>
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'3xl'">
             <form class="px-6 my-8" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}
@@ -358,7 +363,7 @@ const Cabezera = ['Nombre_tablero','avance'];
                 </div>
 
 
-                <div class=" mb-8 mt-[230px] flex justify-end">
+                <div class=" mb-8 mt-[260px] flex justify-end">
                     <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100"> 
                         {{ data.mensajeFalta }} 
                     </h2>

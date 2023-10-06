@@ -18,6 +18,7 @@ import Create from '@/Pages/reporte/Create.vue';
 import Edit from '@/Pages/reporte/Edit.vue';
 import TerminarReporte from '@/Pages/reporte/TerminarReporte.vue';
 import Delete from '@/Pages/reporte/Delete.vue';
+import DeleteBulk from '@/Pages/reporte/DeleteBulk.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -56,9 +57,10 @@ const data = reactive({
     editOpen: false,
     TerminarOpen: false,
     deleteOpen: false,
-    // deleteBulkOpen: false,
     dataSet: usePage().props.app.perpage,
-    totalEmpleados: 0
+    totalEmpleados: 0,
+
+    deleteBulkOpen: false,
 })
 
 const order = (field) => {
@@ -163,17 +165,21 @@ const titulos = [
                     <Delete v-if="can(['delete reporte'])" :numberPermissions="props.numberPermissions"
                         :show="data.deleteOpen" @close="data.deleteOpen = false" :generica="data.generico"
                         :title="props.title" />
+
+                    <DeleteBulk :show="data.deleteBulkOpen"
+                        @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
+                        :selectedId="data.selectedId" :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
-                        <!-- <DangerButton @click="data.deleteBulkOpen = true"
+                        <DangerButton @click="data.deleteBulkOpen = true"
                             v-show="data.selectedId.length != 0 && can(['delete reporte'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
-                        </DangerButton> -->
+                        </DangerButton>
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
                         class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="codigo o fecha " />
@@ -182,7 +188,7 @@ const titulos = [
                     <table v-if="props.total > 0" class="w-full">
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
                             <tr class="dark:bg-gray-900/50 text-left">
-                                <th class="px-2 py-4 text-center">
+                                <th v-if="props.numberPermissions > 1" class="px-2 py-4 text-center">
                                     <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                                 </th>
                                 <th class="px-2 py-4">Accion</th>
@@ -207,8 +213,8 @@ const titulos = [
                         <tbody>
                             <tr v-for="(clasegenerica, indexu) in props.fromController.data" :key="indexu"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    <input
+                                <td v-if="props.numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                                    <input 
                                         class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
                                         type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId" />
@@ -221,7 +227,7 @@ const titulos = [
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <InfoButton v-if="!clasegenerica.hora_final" v-show="can(['update reporte'])" type="button"
+                                            <InfoButton v-if="!clasegenerica.hora_final" v-show="can(['create reporte'])" type="button"
                                                 @click="(data.TerminarOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <CheckCircleIcon class="w-4 h-4" />
@@ -250,8 +256,8 @@ const titulos = [
                                 </td>
                             </tr>
 
-                            <!-- resultados -->
-                            <tr>
+                            <!-- totales -->
+                            <!-- <tr>
                                 <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> </td>
@@ -267,7 +273,7 @@ const titulos = [
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     {{ CalcularAvg(props.fromController.data, 'TiempoEstimado') }}
                                 </td>
-                            </tr>
+                            </tr> -->
                         </tbody>
                     </table>
                     <h2 v-else class="text-center text-xl my-8">Sin Registros</h2>

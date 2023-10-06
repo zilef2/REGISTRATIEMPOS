@@ -68,6 +68,9 @@ Route::middleware('auth', 'verified')->group(function () {
     
     //# SIDEBARMENU
     Route::resource('/reporte', ReportesController::class);
+    Route::post('/reporte/destroy-bulk', [ReportesController::class, 'destroyBulk'])->name('reporte.destroy-bulk');
+
+
     Route::resource('/ordentrabajo', OrdentrabajosController::class);
     Route::resource('/actividad', ActividadsController::class);
 
