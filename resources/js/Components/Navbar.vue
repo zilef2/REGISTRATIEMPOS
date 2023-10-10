@@ -8,7 +8,7 @@ import SwitchDarkModeNavbar from '@/Components/SwitchDarkModeNavbar.vue'
 import SwitchLangNavbar from '@/Components/SwitchLangNavbar.vue'
 
 const emit = defineEmits(["open"])
-
+const version = '0.9.1'
 </script>
 
 <template>
@@ -53,6 +53,9 @@ const emit = defineEmits(["open"])
                                                 <CheckBadgeIcon class="ml-[2px] w-4 h-4 text-white dark:text-white lg:text-primary"
                                                     v-show="$page.props.auth.user.email_verified_at" />
                                             </span>
+                                            <span v-show="$page.props.auth.user.email_verified_at" class="flex items-center justify-start text-sm truncate">
+                                                {{ version }}
+                                            </span>
                                             <ChevronDownIcon class="ml-2 h-5 w-5 fill-current" />
                                         </button>
                                     </span>
@@ -62,10 +65,11 @@ const emit = defineEmits(["open"])
                                     <div
                                         class="py-3 px-4 border-b border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">
                                         <span class="flex items-center justify-start text-sm truncate">
-                                            {{ $page.props.auth.user.name }}
+                                            {{ $page.props.auth.user.name }} 
                                             <CheckBadgeIcon class="ml-[2px] w-4 h-4 dark:text-white text-primary"
                                                 v-show="$page.props.auth.user.email_verified_at" />
                                         </span>
+                                       
                                         <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
                                             {{ $page.props.auth.user.email }}
                                         </span>

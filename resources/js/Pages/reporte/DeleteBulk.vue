@@ -17,8 +17,10 @@ const form = useForm({
     id: []
 })
 
+const MaximoBorrado = 15
+
 const destory = () => {
-    if(props.selectedId?.length <= 5)
+    if(props.selectedId?.length <= MaximoBorrado)
     form.post(route('reporte.destroy-bulk'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -51,13 +53,13 @@ watchEffect(() => {
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     {{ lang().label.delete_confirm }} {{ props.selectedId?.length }} {{ props.title }}s?
                 </p>
-                <p v-if="props.selectedId?.length > 5" class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <p v-if="props.selectedId?.length > MaximoBorrado" class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     {{ lang().label.delete_confirm_quantity }} 
                 </p>
                 <div class="mt-6 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
-                    <DangerButton v-if="props.selectedId?.length <= 5" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    <DangerButton v-if="props.selectedId?.length <= MaximoBorrado" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="destory">
                         {{ form.processing ? 'Delete...' : 'Delete' }}
                     </DangerButton>

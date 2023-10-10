@@ -18,6 +18,7 @@ import { ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/soli
 import Create from '@/Pages/actividad/Create.vue';
 import Edit from '@/Pages/actividad/Edit.vue';
 import Delete from '@/Pages/actividad/Delete.vue';
+// import Delete from '@/Pages/actividad/DeleteBulk.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -70,6 +71,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
 }, 150))
 
 const selectAll = (event) => {
+    console.log("🧈 debu event:", event);
     if (event.target.checked === false) {
         data.selectedId = []
     } else {

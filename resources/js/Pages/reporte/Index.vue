@@ -81,7 +81,7 @@ const selectAll = (event) => {
     if (event.target.checked === false) {
         data.selectedId = []
     } else {
-        props.reportes?.data.forEach((reporte) => {
+        props.fromController?.data.forEach((reporte) => {
             data.selectedId.push(reporte.id)
         })
     }

@@ -16,7 +16,7 @@ class CreateActividadsTable extends Migration
         Schema::create('actividads', function (Blueprint $table) {
             $table->id();
 			$table->string('nombre');
-			$table->string('codigo');
+			$table->string('codigo')->nullable();
 
             // $table->unsignedBigInteger('centrotrabajo_id');
             // $table->foreign('centrotrabajo_id')

@@ -22,8 +22,7 @@ class UserController extends Controller
 {
     public $thisAtributos;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->middleware('permission:create user', ['only' => ['create', 'store']]);
         $this->middleware('permission:read user', ['only' => ['index', 'show']]);
         $this->middleware('permission:update user', ['only' => ['edit', 'update']]);
@@ -37,8 +36,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(UserIndexRequest $request)
-    {
+    public function index(UserIndexRequest $request) {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
 

@@ -44,7 +44,10 @@ class ReportesController extends Controller
         })->filter();
     }
 
-    public function SelectsMasivos($numberPermissions, $atributos_id) {
+    public function SelectsMasivos($numberPermissions) {
+        $reporteTemp = new Reporte();
+        $atributos_id = $reporteTemp->getFillable();
+
         // $usuario = Auth::User();
         // if($numberPermissions < 9){
         /* por ahora el trae todas 
@@ -57,17 +60,22 @@ class ReportesController extends Controller
                 8 => "reproceso"
                 
                 4 => "operario"
-                6 => "calendario"
             */
         $atributos_solo_id = Myhelp::filtrar_solo_id($atributos_id);
         foreach ($atributos_solo_id as $key => $value) {
 
             if ($value == 'operario' || $value == 'calendario') continue;
-
-            // $modelInstance = resolve('App\\Models\\' . ($value));
+            
             $modelInstance = resolve('App\\Models\\' . ucfirst($value));
             $ultima = $modelInstance::All();
             $result[$value] = Myhelp::NEW_turnInSelectID($ultima, ' ');
+            
+            if ($value === 'centrotrabajo'){
+                foreach ($ultima as $key => $val) {
+                    $actis = $val->Actividads;
+                    $result[$value.$val->nombre] = Myhelp::NEW_turnInSelectID($actis, ' ');
+                }
+            }
         }
         return $result;
     }
@@ -126,9 +134,7 @@ class ReportesController extends Controller
         })->get();
         $Trabajadores = Myhelp::NEW_turnInSelectID($Trabajadores, ' operario', 'name');
 
-        $reporteTemp = new Reporte();
-        $atributos_id = $reporteTemp->getFillable();
-        $losSelect = $this->SelectsMasivos($numberPermissions, $atributos_id);
+        $losSelect = $this->SelectsMasivos($numberPermissions);
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $total = $reportes->count();
@@ -164,11 +170,11 @@ class ReportesController extends Controller
         return date("Y-m-d", strtotime($date));
     }
 
-    private function getLastReport($hoy, $user) {
+    private function getLastReport($hoy, $userid) {
         $hoyDate = date_create($hoy);
         date_sub($hoyDate, date_interval_create_from_date_string('1 days'));
         $ayer = date_format($hoyDate, 'Y-m-d');
-        $MainQuery = Reporte::Where('operario_id', $user->id);
+        $MainQuery = Reporte::Where('operario_id', $userid);
 
         $NoTieneReportes = $MainQuery->count() == 0;
         if ($NoTieneReportes) return 1; //primera vez de su vida 
@@ -216,7 +222,7 @@ class ReportesController extends Controller
         DB::beginTransaction();
         try {
             $hoy = date('Y-m-d');
-            $tipoFin = $this->getLastReport($hoy, $user); //BOUNDED 1: primera del dia | 2:intermedia | 3:Ultima del dia
+            $tipoFin = $this->getLastReport($hoy, $userID); //BOUNDED 1: primera del dia | 2:intermedia | 3:Ultima del dia
             $tipoReport = $request->tipoReporte['value'];
             $reporte = Reporte::create([
                 // 'codigo' => $request->codigo,

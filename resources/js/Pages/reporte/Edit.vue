@@ -86,8 +86,8 @@ onMounted(() => {
         // form.codigo = 'AdminCod'+ (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
-        form.centrotrabajo_id = 1
-        form.actividad_id = 1
+        // form.centrotrabajo_id = 1
+        // form.actividad_id = 1
     }
 
 });
@@ -180,6 +180,7 @@ const update = () => {
     form.ordentrabajo_id = form.ordentrabajo_ids
     // data.mensajeFalta = ValidarCreateReporte();
     console.log("🧈 debu form.tipoReporte.value:", form.tipoReporte.value);
+    data.mensajeFalta = ValidarCreateReporte();
     
     let StringResultAny;
     StringResultAny = LookForValueInArray(props.losSelect.centrotrabajo, form.centrotrabajo_id)
@@ -202,16 +203,18 @@ const update = () => {
         form.disponibilidad_id = StringResultAny != '' ? StringResultAny : '';
     }
 
-
-    form.put(route('reporte.update', props.generica?.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit("close")
-            form.reset()
-        },
-        onError: () => alert(JSON.stringify(form.errors, null, 4)),
-        onFinish: () => null,
-    })
+    
+    if(data.mensajeFalta == ''){
+        form.put(route('reporte.update', props.generica?.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit("close")
+                form.reset()
+            },
+            onError: () => alert(JSON.stringify(form.errors, null, 4)),
+            onFinish: () => null,
+        })
+    }
 }
 
 watch(() => form.ordentrabajo_ids, (newX) => {
@@ -266,6 +269,22 @@ watch(() => props.show, () => {
     }
 })
 
+watch(() => form.centrotrabajo_id, (newCentro,old) => { 
+    if(newCentro && typeof newCentro.value !== 'undefined'){
+        let actividadesDelCentro = 'centrotrabajo'+newCentro.title
+        data.actividad_id = props.losSelect[actividadesDelCentro]
+
+
+        if(newCentro.value != props.generica.centrotrabajo_id){
+
+            form.actividad_id = { title: 'Seleccione actividad', value: null }
+        }
+        // console.log("🧈 debu props.generica.centrotrabajo_id:", props.generica.centrotrabajo_id);
+        // console.log("🧈 debu newCentro.value:", newCentro);
+        // console.log("🧈 debu old:", old);
+    }
+})
+
 </script>
 
 
@@ -274,7 +293,7 @@ watch(() => props.show, () => {
         <Modal :show="props.show" @close="emit('close'), data.BanderaTipo = true">
             <form class="px-6 my-8" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.edit }} {{ props.title }}
+                    {{ lang().label.edit }} {{ props.title }} 
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                     <div v-if="props.numberPermissions > 8" id="opcinesActividadO" class="xl:col-span-2 col-span-1">
@@ -312,14 +331,14 @@ watch(() => props.show, () => {
 
                     <div v-if="form.ordentrabajo_ids && form.tipoReporte.value != 2"
                         class="w-full lg:col-span-2 col-span-1">
-                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[0]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
+                        <InputLabel for="index" :value="arrayMostrarDelCodigo[0]" />
+                        <TextInput id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]" />
                     </div>
 
                     <div v-if="form.ordentrabajo_ids && form.tipoReporte.value != 2" class="w-full col-span-1">
-                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[1]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
+                        <InputLabel for="index" :value="arrayMostrarDelCodigo[1]" />
+                        <TextInput id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[1]]" />
                     </div>
 
@@ -334,8 +353,8 @@ watch(() => props.show, () => {
                     <!-- tiempo estimado -->
                     <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && form.tipoReporte.value != 2"
                         class=" col-span-1">
-                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
+                        <InputLabel for="index" :value="arrayMostrarDelCodigo[3]" />
+                        <TextInput id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             v-model="form.TiempoEstimado" />
                     </div>
 
@@ -363,7 +382,7 @@ watch(() => props.show, () => {
                 </div>
 
 
-                <div class=" mb-8 mt-[230px] flex justify-end">
+                <div class=" mb-8 mt-[360px] flex justify-end">
                     <h2 v-if="data.mensajeFalta != ''"
                         class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100">
                         {{ data.mensajeFalta }}

@@ -27,7 +27,7 @@ class ActividadSeeder extends Seeder
                 'REPROCESO CABLEADO',
                 'REPROCESO COMERCIAL',
                 'REPROCESO ALMACEN',
-            ],[
+            ], [
                 'PLANOS MECANICOS',
                 'PLANOS ELECTRICOS',
                 'CAMBIOS DEL CLIENTE',
@@ -36,33 +36,68 @@ class ActividadSeeder extends Seeder
             ]
         ];
         $actividades_actividad = [
-            [
-                // # actividades en actividad
+            'CORTE' => [
                 'CORTE',
+                'PLANEACION',
+                'RECEPCION DE MATERIAL',
+            ],
+            'DOBLEZ' => [
                 'DOBLEZ',
+                'PLANEACION',
+            ],
+            'SOLDADURA' => [
                 'SOLDADURA',
+                'PLANEACION',
+            ],
+            'PULIDA' => [
+
                 'PULIDA',
+                'REMISION PINTURA',
+            ],
+            'ENSAMBLE' => [
                 'ENSAMBLE',
-                'COBRE',
-                'CABLEADO',
-                'PROTOCOLO',
-                'EMPAQUE Y EMBALAJE',
                 'PLANEACION',
                 'DESPACHO',
                 'DEVOLUCION',
-                'RECEPCION DE MATERIAL',
-                'REMISION PINTURA',
                 'KAMBA',
-            ],[
+                'TRABAJO EXTERNO GARANTIAS',
+                'TRABAJO EXTERNO SERVICIOS',
+                'EMPAQUE Y EMBALAJE',
+            ],
+            'COBRE' => [
+                'COBRE',
+                'PLANEACION',
+                'KAMBA',
+            ],
+            'CABLEADO' => [
+                'CABLEADO',
+                'PLANEACION',
+                'PROTOCOLO',
+                'PRUEBAS',
+                'TRABAJO EXTERNO GARANTIAS',
+                'TRABAJO EXTERNO SERVICIOS',
+                'EMPAQUE Y EMBALAJE',
+                'MARCACION Y PLACAS',
+
+            ],
                 // # ingenierias
+            'INGENIERIA MECANICA' => [
                 'PREDISEÑO ',
                 'PLANOS PARA FABRICACION (Pedido de equipos, consumibles, Chapisteria, despiece, impresión)',
+                'TIPICOS',
                 'ACOMPAÑAMIENTO PROYECTOS EN PLANTA',
                 'ACOMPAÑAMIENTO PROYECTOS COMERCIAL',
                 'ACOMPAÑAMIENTO PROYECTOS COMPRAS',
+                'TRABAJO EXTERNO GARANTIAS',
+                'TRABAJO EXTERNO SERVICIOS',
+            ],
+            'INGENIERIA ELECTRICA' => [
+                'PREDISEÑO ',
+                'PLANOS PARA FABRICACION (Pedido de equipos, consumibles, Chapisteria, despiece, impresión)',
                 'TIPICOS',
-            ],[
-                // #ambos (actividad)
+                'ACOMPAÑAMIENTO PROYECTOS EN PLANTA',
+                'ACOMPAÑAMIENTO PROYECTOS COMERCIAL',
+                'ACOMPAÑAMIENTO PROYECTOS COMPRAS',
                 'TRABAJO EXTERNO GARANTIAS',
                 'TRABAJO EXTERNO SERVICIOS',
                 'MARCACION Y PLACAS',
@@ -70,38 +105,20 @@ class ActividadSeeder extends Seeder
             ]
         ];
 
-        $IngMeca = Centrotrabajo::Where('nombre','INGENIERIA MECANICA')->first()->id;
-        $IngElectrica = Centrotrabajo::Where('nombre','INGENIERIA ELECTRICA')->first()->id;
-        $centrosNoIng = Centrotrabajo::WhereNotIn('id',[$IngMeca, $IngElectrica])->pluck('id');
+        // $IngMeca = Centrotrabajo::Where('nombre', 'INGENIERIA MECANICA')->first()->id;
+        // $IngElectrica = Centrotrabajo::Where('nombre', 'INGENIERIA ELECTRICA')->first()->id;
+        // $centrosNoIng = Centrotrabajo::WhereNotIn('id', [$IngMeca, $IngElectrica])->pluck('id');
 
-        // $TiposActividades =[
-        //     $actividades_disponibilidad,
-        //     $actividades_reproceso,
-        //     $actividades_actividad
-        // ];
+        foreach ($actividades_actividad as $key => $value) {
+            $centro = Centrotrabajo::Where('nombre', $key)->first()->id;
 
-        // foreach ($TiposActividades as $valueArray) {
-            foreach ($actividades_actividad as $key => $value) {
-                foreach ($value as $key2 => $val) {
-                    $acti = Actividad::create([
-                        'codigo' => $key.' '.$key2,
-                        'nombre' => $val
-                    ]);
-                    if($key == 0 || $key == 2){
-                        foreach ($centrosNoIng as $IDnoIng) {
-                            $acti->centroTrabajos()->attach($IDnoIng);
-                            // $acti->ActividadTipo($IDnoIng,2);
-                        }
-                    } 
-                    if($key == 1 || $key == 2){
-                        // $acti->ActividadTipo($IngMeca,2);
-                        // $acti->ActividadTipo($IngElectrica,2);
-                        $acti->centroTrabajos()->attach($IngMeca);
-                        $acti->centroTrabajos()->attach($IngElectrica);
-                    }
-                }
+            foreach ($value as $key2 => $val) {
+                $acti = Actividad::firstOrCreate([
+                    // 'codigo' => $key.' '.$key2,
+                    'nombre' => $val
+                ]);
+                $acti->centroTrabajos()->attach($centro);
             }
-        // }
-
+        }
     }
 }

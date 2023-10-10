@@ -32,13 +32,10 @@ const data = reactive({
     params: {
         pregunta: ''
     },
-    // tipoReporte:{ title: 'Actividad', value: 0 },
     actividad_id:props.losSelect.actividad,
     centrotrabajo_id:props.losSelect.centrotrabajo,
     disponibilidad_id:props.losSelect.disponibilidad,
-    // material_id:props.losSelect.material,
     ordentrabajo_id:props.losSelect.ordentrabajo,
-    // pieza_id:props.losSelect.pieza,
     reproceso_id:props.losSelect.reproceso,
     temp_disponibilidad_id:null,
     temp_reproceso_id:null,
@@ -79,14 +76,20 @@ const justNames = [
 ]; const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
 
 onMounted(() => {
-    if(props.numberPermissions > 8){
+    if(props.numberPermissions > 9){
 
         // const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
         // form.codigo = 'AdminCod'+ (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
-    }
 
+        setTimeout(()=>{
+            form.ordentrabajo_ids = data.ordentrabajo_ids[1];
+            form.centrotrabajo_id = data.centrotrabajo_id[1];
+            form.actividad_id = data.actividad_id[1];
+            data.mensajeTiemposAuto = 'Super!'
+        }, 900);
+    }
 });
 
 const tiemposEstimados = [
@@ -101,6 +104,8 @@ const tiemposEstimados = [
     "Tiempo_estimado_Ing_elec", //9
 ];
 
+
+//GetTiempoNotNull:: Selecciona automaticamente un centro que tenga tiempos no nulos
 function GetTiempoNotNull(){
     let contador = 0
     form.centrotrabajo_id = data.centrotrabajo_id[1]
@@ -123,7 +128,7 @@ function GetTiempoNotNull(){
 }
 
 watchEffect(() => {
-    console.log("✅", form.centrotrabajo_id);
+    // console.log("✅", form.centrotrabajo_id);
     if (props.show) {
         if(data.BanderaTipo){
 
@@ -142,10 +147,6 @@ watchEffect(() => {
                 value: inde,
                 // value2: val.id,
             }))
-            console.log("🧈 debu data.nombresOT:", data.nombresOT);
-            console.log("🧈 debu  data.ordentrabajo_ids:",  data.ordentrabajo_ids);
-
-            // console.log("form.ordentrabajo_ids:",  form.ordentrabajo_ids);
         }
 
         //valores implicitos
@@ -154,7 +155,6 @@ watchEffect(() => {
             form.nombreTablero = data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]
             form.OTItem = data.nombresOT[form.ordentrabajo_ids.value]['Item']
             
-            // console.log("🧈✅ debu data.nombresOT[form.ordentrabajo_ids.value]:", data.ordentrabajo_ids[form.ordentrabajo_ids.value]);
             if(data.soloUnaVez) {
                 GetTiempoNotNull();
             }else{
@@ -171,9 +171,10 @@ let ValidarNotNull = (campos) =>{
     let sonObligatorios = '';
     try{
         campos.forEach((value,i) => {
-            if(typeof form[value] === 'undefined' || form[value] === null || form[value].length === 0){ //&& form[value] != ''
+            // console.log("🧈 debu form[value]:", form[value]);
+            // console.log("🧈 debu form[value]:", form[value].value);
+            if(typeof form[value] === 'undefined' || form[value] === null || form[value].value === null || form[value].length === 0){ //&& form[value] != ''
                 sonObligatorios = value
-                console.log("🧈 debu value:", value);
                 throw new Error('BreakException');
             }
         })
@@ -225,8 +226,8 @@ let ValidarCreateReporte = () =>{
 const create = () => {
 
     form.ordentrabajo_id = form.ordentrabajo_ids
-
     data.mensajeFalta = ValidarCreateReporte();
+    
     if(data.mensajeFalta == ''){
         form.post(route('reporte.store'), {
             preserveScroll: true,
@@ -250,14 +251,26 @@ watch(() => form.tipoReporte, (newX) => {
     form.reproceso_id = null
     form.ordentrabajo_ids = null
 })
+
 watch(() => form.ordentrabajo_ids, (newX) => { 
     data.soloUnaVez = true
+})
+
+watch(() => form.centrotrabajo_id, (newCentro) => { 
+    if(newCentro && typeof newCentro.value !== 'undefined'){
+        let actividadesDelCentro = 'centrotrabajo'+newCentro.title
+        data.actividad_id = props.losSelect[actividadesDelCentro]
+    }
+    form.actividad_id = { title: 'Seleccione actividad', value: null }
 })
 
 //very usefull
 const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
 const arrayMostrarDelCodigo = ['Nombre Tablero','% avance','OT+Item','Tiempo estimado'];
 const Cabezera = ['Nombre_tablero','avance'];
+const FiltroParaActividades = {
+    'corte': ['Corte','Planeacion']
+}
 
 </script>
 
@@ -363,7 +376,7 @@ const Cabezera = ['Nombre_tablero','avance'];
                 </div>
 
 
-                <div class=" mb-8 mt-[260px] flex justify-end">
+                <div class=" mb-8 mt-[360px] flex justify-end">
                     <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100"> 
                         {{ data.mensajeFalta }} 
                     </h2>

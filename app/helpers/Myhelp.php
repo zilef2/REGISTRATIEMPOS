@@ -216,7 +216,6 @@ class Myhelp {
     }
 
     public static function NEW_turnInSelectID($theArrayofStrings,$selecc,$theName = null) {
-
         if($theName == null) $theName = 'nombre';
         if(count($theArrayofStrings) == 0) 
             return [
