@@ -10,6 +10,7 @@ use App\helpers\Myhelp;
 use App\helpers\HelpExcel;
 use App\Http\Requests\ActividadRequest;
 use App\Imports\PersonalImport;
+use App\Models\Centrotrabajo;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -24,8 +25,7 @@ class ActividadsController extends Controller
     public $MayusnombreClase = 'Actividad';
     public $thisAtributos;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->thisAtributos = (new Actividad())->getFillable();
     }
 
@@ -37,8 +37,7 @@ class ActividadsController extends Controller
         })->filter();
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $permissions = Myhelp::EscribirEnLog($this, $this->nombreClase);
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();
@@ -58,6 +57,8 @@ class ActividadsController extends Controller
         }
         if ($request->has(['field', 'order']) && $request->field != 'centros') {
             $Actividads = $Actividads->orderBy($request->field, $request->order);
+        }else{
+            $Actividads->orderByDesc('created_at');
         }
         $this->MapearClasePP($Actividads, $numberPermissions);
 
@@ -74,6 +75,7 @@ class ActividadsController extends Controller
             ['path' => request()->url()]
         );
 
+        $centroSelect = Myhelp::NEW_turnInSelectID(Centrotrabajo::all(), 'centro','nombre');
         return Inertia::render('actividad/Index', [
             'breadcrumbs'           => [['label' => __('app.label.Actividad'), 'href' => route('actividad.index')]],
             'title'                 => __('app.label.Actividad'),
@@ -82,6 +84,7 @@ class ActividadsController extends Controller
             'fromController'        => $fromController,
             'total'                 => $total,
             'numberPermissions'     => $numberPermissions,
+            'losSelect'             => $centroSelect,
 
             // 'losSelect'             => $losSelect ?? [],
         ]);
@@ -92,14 +95,10 @@ class ActividadsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-    }
-
+    public function create() { }
 
     //! STORE - UPDATE - DELETE
-    public function store(ActividadRequest $request)
-    {
+    public function store(ActividadRequest $request) {
         $user = Auth::User();
         Myhelp::EscribirEnLog($this, 'STORE:Actividads', '', false);
 
@@ -109,7 +108,13 @@ class ActividadsController extends Controller
             foreach ($this->thisAtributos as $value) {
                 $guardar[$value] = $request->$value;
             }
+            $guardar['codigo'] = 10;
+            $guardar['centro_id'] = null;
             $Actividad = Actividad::create($guardar);
+            foreach ($request->centro_id as $key => $value) {
+                if($value['value'] && $value['value'] != 0)
+                    $Actividad->centroTrabajos()->attach($value['value']);
+            }
 
             DB::commit();
             Myhelp::EscribirEnLog($this, 'STORE:Actividads', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
@@ -122,34 +127,26 @@ class ActividadsController extends Controller
     }
     //fin store functions
 
-    public function show($id)
-    {
-    }
-    public function edit($id)
-    {
-    }
+    public function show($id) { } public function edit($id) { }
 
 
-    public function update(ActividadRequest $request, $id)
-    {
+    public function update(ActividadRequest $request, $id) {
         $user = Auth::User();
 
         Myhelp::EscribirEnLog($this, 'UPGRADE:Actividads', '', false);
         DB::beginTransaction();
         try {
             $Actividad = Actividad::findOrFail($id);
-            foreach ($this->thisAtributos as $value) {
-                $guardar[$value] = $request->$value;
-            }
-            $Actividad->update($guardar);
-            DB::commit();
-            Myhelp::EscribirEnLog($this, 'UPDATE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' actualizado', false);
 
-            return back()->with('success', __('app.label.updated_successfully', ['name' => $Actividad->name]));
+            $Actividad->update([ 'nombre' => $request->nombre ]);
+            DB::commit();
+            Myhelp::EscribirEnLog($this, 'UPDATE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->nombre . ' actualizado', false);
+
+            return back()->with('success', __('app.label.updated_successfully', ['name' => $Actividad->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            Myhelp::EscribirEnLog($this, 'UPDATE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'UPDATE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->nombre . '  fallo en el actualizado', false);
+            return back()->with('error', __('app.label.updated_error', ['name' => $Actividad->nombre]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -159,14 +156,17 @@ class ActividadsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Actividad $Actividad)
-    {
-        $permissions = Myhelp::EscribirEnLog($this, 'DELETE:Actividads');
-
+    public function destroy(Actividad $Actividad){
+        Myhelp::EscribirEnLog($this, 'DELETE:Actividads');
         try {
-            $Actividad->delete();
-            Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' borrado', false);
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $Actividad->name]));
+            if($Actividad->id > 25) {
+
+                $Actividad->delete();
+                Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' borrado', false);
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => $Actividad->name]));
+            }else{
+                return back()->with('error', __('app.label.deleted_error', ['name' => $Actividad->nombre] ). '. Este valor es propio de google sheets.');
+            }
         } catch (\Throwable $th) {
             Myhelp::EscribirEnLog($this, 'DELETE:Actividads', 'usuario id:' . $Actividad->id . ' | ' . $Actividad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
             return back()->with('error', __('app.label.deleted_error', ['name' => $Actividad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());

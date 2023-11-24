@@ -22,7 +22,7 @@ class ReadGoogleSheets extends Controller {
                 return true;
             }else{
                 $difHoras = Carbon::now()->diffInHours($ultimaGuardada);
-                $NecesitaActualizar = $difHoras > 4; //todo: hacer ese 4 un parametro
+                $NecesitaActualizar = $difHoras > 12; //todo: hacer ese 4 un parametro
 
                 return $NecesitaActualizar;
             }
@@ -32,6 +32,8 @@ class ReadGoogleSheets extends Controller {
     }
 
     public function vamoABusca() {
+        ini_set('max_execution_time', 180);
+
         $spreadsheetId = '1j_eDVGjHHVjPlnsQxQBGdyQUH0CXj9HMnSNqp0tZRYU'; $sheetName = 'Comercial';
         $service = new Sheets(new Client());
         // $range = 'AI1:AT30000';
@@ -67,7 +69,7 @@ class ReadGoogleSheets extends Controller {
         // $numberPermissions = Myhelp::getPermissionToNumber(auth()->user()->roles->pluck('name')[0]);
 
         $HayTiemposEstimados = 0;
-        $contador_Item_vue = 0; //! carefull with changing a counting 
+        $contador_Item_vue = 0; //! carefull with changing a counting
         $hayQueGuardar = $this->validarItemsNuevos($cabezaYvalues,$Grupo);
         if($hayQueGuardar){
 
@@ -134,7 +136,7 @@ class ReadGoogleSheets extends Controller {
                 $contador_Item_vue++;
             }
 
-            
+
             $Eloquentvalues[1] = GuardarGoogleSheetsComercial::Where('Grupo',$Grupo)->get();
 
         }
@@ -153,7 +155,7 @@ class ReadGoogleSheets extends Controller {
 
                 $BuscarXDias++;
             }
-            
+
             $cabeza =  $values[0];
             unset($values[0]);
             return [$cabeza,$values];
@@ -171,20 +173,20 @@ class ReadGoogleSheets extends Controller {
             $cabezaYvalues = $this->vamoABusca();
 
             $cabezaYvalues = $this->vamoAGuardaComercial($cabezaYvalues,$Grupo);
-            
+
         }else{
             $cabezaYvalues = $this->Ultimo($Grupo);
         }
         return $cabezaYvalues;
     }
-    
+
     public function __invoke(Request $request) {
         // public function notinvoke(Request $request) {
         // $permissions = Myhelp::EscribirEnLog($this, ' users');
         // $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         // $spreadsheetId = '1EZkfkdQIMoiLewYhG8Qaw2JCc_jqnb_4_pOB75jJAT4'; $sheetName = 'Hoja 1'; //zilef
         [$cabeza,$values] = $this->GetValuesFromSheets();
-      
+
         $total_cantidad = 0;
         foreach ($values as $key => $value) {
             $total_cantidad += intval($value[2]); //%avance

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-class parametrosController extends Controller
+class ParametrosController extends Controller
 {
 
     public $respuestaLimite = 'Limite de tokens';

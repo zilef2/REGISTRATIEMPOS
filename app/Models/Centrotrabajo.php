@@ -10,11 +10,12 @@ class Centrotrabajo extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'codigo',
         'nombre',
     ];
 
     public function Actividads(): BelongsToMany { return $this->BelongsToMany(Actividad::class); }
-   
+
 }

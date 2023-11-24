@@ -63,9 +63,11 @@ const data = reactive({
     deleteBulkOpen: false,
 })
 
-const order = (field) => {
-    data.params.field = field
-    data.params.order = data.params.order === "asc" ? "desc" : "asc"
+const order = (field,CanOrder) => {
+    if(CanOrder){
+        data.params.field = field
+        data.params.order = data.params.order === "asc" ? "desc" : "asc"
+    }
 }
 
 watch(() => _.cloneDeep(data.params), debounce(() => {
@@ -75,7 +77,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
         preserveState: true,
         preserveScroll: true,
     })
-}, 150))
+}, 350))
 
 const selectAll = (event) => {
     if (event.target.checked === false) {
@@ -87,43 +89,24 @@ const selectAll = (event) => {
     }
 }
 const select = () => {
-    if (props.reportes?.data.length == data.selectedId.length) {
-        data.multipleSelect = true
-    } else {
-        data.multipleSelect = false
-    }
+    data.multipleSelect = props.reportes?.data.length === data.selectedId.length;
 }
+// const form = useForm({ })
+watchEffect(() => {})
 
-
-// const form = useForm({
-//     archivo1: '',
-// })
-
-watchEffect(() => {
-})
-
-
-//text number dinero date datetime foreign
-// text // number // dinero // date // datetime // foreign
+// text // number // dinero // date // datetime // foreign // decimal
 const titulos = [
-    // { order: 'codigo', label: 'codigo', type: 'text' },
-    { order: 'fecha', label: 'fecha', type: 'date' },
-    { order: 'operario_id', label: 'operario', type: 'foreign', nameid: 'operario_s' },
-    { order: 'hora_inicial', label: 'hora inicial', type: 'time' },
-    { order: 'hora_final', label: 'hora final', type: 'time' },
-    { order: 'actividad_id', label: 'actividad', type: 'foreign', nameid: 'actividad_s' },
-    { order: 'centrotrabajo_id', label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s' },
-    // { order: 'ordentrabajo_id', label: 'ordentrabajo', type: 'foreign', nameid: 'ordentrabajo_s' },
-    { order: 'OTItem', label: 'ordentrabajo', type: 'text' },
-    { order: 'TiempoEstimado', label: 'TiempoEstimado', type: 'text' },
-
-    // { order: 'pieza_id', label: 'pieza', type: 'foreign', nameid: 'pieza_s' },
-    // { order: 'cantidad', label: 'cantidad', type: 'number' },
-
-    { order: 'disponibilidad_id', label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s' },
-    { order: 'reproceso_id', label: 'reproceso', type: 'foreign', nameid: 'reproceso_s' },
-
-    // {order: 'calendario_id' , label: 'calendario', type: 'foreign', nameid: 'calendario_s'},
+    { order: 'fecha', label: 'fecha', type: 'date' ,CanOrder: true},
+    { order: 'operario_id', label: 'operario', type: 'foreign', nameid: 'operario_s' ,CanOrder: true},
+    { order: 'hora_inicial', label: 'hora inicial', type: 'time' ,CanOrder: true},
+    { order: 'hora_final', label: 'hora final', type: 'time' ,CanOrder: true},
+    { order: 'tiempot', label: 'TiempoTranscurrido', type: 'decimal', nameid: 'tiempot' ,CanOrder: false},
+    { order: 'actividad_id', label: 'actividad', type: 'foreign', nameid: 'actividad_s' ,CanOrder: true},
+    { order: 'centrotrabajo_id', label: 'centrotrabajo', type: 'foreign', nameid: 'centrotrabajo_s' ,CanOrder: true},
+    { order: 'OTItem', label: 'ordentrabajo', type: 'text' ,CanOrder: false},
+    { order: 'TiempoEstimado', label: 'TiempoEstimado', type: 'text' ,CanOrder: true},
+    { order: 'disponibilidad_id', label: 'disponibilidad', type: 'foreign', nameid: 'disponibilidad_s' ,CanOrder: true},
+    { order: 'reproceso_id', label: 'reproceso', type: 'foreign', nameid: 'reproceso_s' ,CanOrder: true},
 ];
 
 </script>
@@ -149,7 +132,7 @@ const titulos = [
                         :Trabajadores=props.Trabajadores
                     />
 
-                    <Edit v-if="can(['update reporte']) && numberPermissions > 1" :numberPermissions="props.numberPermissions" 
+                    <Edit v-if="can(['update reporte']) && numberPermissions > 1" :numberPermissions="props.numberPermissions"
                         :show="data.editOpen"
                         @close="data.editOpen = false" :generica="data.generico" :title="props.title"
                         :losSelect=props.losSelect
@@ -195,10 +178,10 @@ const titulos = [
 
                                 <th class="px-2 py-4 text-center">#</th>
                                 <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer min-w-min"
-                                    v-on:click="order(titulo['order'])">
+                                    v-on:click="order(titulo['order'], titulo['CanOrder'])">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label[titulo['label']] }}</span>
-                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                        <ChevronUpDownIcon v-if="titulo['CanOrder']" class="w-4 h-4" />
                                     </div>
                                 </th>
                                 <!-- <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_nacimiento')">
@@ -214,7 +197,7 @@ const titulos = [
                             <tr v-for="(clasegenerica, indexu) in props.fromController.data" :key="indexu"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
                                 <td v-if="props.numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    <input 
+                                    <input
                                         class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
                                         type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId" />
@@ -229,7 +212,7 @@ const titulos = [
                                             </InfoButton>
                                             <InfoButton v-if="!clasegenerica.hora_final" v-show="can(['create reporte'])" type="button"
                                                 @click="(data.TerminarOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.finalizarTarea">
                                                 <CheckCircleIcon class="w-4 h-4" />
                                             </InfoButton>
                                             <DangerButton v-show="can(['delete reporte'])" type="button"
@@ -242,15 +225,16 @@ const titulos = [
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                                 <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <span v-if="titulo['type'] == 'text'"> {{ clasegenerica[titulo['order']] }} </span>
-                                    <!-- <span v-if="titulo['type'] == 'time'"> {{ (clasegenerica[titulo['order']]).slice(0,-3) }} </span> -->
-                                    <span v-if="titulo['type'] == 'time'"> {{ TimeTo12Format(clasegenerica[titulo['order']]) }} </span>
-                                    <span v-if="titulo['type'] == 'number'"> {{ number_format(clasegenerica[titulo['order']], 0, false) }} </span>
-                                    <span v-if="titulo['type'] == 'dinero'"> {{ number_format(clasegenerica[titulo['order']], 0, true) }} </span>
-                                    <span v-if="titulo['type'] == 'date'"> {{ formatDate(clasegenerica[titulo['order']], '') }} </span>
-                                    <span v-if="titulo['type'] == 'datetime'"> {{ formatDate(clasegenerica[titulo['order']], 'conLaHora') }} </span>
-                                    <span v-if="titulo['type'] == 'foreign'"> {{ clasegenerica[titulo['nameid']] }} </span>
-                                    <span v-if="titulo['order'] == 'hora_final' && clasegenerica[titulo['order']] == null">
+                                    <span v-if="titulo['type'] === 'text'"> {{ clasegenerica[titulo['order']] }} </span>
+                                    <!-- <span v-if="titulo['type'] === 'time'"> {{ (clasegenerica[titulo['order']]).slice(0,-3) }} </span> -->
+                                    <span v-if="titulo['type'] === 'time'"> {{ TimeTo12Format(clasegenerica[titulo['order']]) }} </span>
+                                    <span v-if="titulo['type'] === 'number'"> {{ number_format(clasegenerica[titulo['order']], 0, false) }} </span>
+                                    <span v-if="titulo['type'] === 'decimal'"> {{ number_format(clasegenerica[titulo['order']], 1, false) }} </span>
+                                    <span v-if="titulo['type'] === 'dinero'"> {{ number_format(clasegenerica[titulo['order']], 0, true) }} </span>
+                                    <span v-if="titulo['type'] === 'date'"> {{ formatDate(clasegenerica[titulo['order']], '') }} </span>
+                                    <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(clasegenerica[titulo['order']], 'conLaHora') }} </span>
+                                    <span v-if="titulo['type'] === 'foreign'"> {{ clasegenerica[titulo['nameid']] }} </span>
+                                    <span v-if="titulo['order'] === 'hora_final' && clasegenerica[titulo['order']] == null">
                                         <ClockWorking />
                                     </span>
                                 </td>

@@ -36,6 +36,7 @@ const props = defineProps({
     title: String,
 
     numberPermissions: Number,
+    losSelect: Object,
     Flash: String,
 })
 

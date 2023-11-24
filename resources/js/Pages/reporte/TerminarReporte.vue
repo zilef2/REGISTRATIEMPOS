@@ -96,11 +96,11 @@ const update = () => {
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> Cancelar
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="update">
-                        {{ form.processing ? lang().button.save + '...' : lang().button.save }}
+                        {{ form.processing ? 'Cerrar Tarea' + '...' : 'Cerrar Tarea' }}
                     </PrimaryButton>
                 </div>
             </form>

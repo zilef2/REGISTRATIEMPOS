@@ -35,6 +35,7 @@ return [
         //parametros
         'parametros' => 'parametros',
         //reporte
+        'TiempoTranscurrido' => 'Tiempo Transcurrido',
         'delete_confirm_quantity' => 'Por seguridad e integridad, no esta permitido borrar tantos reportes al tiempo',
         'finLaboral' => 'Finalización jornada laboral',
         'cantidad (pieza)' => 'Cantidad (pieza)',
@@ -199,6 +200,7 @@ return [
         'observaciones' => 'observaciones',
     ],
     'tooltip' => [
+        'finalizarTarea' => 'Finalizar Tarea',
         'ver' => 'ver',
         'inscribir' => 'inscribir',
         'preguntaria' => 'preguntar a la IA',

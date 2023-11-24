@@ -10,6 +10,8 @@ use App\helpers\Myhelp;
 use App\helpers\HelpExcel;
 use App\Http\Requests\DisponibilidadRequest;
 use App\Imports\PersonalImport;
+use App\Models\Centrotrabajo;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +56,8 @@ class DisponibilidadsController extends Controller
         }
         if ($request->has(['field', 'order']) && $request->field != 'centros') {
             $Disponibilidads = $Disponibilidads->orderBy($request->field, $request->order);
+        }else{
+            $Disponibilidads->orderByDesc('created_at');
         }
         $this->MapearClasePP($Disponibilidads, $numberPermissions);
 
@@ -69,6 +73,7 @@ class DisponibilidadsController extends Controller
             $page,
             ['path' => request()->url()]
         );
+        $centroSelect = Myhelp::NEW_turnInSelectID(Centrotrabajo::all(), 'centro','nombre');
 
         return Inertia::render('disponibilidad/Index', [
             'breadcrumbs'           => [['label' => __('app.label.disponibilidad'), 'href' => route('disponibilidad.index')]],
@@ -78,8 +83,7 @@ class DisponibilidadsController extends Controller
             'fromController'        => $fromController,
             'total'                 => $total,
             'numberPermissions'     => $numberPermissions,
-
-            // 'losSelect'             => $losSelect ?? [],
+            'losSelect'             => $centroSelect,
         ]);
     }
 
@@ -94,8 +98,7 @@ class DisponibilidadsController extends Controller
 
 
     //! STORE - UPDATE - DELETE
-    public function store(DisponibilidadRequest $request)
-    {
+    public function store(DisponibilidadRequest $request){
         $user = Auth::User();
         Myhelp::EscribirEnLog($this, 'STORE:Disponibilidads', '', false);
 
@@ -105,8 +108,13 @@ class DisponibilidadsController extends Controller
             foreach ($this->thisAtributos as $value) {
                 $guardar[$value] = $request->$value;
             }
+            $guardar['centro_id'] = null;
+            $guardar['codigo'] = 10;
             $Disponibilidad = Disponibilidad::create($guardar);
-
+            foreach ($request->centro_id as $key => $value) {
+                if($value['value'] && $value['value'] != 0)
+                    $Disponibilidad->centroTrabajos()->attach($value['value']);
+            }
             DB::commit();
             Myhelp::EscribirEnLog($this, 'STORE:Disponibilidads', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
             return back()->with('success', __('app.label.created_successfully', ['name' => $Disponibilidad->name]));
@@ -126,51 +134,48 @@ class DisponibilidadsController extends Controller
     }
 
 
-    public function update(DisponibilidadRequest $request, $id)
-    {
+    public function update(DisponibilidadRequest $request, $id) {
         $user = Auth::User();
 
         Myhelp::EscribirEnLog($this, 'UPGRADE:Disponibilidads', '', false);
         DB::beginTransaction();
         try {
             $Disponibilidad = Disponibilidad::findOrFail($id);
-            foreach ($this->thisAtributos as $value) {
-                $guardar[$value] = $request->$value;
-            }
-            $Disponibilidad->update($guardar);
-            DB::commit();
-            Myhelp::EscribirEnLog($this, 'UPDATE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . ' actualizado', false);
+            $Disponibilidad->update([ 'nombre' => $request->nombre ]);
 
-            return back()->with('success', __('app.label.updated_successfully', ['name' => $Disponibilidad->name]));
+            DB::commit();
+            Myhelp::EscribirEnLog($this, 'UPDATE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->nombre . ' actualizado', false);
+
+            return back()->with('success', __('app.label.updated_successfully', ['name' => $Disponibilidad->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            Myhelp::EscribirEnLog($this, 'UPDATE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Disponibilidad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'UPDATE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->nombre . '  fallo en el actualizado', false);
+            return back()->with('error', __('app.label.updated_error', ['name' => $Disponibilidad->nombre]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Disponibilidad $Disponibilidad)
-    {
+    public function destroy(Disponibilidad $Disponibilidad){
         $permissions = Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads');
-
         try {
-            $Disponibilidad->delete();
-            Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . ' borrado', false);
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $Disponibilidad->name]));
+            Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->nombre . ' borrado', false);
+            if ($Disponibilidad->id > 15) {
+                $Disponibilidad->delete();
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => $Disponibilidad->nombre]));
+            } else {
+
+                return back()->with('error', $Disponibilidad->nombre . ' no se puede borrar. Este valor es necesario.');
+            }
+        }catch (QueryException $e) {
+            $myHelp = new Myhelp();
+            $mensajeError = $myHelp->mensajesErrorBD($e,$this->nombreClase,$Disponibilidad->id,$Disponibilidad->nombre);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Disponibilidad->nombre]) . $mensajeError);
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads', 'usuario id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Disponibilidad->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'DELETE:Disponibilidads Throwable', 'disponibilidad id:' . $Disponibilidad->id . ' | ' . $Disponibilidad->nombre . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Disponibilidad->nombre]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
-    public function destroyBulk(Request $request)
-    {
+    public function destroyBulk(Request $request){
         try {
             $Disponibilidad = Disponibilidad::whereIn('id', $request->id);
             $Disponibilidad->delete();
@@ -196,8 +201,7 @@ class DisponibilidadsController extends Controller
 
 
     // Duplicate entry '1152194566' for key 'Disponibilidads_identificacion_unique'
-    private function MensajeWar()
-    {
+    private function MensajeWar() {
         $bandera = false;
         $contares = [
             'contar1',

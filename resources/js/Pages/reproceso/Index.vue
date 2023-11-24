@@ -31,6 +31,7 @@ const props = defineProps({
     filters: Object,
     breadcrumbs: Object,
     perPage: Number,
+    losSelect: Object, 
 
     title: String,
 

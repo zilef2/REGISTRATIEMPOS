@@ -7,21 +7,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ActividadsController;
 use App\Http\Controllers\CentrotrabajosController;
 use App\Http\Controllers\DisponibilidadsController;
-use App\Http\Controllers\MaterialsController;
-use App\Http\Controllers\OrdentrabajosController;
-use App\Http\Controllers\PiezasController;
+//use App\Http\Controllers\OrdentrabajosController;
+//use App\Http\Controllers\PiezasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReadGoogleSheets;
 use App\Http\Controllers\ReprocesosController;
-use App\Models\Permission;
-use App\Models\Reporte;
-use App\Models\Role;
-use App\Models\User;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Inertia\Inertia;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -32,14 +25,7 @@ use Inertia\Inertia;
 //     ]);
 // });
 Route::get('/', function () { return redirect('/login'); });
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard', [
-        'users'         => (int) User::count(),
-        'roles'         => (int) Role::count(),
-        'reportes'      => (int) Reporte::count(),
-        'permissions'   => (int) Permission::count(),
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/setLang/{locale}', function ($locale) {
     Session::put('locale', $locale);
@@ -59,28 +45,25 @@ Route::middleware('auth', 'verified')->group(function () {
 
     Route::resource('/role', RoleController::class)->except('create', 'show', 'edit');
     Route::post('/role/destroy-bulk', [RoleController::class, 'destroyBulk'])->name('role.destroy-bulk');
-    
+
     Route::resource('/permission', PermissionController::class)->except('create', 'show', 'edit');
     Route::post('/permission/destroy-bulk', [PermissionController::class, 'destroyBulk'])->name('permission.destroy-bulk');
 
-    
+
     Route::resource('/parametro', ParametrosController::class);
-    
+
     //# SIDEBARMENU
     Route::resource('/reporte', ReportesController::class);
     Route::post('/reporte/destroy-bulk', [ReportesController::class, 'destroyBulk'])->name('reporte.destroy-bulk');
 
 
-    Route::resource('/ordentrabajo', OrdentrabajosController::class);
     Route::resource('/actividad', ActividadsController::class);
 
     Route::resource('/centrotrabajo', CentrotrabajosController::class);
     Route::resource('/disponibilidad', DisponibilidadsController::class);
-    Route::resource('/material', MaterialsController::class);
-    Route::resource('/pieza', PiezasController::class);
     Route::resource('/reproceso', ReprocesosController::class);
     Route::get('/gsheet', ReadGoogleSheets::class);
-
+    Route::get('/demco', [UserController::class,'todaBD']);
 });
 
 // ultimo comit 25sept

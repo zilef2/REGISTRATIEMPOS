@@ -8,9 +8,12 @@ use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserStoreRequest;
 use App\Http\Requests\User\UserUpdateRequest;
 use App\Imports\PersonalImport;
+use App\Models\Permission;
+use App\Models\Reporte;
 use App\Models\Role;
-use App\Models\Universidad;
 use App\Models\User;
+use App\Exports\MultipleExport;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -31,11 +34,24 @@ class UserController extends Controller
 
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function Dashboard() {
+        $readGoogle = new ReadGoogleSheets();
+        $readGoogle->GetValuesFromSheets();
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' Dashboard'));
+        if($numberPermissions > 1){
+
+            return Inertia::render('Dashboard', [
+                'users'         => (int) User::count(),
+                'roles'         => (int) Role::count(),
+                'reportes'      => (int) Reporte::count(),
+                'permissions'   => (int) Permission::count(),
+            ]);
+        }else{
+            return redirect()->route('reporte.index');
+        }
+
+    }
+
     public function index(UserIndexRequest $request) {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
@@ -288,5 +304,12 @@ class UserController extends Controller
             Myhelp::EscribirEnLog($this, 'IMPORT:users', ' Fallo importacion: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
             return back()->with('error', __('app.label.op_not_successfully') . ' Usuario del error: ' . session('larow')[0] . ' error en la iteracion ' . $countfilas . ' ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
+    }
+
+    public function todaBD()
+    {
+//        return (new MultipleExport())->download('DemcoDB.xlsx');
+        return Excel::download(new MultipleExport, 'DemcoDB.xlsx');
+
     }
 }

@@ -31,7 +31,7 @@ class User extends Authenticatable
         // 19 sept
         'area',
         'cargo',
-        'centro_trabajo_id',
+        'centrotrabajo_id',
     ];
     /**
      * The attributes that should be hidden for serialization.

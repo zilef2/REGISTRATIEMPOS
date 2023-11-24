@@ -37,8 +37,7 @@ class CentrotrabajosController extends Controller
         })->filter();
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request){
         $permissions = Myhelp::EscribirEnLog($this, $this->nombreClase);
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $user = Auth::user();
@@ -97,8 +96,7 @@ class CentrotrabajosController extends Controller
 
 
     //! STORE - UPDATE - DELETE
-    public function store(CentrotrabajoRequest $request)
-    {
+    public function store(CentrotrabajoRequest $request) {
         $user = Auth::User();
         Myhelp::EscribirEnLog($this, 'STORE:Centrotrabajos', '', false);
 
@@ -108,6 +106,7 @@ class CentrotrabajosController extends Controller
             foreach ($this->thisAtributos as $value) {
                 $guardar[$value] = $request->$value;
             }
+            $guardar['codigo'] = 10;
             $Centrotrabajo = Centrotrabajo::create($guardar);
 
             DB::commit();
@@ -152,28 +151,26 @@ class CentrotrabajosController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Centrotrabajo $Centrotrabajo)
-    {
-        $permissions = Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos');
 
+    public function destroy(Centrotrabajo $Centrotrabajo){
+        Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos');
         try {
-            $Centrotrabajo->delete();
-            Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->name . ' borrado', false);
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $Centrotrabajo->name]));
+            if($Centrotrabajo->id > 9) {
+
+                $Centrotrabajo->delete();
+                Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->nombre . ' borrado', false);
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => $Centrotrabajo->nombre]));
+            }else{
+                return back()->with('error', __('app.label.deleted_error', ['name' => $Centrotrabajo->nombre] ). '. Este valor es propio de google sheets.');
+            }
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Centrotrabajo->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'DELETE:Centrotrabajos', 'usuario id:' . $Centrotrabajo->id . ' | ' . $Centrotrabajo->nombre . ' fallo en el borrado ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Centrotrabajo->nombre]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
-    public function destroyBulk(Request $request)
-    {
+    public function destroyBulk(Request $request){
         try {
             $Centrotrabajo = Centrotrabajo::whereIn('id', $request->id);
             $Centrotrabajo->delete();

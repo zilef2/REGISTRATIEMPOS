@@ -1,6 +1,6 @@
 //misterdebug - crud-generator-laravel
 (example-project: demco)
-    
+
     php artisan make:crud Parametro "prompEjercicios:string, NumeroTicketDefecto:integer"
 
     php artisan make:crud Reporte "nombre:string, fecha:string, disponibilidad:string, hora_inicial:datetime, hora_final:datetime, cantidad:integer, Tiempo:string"
@@ -14,7 +14,7 @@
         pieza_id  //no necesary crud
         reproceso_id
 
-    
+
 php artisan make:crud Actividad "codigo:string"
 php artisan make:crud Centrotrabajo "codigo:string"
 php artisan make:crud Disponibilidad "codigo:string"
@@ -42,9 +42,11 @@ php artisan make:crud MedidaControl "tokens_usados:string, user_id:integer"
 //#Utilidades
 para borrar:  php artisan rm:crud post --force
     php artisan rm:crud centroTrabajo --force
-//#laravel excel 
-php artisan make:import PersonalImport --model=User
-php artisan make:import PersonalUniversidadImport --model=User
+//#laravel excel
+php artisan make:0import PersonalImport --model=User
+php artisan make:0import PersonalUniversidadImport --model=User
+
+php artisan make:export TodaBDExport
 
 // node
 vue-datapicker

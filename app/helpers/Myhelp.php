@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 //JUST THIS PROJECT
 //STRING S
-//LARAVEL
+//LARAVELFunctions
 //dates
 
 class Myhelp {
@@ -31,7 +31,7 @@ class Myhelp {
                 'role',
                 'permission',
                 'user',
-                
+
                 'reporte',//core
 
                 'ordentrabajo',
@@ -50,7 +50,7 @@ class Myhelp {
             ];
         }
 
-        
+
         public static function getPermissionToNumber($permissions) {
 
             if($permissions == 'trabajador') return 1;
@@ -118,7 +118,7 @@ class Myhelp {
                 $result[] = $Elarray[0];
                 $result[] = $Elarray[1];
                 $result[] = $Elarray[2];
-    
+
                 return implode(", ", $result)  . '...';
             } else {
                 if (count($Elarray) > 0) {
@@ -136,12 +136,35 @@ class Myhelp {
 
 
 
-    //LARAVEL
+    //LARAVELFunctions
+        public function mensajesErrorBD($e,$clasePrincipal,$elid,$elnombre) {
+            $errorCode = $e->getCode();
+            $arrayCodes = [
+                23000 => ' No se puede eliminar este registro debido a restricciones de integridad referencial.',
+                1451 => ' Hay otros campos que necesitan este registro',
+            ];
+
+            if(isset($arrayCodes[$errorCode])){
+                $errorMessage = $arrayCodes[$errorCode];
+            }else{
+                $errorMessage = "Ocurrió un error de base de datos.";
+            }
+
+            Myhelp::EscribirEnLog(
+                $this,
+                'DELETE:'.$clasePrincipal.', QueryException',
+                $clasePrincipal.' id:' . $elid . ' | ' . $elnombre . ' fallo en el borrado:: ' . $errorMessage,
+                false,
+                true
+            );
+            return $errorMessage;
+
+        }
         public function redirect($ruta, $seconds = 14) {
             sleep($seconds);
             return redirect()->to($ruta);
         }
-        
+
         public function erroresExcel($errorFeo) {
             // $fila = session('ultimaPalabra');
             $error1 = "PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date";
@@ -217,7 +240,7 @@ class Myhelp {
 
     public static function NEW_turnInSelectID($theArrayofStrings,$selecc,$theName = null) {
         if($theName == null) $theName = 'nombre';
-        if(count($theArrayofStrings) == 0) 
+        if(count($theArrayofStrings) == 0)
             return [
               [  'title' => 'No hay registros ', 'value' => 0,]
                 // 'filtro' => 'General'
@@ -231,7 +254,7 @@ class Myhelp {
             ]
         ];
         foreach ($theArrayofStrings as $value) {
-            $result[] = 
+            $result[] =
             [
                 'title' => $value->{$theName},
                 'value' => $value->id,

@@ -84,28 +84,12 @@ const update = () => {
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <div v-for="(atributosform, indice) in printForm" :key="indice">
-                        <div v-if="atributosform.type == 'id'" id="SelectVue">
-                            <label name="labelSelectVue"> {{ atributosform.label }} </label>
-                            <v-select :options="data[atributosform.idd]" label="title" v-model="form[atributosform.idd]"
-                                :value="data[atributosform.idd][props.generica.reproceso_id]"></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
-
-                        <div v-else-if="atributosform.type == 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" step="3600" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
-                        <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
+                    <div class="">
+                        <InputLabel for="nombre" :value="lang().label.nombre" />
+                        <TextInput id="nombre" type="text" class="mt-1 block w-full"
+                            v-model="form['nombre']" required :placeholder="nombre"
+                            :error="form.errors['nombre']" />
+                        <InputError class="mt-2" :message="form.errors['nombre']" />
                     </div>
 
                 </div>

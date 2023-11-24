@@ -39,6 +39,22 @@ class ReportesController extends Controller
             $reporte->disponibilidad_s = $reporte->disponibilidad()->first() !== null ? $reporte->disponibilidad()->first()->nombre : '';
             $reporte->reproceso_s = $reporte->reproceso()->first() !== null ? $reporte->reproceso()->first()->nombre : '';
 
+            if($reporte->hora_final !== null){
+                $fin = new \DateTime($reporte->hora_final);
+                $ini = new \DateTime($reporte->hora_inicial);
+                $intervalo = $fin->diff($ini);
+
+                $horas = $intervalo->h; // Obtiene las horas de diferencia
+                $minutos = $intervalo->i; // Obtiene los minutos de diferencia
+                $segundos = $intervalo->s; // Obtiene los segundos de diferencia
+
+                $total_segundos = $horas * 3600 + $minutos * 60 + $segundos; // Convierte a segundos
+                $reporte->tiempot = ($total_segundos/3600);
+
+            }else{
+                $reporte->tiempot = 0;
+            }
+
             // $reporte->calendario_s = $reporte->calendario()->first() !== null ? $reporte->calendario()->first()->nombre : '';
             return $reporte;
         })->filter();
@@ -50,7 +66,7 @@ class ReportesController extends Controller
 
         // $usuario = Auth::User();
         // if($numberPermissions < 9){
-        /* por ahora el trae todas 
+        /* por ahora el trae todas
                 0 => "actividad"
                 1 => "centrotrabajo"
                 2 => "disponibilidad"
@@ -58,18 +74,18 @@ class ReportesController extends Controller
                 5 => "ordentrabajo"
                 7 => "pieza"
                 8 => "reproceso"
-                
+
                 4 => "operario"
             */
         $atributos_solo_id = Myhelp::filtrar_solo_id($atributos_id);
         foreach ($atributos_solo_id as $key => $value) {
 
             if ($value == 'operario' || $value == 'calendario') continue;
-            
+
             $modelInstance = resolve('App\\Models\\' . ucfirst($value));
             $ultima = $modelInstance::All();
             $result[$value] = Myhelp::NEW_turnInSelectID($ultima, ' ');
-            
+
             if ($value === 'centrotrabajo'){
                 foreach ($ultima as $key => $val) {
                     $actis = $val->Actividads;
@@ -162,7 +178,7 @@ class ReportesController extends Controller
         ]);
     }
     public function create() { }
-    
+
     public function updatingDate($date) {
         if ($date === null || $date == '1969-12-31') {
             return null;
@@ -177,14 +193,14 @@ class ReportesController extends Controller
         $MainQuery = Reporte::Where('operario_id', $userid);
 
         $NoTieneReportes = $MainQuery->count() == 0;
-        if ($NoTieneReportes) return 1; //primera vez de su vida 
+        if ($NoTieneReportes) return 1; //primera vez de su vida
 
         $ultimoReporte = $MainQuery->Where('fecha', $hoy)
             ->latest()->first();
         if ($ultimoReporte === null) { //hoy
 
             $ultimoReporte = $MainQuery->Where('fecha', $ayer)->latest()->first();
-            $tipo = 1; //primera del dia 
+            $tipo = 1; //primera del dia
             if ($ultimoReporte === null) { //ayer
                 //leva dias sin reportar
                 //todo: actualizar la ultima para que sea tipoFinalizacion = 3
@@ -265,7 +281,7 @@ class ReportesController extends Controller
         DB::beginTransaction();
         try {
             $reporte = Reporte::findOrFail($id);
-            
+
             if ($request->hora_final == null) {
                 $orden = null;
 
@@ -284,18 +300,18 @@ class ReportesController extends Controller
                 $request->disponibilidad_id == null ? null : $actualizar_reporte['disponibilidad_id'] = $request->disponibilidad_id;
                 $request->reproceso_id == null ? null : $actualizar_reporte['reproceso_id'] = $request->reproceso_id;
 
-                //tipoF no va 
+                //tipoF no va
                 $actualizar_reporte['nombreTablero'] = $orden->Nombre_tablero ?? null;
                 $actualizar_reporte['OTItem'] = $orden->Item ?? null;
                 $request->TiempoEstimado == null ? null : $actualizar_reporte['TiempoEstimado'] = $request->TiempoEstimado;
-                
+
             }else{ //se esta reportando solo la hora fin
                 $DigitosHoraFinal = intval(substr($request->hora_final,0,2)); //deberia retornar 16
                 // if($DigitosHoraFinal > 15){ //toask: deberia negar que se reporte antes de 4pm?
                 $actualizar_reporte['hora_final'] = $request->hora_final;
-                
+
                 // $reporte->update($actualizar_reporte);
-                    
+
                 // }else{
                 //     return back()->with('error', 'No son las 4pm');
                 // }
@@ -314,9 +330,12 @@ class ReportesController extends Controller
 
     public function destroy(reporte $reporte)
     {
-        $permissions = Myhelp::EscribirEnLog($this, 'DELETE:reportes');
-
+        $Numberpermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'DELETE:reportes'));
         try {
+            if ($Numberpermissions < 2 && $reporte->hora_final !== null) {
+                return back()->with('warn', 'Este reporte ya esta finalizado, consulte con un supervisor');
+            }
+
             $reporte->delete();
             Myhelp::EscribirEnLog($this, 'DELETE:reportes', 'usuario id:' . $reporte->id . ' | ' . $reporte->codigo . ' borrado', false);
             return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));

@@ -5,21 +5,19 @@ import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
-import { onMounted, reactive, watch, watchEffect } from 'vue';
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
-
-import { TransformTdate, formatTime } from '@/global.ts';
+import {useForm} from '@inertiajs/vue3';
+import {computed, onMounted, reactive, watch, watchEffect} from 'vue';
+import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
+import {DiferenciaMinutos, formatTime, TransformTdate} from '@/global.ts';
 import '@vuepic/vue-datepicker/dist/main.css';
 
-// --------------------------- ** -------------------------
+
 
 const props = defineProps({
     show: Boolean,
     title: String,
     roles: Object,
-    
+
     losSelect: Object,
     numberPermissions: Number,
     valuesGoogleCabeza: Object,
@@ -47,7 +45,8 @@ const data = reactive({
     mensajeFalta: '',
     BanderaTipo:true,
     mensajeTiemposAuto: '',
-    soloUnaVez:true
+    soloUnaVez:true,
+    limiteMinimo:'',
 })
 
 
@@ -75,20 +74,26 @@ const justNames = [
 
 ]; const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
 
+const CalcularHoraActual = ()=>{
+  let horaActual = new Date();
+  horaActual.setHours(horaActual.getHours() - 1);
+  let formatoHora = (valor) => (valor < 10 ? `0${valor}` : valor);
+  return `${formatoHora(horaActual.getHours())}:${formatoHora(horaActual.getMinutes())}`;
+}
+
 onMounted(() => {
+    data.limiteMinimo = CalcularHoraActual()
+    setInterval(() => {
+      data.limiteMinimo = CalcularHoraActual()
+    }, 60000);
+
     if(props.numberPermissions > 9){
-
-        // const valueRAn = Math.floor(Math.random() * (9 - 0) + 0)
-        // form.codigo = 'AdminCod'+ (valueRAn);
-        // form.hora_inicial = '0'+valueRAn+':00'//temp
-        // form.fecha = '2023-06-01'
-
         setTimeout(()=>{
             form.ordentrabajo_ids = data.ordentrabajo_ids[1];
             form.centrotrabajo_id = data.centrotrabajo_id[1];
             form.actividad_id = data.actividad_id[1];
             data.mensajeTiemposAuto = 'Super!'
-        }, 900);
+        }, 500);
     }
 });
 
@@ -109,23 +114,97 @@ const tiemposEstimados = [
 function GetTiempoNotNull(){
     let contador = 0
     form.centrotrabajo_id = data.centrotrabajo_id[1]
-    
 
 
     while( data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]] === "" && contador <= tiemposEstimados.length){
         contador++
     }
     form.TiempoEstimado = data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[contador]];
-    
+
     if(contador !== tiemposEstimados.length){
         form.centrotrabajo_id = data.centrotrabajo_id[contador+1];
         data.mensajeTiemposAuto = ''
     }else{
         data.mensajeTiemposAuto = 'Tiempos vacios!'
     }
-    
+
     data.soloUnaVez = false
 }
+
+
+let ValidarNotNull = (campos) =>{
+    let sonObligatorios = '';
+    try{
+        campos.forEach((value,i) => {
+            // console.log("🧈 debu form[value]:", form[value]);
+            // console.log("🧈 debu form[value]:", form[value].value);
+            if(typeof form[value] === 'undefined' || form[value] === null || form[value].value === null || form[value].length === 0){ //&& form[value] != ''
+                sonObligatorios = value
+                throw new Error('BreakException');
+            }
+        })
+    } catch (e) {
+        // if (e.message !== 'BreakException') throw e;
+    }
+    return sonObligatorios;
+}
+
+let ValidarCreateReporte = () =>{
+    let tipo = form.tipoReporte.value;
+    let result = true;
+    const mensaje = ' es obligatorio'
+
+    let horaactual = new Date().getHours()
+    console.log(horaactual)
+    console.log('espacio\n')
+    console.log(form.hora_inicial)
+    console.log('espacio2\n')
+    let minutosDif = DiferenciaMinutos( horaactual+ ':00', form.hora_inicial)
+    console.log(minutosDif)
+
+    if(minutosDif > 0) return 'Ha pasado mucho tiempo!';
+
+    if(tipo === 0){
+        result = ValidarNotNull([
+            'ordentrabajo_ids',
+            'centrotrabajo_id',
+            'actividad_id',
+        ])
+    } //acti
+
+    if(tipo === 1) {
+        result = ValidarNotNull([
+            'centrotrabajo_id',
+            'ordentrabajo_ids',
+            'actividad_id',
+            'reproceso_id',
+        ])
+    } //reproceso
+
+    if(tipo === 2) {
+        result = ValidarNotNull([
+            'centrotrabajo_id',
+            'disponibilidad_id',
+        ])
+    } //disponibilidad
+
+    let objectMessages = {
+        'ordentrabajo_ids':'Orden trabajo',
+        'actividad_id':'Actividad',
+        'reproceso_id':'Reproceso',
+        'centrotrabajo_id':'Centro de trabajo',
+        'disponibilidad_id':'Disponibilidad',
+    }
+    if(result !== '') return objectMessages[result] + mensaje
+    else return result
+}
+
+
+
+
+
+// <!--<editor-fold desc="Watchers">-->
+
 
 watchEffect(() => {
     // console.log("✅", form.centrotrabajo_id);
@@ -154,7 +233,7 @@ watchEffect(() => {
         if(form.ordentrabajo_ids && form.ordentrabajo_ids.value != null){
             form.nombreTablero = data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]
             form.OTItem = data.nombresOT[form.ordentrabajo_ids.value]['Item']
-            
+
             if(data.soloUnaVez) {
                 GetTiempoNotNull();
             }else{
@@ -167,82 +246,9 @@ watchEffect(() => {
     }
 })
 
-let ValidarNotNull = (campos) =>{
-    let sonObligatorios = '';
-    try{
-        campos.forEach((value,i) => {
-            // console.log("🧈 debu form[value]:", form[value]);
-            // console.log("🧈 debu form[value]:", form[value].value);
-            if(typeof form[value] === 'undefined' || form[value] === null || form[value].value === null || form[value].length === 0){ //&& form[value] != ''
-                sonObligatorios = value
-                throw new Error('BreakException');
-            }
-        })
-    } catch (e) {
-        // if (e.message !== 'BreakException') throw e;
-    }
-    return sonObligatorios;
-}
 
-let ValidarCreateReporte = () =>{
-    let tipo = form.tipoReporte.value;
-    let result = true;
-    const mensaje = ' es obligatorio'
-    if(tipo == 0){
-        result = ValidarNotNull([
-            'ordentrabajo_ids',
-            'centrotrabajo_id',
-            'actividad_id',
-        ])
-    } //acti
 
-    if(tipo == 1) {
-        result = ValidarNotNull([
-            'centrotrabajo_id',
-            'ordentrabajo_ids',
-            'actividad_id',
-            'reproceso_id',
-        ])
-    } //reproceso
-
-    if(tipo == 2) {
-        result = ValidarNotNull([
-            'centrotrabajo_id',
-            'disponibilidad_id',
-        ])
-    } //disponibilidad
-
-    let objectMessages = {
-        'ordentrabajo_ids':'Orden trabajo',
-        'actividad_id':'Actividad',
-        'reproceso_id':'Reproceso',
-        'centrotrabajo_id':'Centro de trabajo',
-        'disponibilidad_id':'Disponibilidad',
-    }
-    if(result != '') return objectMessages[result] + mensaje
-    else return result
-}
-
-const create = () => {
-
-    form.ordentrabajo_id = form.ordentrabajo_ids
-    data.mensajeFalta = ValidarCreateReporte();
-    
-    if(data.mensajeFalta == ''){
-        form.post(route('reporte.store'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                emit("close")
-                form.reset()
-            },
-            onError: () => alert(JSON.stringify(form.errors, null, 4)),
-            onFinish: () => null,
-        })
-    }
-
-}
-
-watch(() => form.tipoReporte, (newX) => { 
+watch(() => form.tipoReporte, (newX) => {
     form.actividad_id = null
     form.centrotrabajo_id = null
     form.disponibilidad_id = null
@@ -252,26 +258,45 @@ watch(() => form.tipoReporte, (newX) => {
     form.ordentrabajo_ids = null
 })
 
-watch(() => form.ordentrabajo_ids, (newX) => { 
+watch(() => form.ordentrabajo_ids, (newX) => {
     data.soloUnaVez = true
 })
 
-watch(() => form.centrotrabajo_id, (newCentro) => { 
+watch(() => form.centrotrabajo_id, (newCentro) => {
     if(newCentro && typeof newCentro.value !== 'undefined'){
         let actividadesDelCentro = 'centrotrabajo'+newCentro.title
         data.actividad_id = props.losSelect[actividadesDelCentro]
     }
     form.actividad_id = { title: 'Seleccione actividad', value: null }
 })
+// <!--</editor-fold>-->
+
+
+const create = () => {
+
+    form.ordentrabajo_id = form.ordentrabajo_ids
+    data.mensajeFalta = ValidarCreateReporte();
+    // form.hora_inicial = formatTime()
+    if(data.mensajeFalta === ''){
+        setTimeout(
+            form.post(route('reporte.store'), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // emit("close")
+                    // form.reset()
+                },
+                onError: () => alert(JSON.stringify(form.errors, null, 4)),
+                onFinish: () => null,
+            }),
+            500);
+    }
+
+}
 
 //very usefull
 const opcinesActividadOTros = [{ title: 'Actividad', value: 0 }, { title: 'Reproceso', value: 1 }, { title: 'Disponibilidad(paro)', value: 2 }];
 const arrayMostrarDelCodigo = ['Nombre Tablero','% avance','OT+Item','Tiempo estimado'];
 const Cabezera = ['Nombre_tablero','avance'];
-const FiltroParaActividades = {
-    'corte': ['Corte','Planeacion']
-}
-
 </script>
 
 <template>
@@ -302,15 +327,14 @@ const FiltroParaActividades = {
                         <InputError class="mt-2" :message="form.errors['fecha']" />
                     </div>
                     <div class=" col-span-1">
-                        <InputLabel for="hora_inicial" :value="lang().label['hora inicial']" />
-                        <TextInput id="hora_inicial" type="time" class="mt-1 block w-full bg-gray-200"
-                            v-model="form['hora_inicial']" disabled placeholder="hora_inicial"
-                            :error="form.errors['hora_inicial']" step="3600" />
+                        <InputLabel for="hora_inicial" :value="lang().label['hora inicial'] + ', min: '+data.limiteMinimo" />
+                        <TextInput id="hora_inicial" type="time" class="mt-1 block w-full"
+                            v-model="form['hora_inicial']"  placeholder="hora_inicial"
+                            :error="form.errors['hora_inicial']" step="60" />
                         <InputError class="mt-2" :message="form.errors['hora_inicial']" />
                     </div>
 
-
-                    <div id="Sordentrabajo" v-if="form.tipoReporte.value != 2" class="xl:col-span-2 col-span-1">
+                    <div id="Sordentrabajo" v-if="form.tipoReporte.value !== 2" class="xl:col-span-2 col-span-1">
                         <label name="ordentrabajo_ids"> Orden de trabajo </label>
                         <v-select :options="data['ordentrabajo_ids']" label="title"
                             v-model="form['ordentrabajo_ids']"
@@ -318,17 +342,17 @@ const FiltroParaActividades = {
                         <InputError class="mt-2" :message="form.errors['ordentrabajo_id']" />
                     </div>
 
-                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value != 2" class="w-full lg:col-span-2 col-span-1">
+                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value !== 2" class="w-full lg:col-span-2 col-span-1">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[0]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
-                            :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]" 
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
+                            :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]"
                         />
                     </div>
 
-                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value != 2" class="w-full col-span-1">
+                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value !== 2" class="w-full col-span-1">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[1]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
-                            :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[1]]" 
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
+                            :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[1]]"
                         />
                     </div>
 
@@ -344,7 +368,7 @@ const FiltroParaActividades = {
                     <!-- tiempo estimado -->
                     <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200" 
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             v-model="form.TiempoEstimado"
                         />
                     </div>
@@ -377,11 +401,11 @@ const FiltroParaActividades = {
 
 
                 <div class=" mb-8 mt-[360px] flex justify-end">
-                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100"> 
-                        {{ data.mensajeFalta }} 
+                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100">
+                        {{ data.mensajeFalta }}
                     </h2>
-                    <h2 v-if="data.mensajeTiemposAuto != ''" class="mx-12 px-8 text-lg font-medium text-gray-800 dark:text-gray-100"> 
-                        {{ data.mensajeTiemposAuto }} 
+                    <h2 v-if="data.mensajeTiemposAuto != ''" class="mx-12 px-8 text-lg font-medium text-gray-800 dark:text-gray-100">
+                        {{ data.mensajeTiemposAuto }}
                     </h2>
 
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

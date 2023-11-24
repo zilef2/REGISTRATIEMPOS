@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
+use App\Models\Disponibilidad;
 use App\Models\Reproceso;
 use App\helpers\Myhelp;
 
 use App\helpers\HelpExcel;
 use App\Http\Requests\ReprocesoRequest;
 use App\Imports\PersonalImport;
+use App\Models\Centrotrabajo;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -24,8 +27,7 @@ class ReprocesosController extends Controller
     public $MayusnombreClase = 'Reproceso';
     public $thisAtributos;
 
-    public function __construct()
-    {
+    public function __construct(){
         $this->thisAtributos = (new Reproceso())->getFillable();
     }
 
@@ -58,6 +60,9 @@ class ReprocesosController extends Controller
         }
         if ($request->has(['field', 'order']) && $request->field != 'centros') {
             $Reprocesos = $Reprocesos->orderBy($request->field, $request->order);
+        }else{
+            $Reprocesos->orderByDesc('created_at');
+
         }
         $this->MapearClasePP($Reprocesos, $numberPermissions);
 
@@ -73,6 +78,7 @@ class ReprocesosController extends Controller
             $page,
             ['path' => request()->url()]
         );
+        $centroSelect = Myhelp::NEW_turnInSelectID(Centrotrabajo::all(), 'centro','nombre');
 
         return Inertia::render('reproceso/Index', [
             'breadcrumbs'           => [['label' => __('app.label.reproceso'), 'href' => route('reproceso.index')]],
@@ -82,8 +88,7 @@ class ReprocesosController extends Controller
             'fromController'        => $fromController,
             'total'                 => $total,
             'numberPermissions'     => $numberPermissions,
-
-            // 'losSelect'             => $losSelect ?? [],
+            'losSelect'             => $centroSelect,
         ]);
     }
 
@@ -98,8 +103,7 @@ class ReprocesosController extends Controller
 
 
     //! STORE - UPDATE - DELETE
-    public function store(ReprocesoRequest $request)
-    {
+    public function store(ReprocesoRequest $request){
         $user = Auth::User();
         Myhelp::EscribirEnLog($this, 'STORE:Reprocesos', '', false);
 
@@ -109,8 +113,13 @@ class ReprocesosController extends Controller
             foreach ($this->thisAtributos as $value) {
                 $guardar[$value] = $request->$value;
             }
+            $guardar['centro_id'] = null;
+            $guardar['codigo'] = 10;
             $Reproceso = Reproceso::create($guardar);
-
+            foreach ($request->centro_id as $key => $value) {
+                if($value['value'] && $value['value'] != 0)
+                    $Reproceso->centroTrabajos()->attach($value['value']);
+            }
             DB::commit();
             Myhelp::EscribirEnLog($this, 'STORE:Reprocesos', 'usuario id:' . $user->id . ' | ' . $user->name . ' guardado', false);
             return back()->with('success', __('app.label.created_successfully', ['name' => $Reproceso->name]));
@@ -130,26 +139,22 @@ class ReprocesosController extends Controller
     }
 
 
-    public function update(ReprocesoRequest $request, $id)
-    {
+    public function update(ReprocesoRequest $request, $id) {
         $user = Auth::User();
 
         Myhelp::EscribirEnLog($this, 'UPGRADE:Reprocesos', '', false);
         DB::beginTransaction();
         try {
             $Reproceso = Reproceso::findOrFail($id);
-            foreach ($this->thisAtributos as $value) {
-                $guardar[$value] = $request->$value;
-            }
-            $Reproceso->update($guardar);
+            $Reproceso->update([ 'nombre' => $request->nombre ]);
             DB::commit();
-            Myhelp::EscribirEnLog($this, 'UPDATE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->name . ' actualizado', false);
+            Myhelp::EscribirEnLog($this, 'UPDATE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->nombre . ' actualizado', false);
 
-            return back()->with('success', __('app.label.updated_successfully', ['name' => $Reproceso->name]));
+            return back()->with('success', __('app.label.updated_successfully', ['name' => $Reproceso->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            Myhelp::EscribirEnLog($this, 'UPDATE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->name . '  fallo en el actualizado', false);
-            return back()->with('error', __('app.label.updated_error', ['name' => $Reproceso->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'UPDATE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->nombre . '  fallo en el actualizado', false);
+            return back()->with('error', __('app.label.updated_error', ['name' => $Reproceso->nombre]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 
@@ -164,12 +169,21 @@ class ReprocesosController extends Controller
         $permissions = Myhelp::EscribirEnLog($this, 'DELETE:Reprocesos');
 
         try {
-            $Reproceso->delete();
-            Myhelp::EscribirEnLog($this, 'DELETE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->name . ' borrado', false);
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $Reproceso->name]));
+
+            if($Reproceso->id > 13){
+                $Reproceso->delete();
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => $Reproceso->nombre]));
+
+            }else{
+                return back()->with('Error', __('app.label.deleted_error', ['name' => $Reproceso->nombre] ). '. Este valor es propio de google sheets.');
+            }
+        }catch (QueryException $e) {
+            $myHelp = new Myhelp();
+            $mensajeError = $myHelp->mensajesErrorBD($e,$this->nombreClase,$Reproceso->id,$Reproceso->nombre);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Reproceso->nombre]) . $mensajeError);
         } catch (\Throwable $th) {
-            Myhelp::EscribirEnLog($this, 'DELETE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->name . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
-            return back()->with('error', __('app.label.deleted_error', ['name' => $Reproceso->name]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
+            Myhelp::EscribirEnLog($this, 'DELETE:Reprocesos', 'usuario id:' . $Reproceso->id . ' | ' . $Reproceso->nombre . ' fallo en el borrado:: ' . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile(), false);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $Reproceso->nombre]) . $th->getMessage() . ' L:' . $th->getLine() . ' Ubi: ' . $th->getFile());
         }
     }
 

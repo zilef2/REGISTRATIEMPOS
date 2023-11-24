@@ -1,13 +1,16 @@
 /*
+    *** MENU of global.ts ***
 -- this Project
 
- --DATE
+ --DATE functions
+ DiferenciaMinutos
+ IsDate_GOES_formatDate
  formatToVue
  formatDate
  monthName
  TransformTdate
 
- --MATH
+ --MATH  functions
 
  number_format
  CalcularEdad
@@ -28,8 +31,9 @@
  vectorSelect
 */
 
-import { toInteger } from "lodash";
+import {toInteger} from "lodash";
 
+//<editor-fold desc="This Project">
 // this Project
     export function LookForValueInArray(arrayOfObjects:Object[] , searchValue): String {
         if(arrayOfObjects === null) return null
@@ -51,13 +55,35 @@ import { toInteger } from "lodash";
                 }
             }
         }
-        
+
         return foundObject;
     }
 // end this Project
+//</editor-fold>
 
 
-// DATE functions 
+// DATE functions
+
+    //maded by gpt 3.5
+    export function DiferenciaMinutos(hora1: string, hora2: string): number {
+        // Convertir las horas a objetos Date
+        const date1:Date = new Date(`2000-01-01T${hora1}`);
+        const date2:Date = new Date(`2000-01-01T${hora2}`);
+
+        // Obtener la representación numérica de las horas (en milisegundos)
+        const time1 :number = date1.getTime();
+
+        const time2 :number = date2.getTime();
+        console.log(time1)
+        console.log('lostimes')
+        console.log(time2)
+
+        // Obtener la diferencia en milisegundos y convertirla a minutos
+        const diferenciaMs:number = (time1 - time2);
+        // const diferenciaMs:number = Math.abs(time1 - time2);
+        return Math.floor(diferenciaMs / (1000 * 60));
+    }
+
     export function IsDate_GOES_formatDate(text:string) : String{
             const [day,month, year] = text.split('/').map(Number);
             let date = new Date(year, month - 1, day);
@@ -68,7 +94,7 @@ import { toInteger } from "lodash";
             return "No es una fecha";
             // throw new Error("El texto no es una fecha válida");
         }
-          
+
         return formatToVue(date);
     }
     export function formatToVue(date) : String{
@@ -113,7 +139,7 @@ import { toInteger } from "lodash";
     export function TimeTo12Format(timeString) {
         if(timeString === null) return '';
         const [hours, minutes, seconds] = timeString.split(':');
-        
+
         // Convert the time to 12-hour format and add 'am' or 'pm'
         const timeIn12HourFormat = new Date(2023, 7, 5, parseInt(hours), parseInt(minutes)).toLocaleString('es-CO', {
           hour: 'numeric',
@@ -133,11 +159,11 @@ import { toInteger } from "lodash";
 
         let hora = validDate.getHours();
         let hourAndtime =  (hora < 10 ? '0': '')+ hora + ':'+ (validDate.getMinutes() < 10 ? '0': '') + validDate.getMinutes() + ':00';
-        
+
         return `${hourAndtime}`;
     }
 
-    
+
     export function monthName(monthNumber){
         if(monthNumber == 1) return 'Enero';
         if(monthNumber == 2) return 'Febrero';
@@ -163,11 +189,12 @@ import { toInteger } from "lodash";
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
-// fin DATE functions 
+// fin DATE functions
 
 
 
-// MATH 
+
+// MATH  functions
     export function CalcularAvg(TheArray,NameValue = '',isTime = false) {
         let sum: number
         sum = 0
@@ -246,7 +273,7 @@ import { toInteger } from "lodash";
         if(texto){
 
             if(texto.length > caracteres + 5){
-                
+
                 const primeros = texto.substring(0,caracteres);
                 return primeros + '...';
             }
