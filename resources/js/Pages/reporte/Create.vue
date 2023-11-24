@@ -300,33 +300,33 @@ const Cabezera = ['Nombre_tablero','avance'];
 </script>
 
 <template>
-    <section class="space-y-6">
+    <section class="space-y-6  dark:text-white">
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'3xl'">
             <form class="px-6 my-8" @submit.prevent="create">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-white">
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                     <div v-if="props.numberPermissions > 8" id="opcinesActividadO" class="xl:col-span-2 col-span-1">
-                        <label name=""> Reportar en nombre de: </label>
-                        <v-select :options="props.Trabajadores" label="title"
+                        <label class=" dark:text-white" name=""> Reportar en nombre de: </label>
+                        <v-select :options="props.Trabajadores" label="title" class="dark:bg-gray-400"
                         v-model="form.user_id"></v-select>
                     </div>
-                    <div id="opcinesActividadO" class="xl:col-span-2 col-span-1">
-                        <label name=""> Tipo de reporte </label>
-                        <v-select :options="opcinesActividadOTros" label="title"
+                    <div id="opcinesActividadO" class="xl:col-span-2 col-span-1 ">
+                        <label class=" dark:text-white"> Tipo de reporte </label>
+                        <v-select :options="opcinesActividadOTros" label="title" class="dark:bg-gray-400"
                         v-model="form.tipoReporte"></v-select>
                     </div>
                     <!-- empieza -->
 
                     <div class="xl:col-span-1 col-span-1">
-                        <InputLabel for="fecha" :value="lang().label['fecha']" />
-                        <TextInput id="fecha" type="date" class="mt-1 block w-full bg-gray-200"
+                        <InputLabel for="fecha" :value="lang().label['fecha']" class=" dark:text-white"/>
+                        <TextInput id="fecha" type="date" class="mt-1 block w-full bg-gray-200  dark:text-white"
                             v-model="form['fecha']" disabled placeholder="fecha"
                             :error="form.errors['fecha']" />
                         <InputError class="mt-2" :message="form.errors['fecha']" />
                     </div>
-                    <div class=" col-span-1">
+                    <div class=" dark:text-white col-span-1">
                         <InputLabel for="hora_inicial" :value="lang().label['hora inicial'] + ', min: '+data.limiteMinimo" />
                         <TextInput id="hora_inicial" type="time" class="mt-1 block w-full"
                             v-model="form['hora_inicial']"  placeholder="hora_inicial"
@@ -335,21 +335,21 @@ const Cabezera = ['Nombre_tablero','avance'];
                     </div>
 
                     <div id="Sordentrabajo" v-if="form.tipoReporte.value !== 2" class="xl:col-span-2 col-span-1">
-                        <label name="ordentrabajo_ids"> Orden de trabajo </label>
-                        <v-select :options="data['ordentrabajo_ids']" label="title"
+                        <label name="ordentrabajo_ids" class=" dark:text-white"> Orden de trabajo </label>
+                        <v-select :options="data['ordentrabajo_ids']" label="title" class="dark:bg-gray-400"
                             v-model="form['ordentrabajo_ids']"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['ordentrabajo_id']" />
                     </div>
 
-                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value !== 2" class="w-full lg:col-span-2 col-span-1">
-                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[0]" />
+                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value !== 2" class="w-full lg:col-span-2 col-span-1  dark:text-white">
+                        <InputLabel :for="index" :value="arrayMostrarDelCodigo[0]" class=""/>
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[0]]"
                         />
                     </div>
 
-                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value !== 2" class="w-full col-span-1">
+                    <div v-if="form.ordentrabajo_ids && form.tipoReporte.value !== 2" class="w-full col-span-1 dark:text-white">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[1]" />
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             :value="data.nombresOT[form.ordentrabajo_ids.value][Cabezera[1]]"
@@ -357,7 +357,7 @@ const Cabezera = ['Nombre_tablero','avance'];
                     </div>
 
                     <div id="Scentrotrabajo" class=" col-span-1">
-                        <label name="centrotrabajo_id"> Centro de trabajo </label>
+                        <label name="centrotrabajo_id" class=" dark:text-white"> Centro de trabajo </label>
                         <v-select :options="data['centrotrabajo_id']" label="title"
                             v-model="form['centrotrabajo_id']"
                         ></v-select>
@@ -366,7 +366,7 @@ const Cabezera = ['Nombre_tablero','avance'];
 
 
                     <!-- tiempo estimado -->
-                    <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1">
+                    <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1 dark:text-white">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
                         <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
                             v-model="form.TiempoEstimado"
@@ -376,23 +376,23 @@ const Cabezera = ['Nombre_tablero','avance'];
 
                     <!-- eleccion -->
                     <div id="actividad" v-if="form.tipoReporte.value == 0 || form.tipoReporte.value == 1" class="xl:col-span-2 col-span-1">
-                        <label name="actividad_id"> Actividad </label>
+                        <label name="actividad_id" class=" dark:text-white"> Actividad </label>
                         <v-select :options="data['actividad_id']" label="title" required
-                            v-model="form['actividad_id']"
+                            v-model="form['actividad_id']" class="dark:bg-gray-400"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['actividad_id']" />
                     </div>
                     <div id="reproceso" v-if="form.tipoReporte.value == 1" class="xl:col-span-2 col-span-1">
-                        <label name="reproceso_id"> Reproceso</label>
+                        <label name="reproceso_id" class=" dark:text-white"> Reproceso</label>
                         <v-select :options="data['reproceso_id']" label="title" required
-                            v-model="form['reproceso_id']"
+                            v-model="form['reproceso_id']" class="dark:bg-gray-400"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['reproceso_id']" />
                     </div>
                     <div id="disponibilidad" v-if="form.tipoReporte.value == 2" class="xl:col-span-3  col-span-1">
-                        <label name="disponibilidad_id"> Disponibilidad</label>
+                        <label name="disponibilidad_id" class=" dark:text-white"> Disponibilidad</label>
                         <v-select :options="data['disponibilidad_id']" label="title" required
-                            v-model="form['disponibilidad_id']"
+                            v-model="form['disponibilidad_id']" class="dark:bg-gray-400"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['disponibilidad_id']" />
                     </div>
@@ -401,10 +401,10 @@ const Cabezera = ['Nombre_tablero','avance'];
 
 
                 <div class=" mb-8 mt-[360px] flex justify-end">
-                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-gray-100">
+                    <h2 v-if="data.mensajeFalta != ''" class="mx-12 px-8 text-lg font-medium text-red-600 bg-red-50 dark:text-white">
                         {{ data.mensajeFalta }}
                     </h2>
-                    <h2 v-if="data.mensajeTiemposAuto != ''" class="mx-12 px-8 text-lg font-medium text-gray-800 dark:text-gray-100">
+                    <h2 v-if="data.mensajeTiemposAuto != ''" class="mx-12 px-8 text-lg font-medium text-gray-800 dark:text-white">
                         {{ data.mensajeTiemposAuto }}
                     </h2>
 

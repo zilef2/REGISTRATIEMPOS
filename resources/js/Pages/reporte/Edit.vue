@@ -115,7 +115,7 @@ watchEffect(() => {
             let tempCentro = form.centrotrabajo_id.value - 1
             form.TiempoEstimado = data.nombresOT[form.ordentrabajo_ids.value][tiemposEstimados[tempCentro]];
         }
-        
+
     } else {
         data.BanderaTipo = true
     }
@@ -181,7 +181,7 @@ const update = () => {
     // data.mensajeFalta = ValidarCreateReporte();
     console.log("🧈 debu form.tipoReporte.value:", form.tipoReporte.value);
     data.mensajeFalta = ValidarCreateReporte();
-    
+
     let StringResultAny;
     StringResultAny = LookForValueInArray(props.losSelect.centrotrabajo, form.centrotrabajo_id)
     form.centrotrabajo_id = StringResultAny != '' ? StringResultAny : '';
@@ -193,17 +193,17 @@ const update = () => {
     if(form.tipoReporte.value === 1){
         StringResultAny = LookForValueInArray(props.losSelect.actividad, form.actividad_id)
         form.actividad_id = StringResultAny != '' ? StringResultAny : '';
-        
+
         StringResultAny = LookForValueInArray(props.losSelect.reproceso, form.reproceso_id)
         form.reproceso_id = StringResultAny != '' ? StringResultAny : '';
     }
-    
+
     if(form.tipoReporte.value === 2){ //disponibilidad
         StringResultAny = LookForValueInArray(props.losSelect.disponibilidad, form.disponibilidad_id)
         form.disponibilidad_id = StringResultAny != '' ? StringResultAny : '';
     }
 
-    
+
     if(data.mensajeFalta == ''){
         form.put(route('reporte.update', props.generica?.id), {
             preserveScroll: true,
@@ -256,10 +256,10 @@ watch(() => props.show, () => {
         form.fecha = props.generica?.fecha
         form.hora_inicial = props.generica?.hora_inicial
 
-        
+
         let posicionUser = props.Trabajadores.findIndex(obj => obj.value == props.generica?.operario_id)
         form.user_id = props.Trabajadores[posicionUser]
-        
+
         form.nombreTablero = props.generica?.nombreTablero
         form.OTItem = props.generica?.OTItem
         form.TiempoEstimado = props.generica?.TiempoEstimado
@@ -269,7 +269,7 @@ watch(() => props.show, () => {
     }
 })
 
-watch(() => form.centrotrabajo_id, (newCentro,old) => { 
+watch(() => form.centrotrabajo_id, (newCentro,old) => {
     if(newCentro && typeof newCentro.value !== 'undefined'){
         let actividadesDelCentro = 'centrotrabajo'+newCentro.title
         data.actividad_id = props.losSelect[actividadesDelCentro]
@@ -293,7 +293,7 @@ watch(() => form.centrotrabajo_id, (newCentro,old) => {
         <Modal :show="props.show" @close="emit('close'), data.BanderaTipo = true">
             <form class="px-6 my-8" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.edit }} {{ props.title }} 
+                    {{ lang().label.edit }} {{ props.title }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                     <div v-if="props.numberPermissions > 8" id="opcinesActividadO" class="xl:col-span-2 col-span-1">
@@ -316,11 +316,10 @@ watch(() => form.centrotrabajo_id, (newCentro,old) => {
                     <div class=" col-span-1">
                         <InputLabel for="hora_inicial" :value="lang().label['hora inicial']" />
                         <TextInput id="hora_inicial" type="time" class="mt-1 block w-full bg-gray-200"
-                            v-model="form['hora_inicial']" disabled placeholder="hora_inicial"
-                            :error="form.errors['hora_inicial']" step="3600" />
+                            v-model="form['hora_inicial']" placeholder="hora_inicial"
+                            :error="form.errors['hora_inicial']" step="60" />
                         <InputError class="mt-2" :message="form.errors['hora_inicial']" />
                     </div>
-
 
                     <div id="Sordentrabajo" v-if="form.tipoReporte.value != 2" class="xl:col-span-2 col-span-1">
                         <label name="ordentrabajo_ids"> Orden de trabajo </label>

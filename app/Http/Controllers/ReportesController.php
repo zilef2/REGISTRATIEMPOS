@@ -80,14 +80,14 @@ class ReportesController extends Controller
         $atributos_solo_id = Myhelp::filtrar_solo_id($atributos_id);
         foreach ($atributos_solo_id as $key => $value) {
 
-            if ($value == 'operario' || $value == 'calendario') continue;
+            if ($value === 'operario' || $value === 'calendario') continue;
 
             $modelInstance = resolve('App\\Models\\' . ucfirst($value));
             $ultima = $modelInstance::All();
             $result[$value] = Myhelp::NEW_turnInSelectID($ultima, ' ');
 
             if ($value === 'centrotrabajo'){
-                foreach ($ultima as $key => $val) {
+                foreach ($ultima as $key2 => $val) {
                     $actis = $val->Actividads;
                     $result[$value.$val->nombre] = Myhelp::NEW_turnInSelectID($actis, ' ');
                 }
