@@ -282,8 +282,8 @@ const create = () => {
             form.post(route('reporte.store'), {
                 preserveScroll: true,
                 onSuccess: () => {
-                    // emit("close")
-                    // form.reset()
+                    emit("close")
+                    form.reset()
                 },
                 onError: () => alert(JSON.stringify(form.errors, null, 4)),
                 onFinish: () => null,
@@ -327,7 +327,8 @@ const Cabezera = ['Nombre_tablero','avance'];
                         <InputError class="mt-2" :message="form.errors['fecha']" />
                     </div>
                     <div class=" dark:text-white col-span-1">
-                        <InputLabel for="hora_inicial" :value="lang().label['hora inicial'] + ', min: '+data.limiteMinimo" />
+                        <InputLabel for="hora_inicial"
+                            :value="lang().label['hora inicial'] + ', min: '+data.limiteMinimo" />
                         <TextInput id="hora_inicial" type="time" class="mt-1 block w-full"
                             v-model="form['hora_inicial']"  placeholder="hora_inicial"
                             :error="form.errors['hora_inicial']" step="60" />
@@ -358,7 +359,7 @@ const Cabezera = ['Nombre_tablero','avance'];
 
                     <div id="Scentrotrabajo" class=" col-span-1">
                         <label name="centrotrabajo_id" class=" dark:text-white"> Centro de trabajo </label>
-                        <v-select :options="data['centrotrabajo_id']" label="title"
+                        <v-select :options="data['centrotrabajo_id']" label="title" class="dark:bg-gray-400"
                             v-model="form['centrotrabajo_id']"
                         ></v-select>
                         <InputError class="mt-2" :message="form.errors['centrotrabajo_id']" />
@@ -368,7 +369,7 @@ const Cabezera = ['Nombre_tablero','avance'];
                     <!-- tiempo estimado -->
                     <div v-if="form.ordentrabajo_ids && form.centrotrabajo_id && form.tipoReporte.value != 2" class=" col-span-1 dark:text-white">
                         <InputLabel :for="index" :value="arrayMostrarDelCodigo[3]" />
-                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200"
+                        <TextInput :id="index" type="text" disabled class="mt-1 block w-full bg-gray-200 dark:bg-gray-400"
                             v-model="form.TiempoEstimado"
                         />
                     </div>

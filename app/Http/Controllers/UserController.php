@@ -306,10 +306,37 @@ class UserController extends Controller
         }
     }
 
-    public function todaBD()
-    {
+    public function todaBD(){
 //        return (new MultipleExport())->download('DemcoDB.xlsx');
         return Excel::download(new MultipleExport, 'DemcoDB.xlsx');
+
+    }
+
+    public function RRepor(){
+        $usuariosConUltimoReporte = User::has('reportes')->get();
+//        $usuariosConUltimoReporte = User::with(['reportes' => function ($query) {
+//            $query->latest()->take(1);
+//        }])->get();
+        $reportes = [];
+        foreach ($usuariosConUltimoReporte as $item) {
+            $elmodelo = $item->reportes->first();
+            if($elmodelo){
+                $reportes[] = [
+                    $item->name,
+                    $elmodelo->fecha,
+                    $elmodelo->hora_inicial,
+                    $elmodelo->hora_final,
+                ];
+            }
+        }
+
+        dd(
+            $reportes,
+            $reportes[0],
+            $reportes[1] ?? 'no existe',
+            $reportes[2] ?? 'no existe',
+            $reportes[3] ?? 'no existe',
+        );
 
     }
 }

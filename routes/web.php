@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Session;
 // });
 Route::get('/', function () { return redirect('/login'); });
 Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/RRepor', [UserController::class, 'RRepor'])->middleware(['auth', 'verified'])->name('RRepor');
 
 Route::get('/setLang/{locale}', function ($locale) {
     Session::put('locale', $locale);
